@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "@/components/SiteLink";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { EASE, SPRING_SOFT, useReducedMotion } from "@/lib/motion";
+import { SPRING_SOFT, useReducedMotion } from "@/lib/motion";
 import { SERVICES } from "@/lib/site";
 import LightBand from "@/components/ui/LightBand";
 import {
@@ -94,13 +94,14 @@ export default function StickyServices() {
           {SERVICES.map((service, i) => {
             const Glyph = GLYPHS[i];
             return (
-              <motion.article
+              <article
                 key={service.href}
-                initial={reduced ? false : { opacity: 0, y: 26, filter: "blur(6px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                viewport={{ once: true, amount: 0.35 }}
-                transition={{ duration: 0.55, ease: EASE }}
-                className="v-spotlight group relative overflow-hidden rounded-[var(--radius)] border border-[var(--v-border)] bg-white p-7 transition-colors duration-300 hover:border-[var(--v-primary)]/45 sm:p-8"
+                // CSS scroll timeline, not whileInView. An observer attached
+                // after hydration never fires for an element already scrolled
+                // past, which strands the panel at opacity 0 permanently. The
+                // reveal's base style is the visible one, so it cannot.
+                style={{ "--reveal-i": Math.min(i, 4) } as React.CSSProperties}
+                className="v-reveal v-spotlight group relative overflow-hidden rounded-[var(--radius)] border border-[var(--v-border)] bg-white p-7 transition-colors duration-300 hover:border-[var(--v-primary)]/45 sm:p-8"
                 onPointerMove={(e) => {
                   const el = e.currentTarget;
                   const r = el.getBoundingClientRect();
@@ -137,7 +138,7 @@ export default function StickyServices() {
                     className="transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
                   />
                 </Link>
-              </motion.article>
+              </article>
             );
           })}
         </div>

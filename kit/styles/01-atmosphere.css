@@ -1,0 +1,213 @@
+/* ============================================================================
+   ATMOSPHERE
+
+   Six fixed layers behind the content. This is what stops a dark page reading
+   as a flat black rectangle, and it is the part that is almost never
+   reproduced from a description, because the magnitudes are the whole thing.
+
+   Do not adjust the opacities. They look wrong in isolation and correct in
+   combination. The mesh at 0.02 looks invisible on its own; at 0.04 it becomes
+   graph paper. The grain at 0.05 looks like nothing; remove it and the page
+   loses most of its perceived quality.
+
+   Z-order, back to front:
+     -3  aurora        slow wide colour field
+     -3  conic sweep   very slow rotation
+     -2  depth field   three parallax point layers
+     -2  ambient light radial spots + edge vignette
+     -2  mesh grid     52px, radially masked
+     -1  grain         SVG turbulence, unifies everything above into one surface
+   ========================================================================= */
+
+.v-shell {
+  position: relative;
+  min-height: 100vh;
+  background: var(--v-bg);
+  color: var(--v-ink);
+  isolation: isolate;
+}
+
+/* ---- Ambient light + vignette --------------------------------------------
+   The last gradient is the vignette. It is what makes the centre read as lit
+   and the frame fall into shadow. Without it the page is evenly bright and
+   reads as flat. */
+.v-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(1100px 640px at 82% -12%, rgba(62, 123, 250, 0.22), transparent 60%),
+    radial-gradient(760px 520px at 4% 2%, rgba(47, 95, 214, 0.16), transparent 55%),
+    radial-gradient(1200px 820px at 50% 120%, rgba(74, 222, 155, 0.07), transparent 60%),
+    radial-gradient(140% 120% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* ---- Mesh grid. 0.02 alpha. Not 0.04. ---------------------------------- */
+.v-shell::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(1200px 820px at 60% 0%, #000 28%, transparent 78%);
+  -webkit-mask-image: radial-gradient(1200px 820px at 60% 0%, #000 28%, transparent 78%);
+}
+
+/* ---- Grain ---------------------------------------------------------------
+   Sits ABOVE the colour fields and BELOW content. Five lines that do more for
+   perceived quality than anything else in this file: it unifies every layer
+   underneath into one photographic surface instead of several gradients. */
+.v-grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.05;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- Aurora --------------------------------------------------------------
+   inset: -25% matters: the layer must overhang the viewport so rotation never
+   exposes an edge. 34s matters: fast enough to notice on a second glance, slow
+   enough that it never competes with reading. */
+@keyframes v-aurora {
+  0%   { transform: translate3d(-8%, -4%, 0) rotate(0deg)   scale(1.15); }
+  33%  { transform: translate3d(6%, 3%, 0)   rotate(38deg)  scale(1.3); }
+  66%  { transform: translate3d(-4%, 6%, 0)  rotate(-26deg) scale(1.2); }
+  100% { transform: translate3d(-8%, -4%, 0) rotate(0deg)   scale(1.15); }
+}
+.v-aurora {
+  position: fixed;
+  inset: -25%;
+  z-index: -3;
+  pointer-events: none;
+  opacity: 0.5;
+  filter: blur(90px) saturate(140%);
+  background:
+    radial-gradient(38% 44% at 22% 28%, rgba(62, 123, 250, 0.55), transparent 62%),
+    radial-gradient(32% 38% at 74% 22%, rgba(47, 95, 214, 0.45), transparent 60%),
+    radial-gradient(34% 40% at 62% 76%, rgba(74, 222, 155, 0.22), transparent 62%),
+    radial-gradient(30% 34% at 30% 78%, rgba(143, 176, 255, 0.28), transparent 60%);
+  animation: v-aurora 34s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ---- Conic sweep. 0.055 opacity, 70s. Depth without reading as a gimmick. */
+@keyframes v-sweep { to { transform: rotate(360deg); } }
+.v-sweep {
+  position: fixed;
+  left: 50%;
+  top: -30vh;
+  width: 140vmax;
+  height: 140vmax;
+  margin-left: -70vmax;
+  z-index: -3;
+  pointer-events: none;
+  opacity: 0.055;
+  background: conic-gradient(from 0deg,
+    transparent 0deg,
+    rgba(62, 123, 250, 0.9) 60deg,
+    transparent 140deg,
+    transparent 220deg,
+    rgba(74, 222, 155, 0.55) 290deg,
+    transparent 350deg);
+  animation: v-sweep 70s linear infinite;
+  will-change: transform;
+}
+
+/* ---- Parallax depth field ------------------------------------------------
+   TWO RULES, both of which are invisible until broken:
+
+   1. Travel distance must EQUAL tile size, on both axes. An earlier version
+      tiled at 190x210 but travelled -190x-105, which snapped the entire sky
+      sideways once per cycle. Nobody could say what was wrong, everybody could
+      see that something was.
+
+   2. Ambient drift writes to `translate`, NOT `transform`, so the scroll-driven
+      parallax below can own `transform` without the two fighting. */
+.v-depth {
+  position: fixed;
+  inset: -20%;
+  z-index: -2;
+  pointer-events: none;
+  will-change: transform;
+  /* Held back from the middle of the screen so it never competes with body
+     text, and faded at the base where a footer glow takes over. */
+  mask-image: radial-gradient(120% 90% at 50% 0%, #000 5%, rgba(0, 0, 0, 0.35) 45%, transparent 85%);
+  -webkit-mask-image: radial-gradient(120% 90% at 50% 0%, #000 5%, rgba(0, 0, 0, 0.35) 45%, transparent 85%);
+}
+
+/* Points are radial-gradients rather than box-shadow lists, so each layer is
+   one tiled paint instead of several hundred shadow passes. */
+.v-depth-far {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.55) 0.6px, transparent 0.6px),
+    radial-gradient(circle, rgba(143, 176, 255, 0.4) 0.5px, transparent 0.5px);
+  background-size: 190px 210px;
+  background-position: 0 0, 97px 131px;
+  opacity: 0.5;
+  animation: v-depth-drift-far 220s linear infinite;
+}
+.v-depth-mid {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.7) 0.9px, transparent 0.9px),
+    radial-gradient(circle, rgba(94, 179, 255, 0.5) 0.8px, transparent 0.8px);
+  background-size: 340px 320px;
+  background-position: 40px 10px, 211px 187px;
+  opacity: 0.45;
+  animation: v-depth-drift-mid 148s linear infinite;
+}
+.v-depth-near {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.9) 1.3px, transparent 1.3px);
+  background-size: 620px 560px;
+  background-position: 160px 80px;
+  opacity: 0.4;
+  animation: v-depth-drift-near 96s linear infinite;
+}
+
+@keyframes v-depth-drift-far  { to { translate: -190px -210px; } }
+@keyframes v-depth-drift-mid  { to { translate: -340px -320px; } }
+@keyframes v-depth-drift-near { to { translate: -620px -560px; } }
+
+/* Scrolling should feel like moving THROUGH the field, not like sliding a page
+   over a fixed photograph of one. Scroll-driven animations run on the
+   compositor: no scroll listener, no layout read, smooth under load. Browsers
+   without the timeline keep the ambient drift and lose nothing important. */
+@supports (animation-timeline: scroll()) {
+  .v-depth-far {
+    animation: v-depth-drift-far 220s linear infinite, v-depth-par-far linear both;
+    animation-timeline: auto, scroll(root block);
+  }
+  .v-depth-mid {
+    animation: v-depth-drift-mid 148s linear infinite, v-depth-par-mid linear both;
+    animation-timeline: auto, scroll(root block);
+  }
+  .v-depth-near {
+    animation: v-depth-drift-near 96s linear infinite, v-depth-par-near linear both;
+    animation-timeline: auto, scroll(root block);
+  }
+}
+@keyframes v-depth-par-far  { to { transform: translate3d(0, -60px, 0); } }
+@keyframes v-depth-par-mid  { to { transform: translate3d(0, -150px, 0); } }
+@keyframes v-depth-par-near { to { transform: translate3d(0, -320px, 0); } }
+
+/* ---- Orb: slow drift for hero accents ---------------------------------- */
+@keyframes v-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(2%, -3%, 0) scale(1.06); }
+}
+.v-orb { animation: v-drift 16s ease-in-out infinite; will-change: transform; }
+
+@media (prefers-reduced-motion: reduce) {
+  .v-aurora, .v-sweep, .v-orb, .v-depth,
+  .v-depth-far, .v-depth-mid, .v-depth-near {
+    animation: none;
+  }
+}

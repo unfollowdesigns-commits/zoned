@@ -1,0 +1,119 @@
+/* ============================================================================
+   TOKENS
+
+   The only file you edit per client. Change the four values marked SWAP and
+   the whole system moves. Everything else in the kit is white at low alpha and
+   follows automatically.
+
+   Ground is deliberately NOT neutral grey. It carries 4 to 8 percent of the
+   accent's hue. That is why the page reads as colour-designed rather than as
+   "dark mode applied to a white site". If you set the grounds to pure greys
+   the whole thing looks generic and no amount of the rest will fix it.
+   ========================================================================= */
+
+:root {
+  color-scheme: dark;
+
+  /* ---- SWAP 1: the accent --------------------------------------------- */
+  --v-primary: #3e7bfa;
+  /* SWAP 2: accent, ~12% darker in lightness, saturation held. Gradient end. */
+  --v-primary-deep: #2f5fd6;
+  /* SWAP 3: accent, ~10% lighter. Focus ring. Must reach 3:1 on --v-bg. */
+  --v-ring: #8fb0ff;
+  /* SWAP 4: positive / truth. One semantic colour, not a rainbow. */
+  --v-positive: #4ade9b;
+
+  /* ---- Grounds. Nudge these toward the accent's hue family. ------------ */
+  --v-bg: #060814;        /* page */
+  --v-bg-2: #0a0d1c;      /* raised ground: sidebar, top bar */
+  --v-surface: #0d1122;   /* panels */
+  --v-surface-2: #11162970;
+
+  /* ---- Ink ------------------------------------------------------------- */
+  --v-ink: #f6f7fc;       /* never pure white */
+  --v-muted: #9aa0b4;
+
+  /* ---- Borders. Always white at alpha, never a solid grey. ------------- */
+  --v-border: rgba(255, 255, 255, 0.09);
+  --v-border-strong: rgba(255, 255, 255, 0.16);
+
+  --radius: 0.9rem;
+
+  /* ---- Type scale. SEVEN sizes. Do not add an eighth. ------------------
+     The most common way this system degrades is size sprawl: a 12.5px here,
+     an 8.5px there, and after a week there are thirteen sizes and the page
+     reads as assembled rather than designed. If something does not fit, change
+     the layout, not the size. Nothing below 11px, ever. */
+  /* The hero headline is FLUID and much larger than a stepped scale suggests.
+     Told "a big headline" a model writes text-5xl, gets 48px at 1.1 leading,
+     and the result reads as a section title. This is nearly twice that, with
+     leading BELOW one, which is the single most commonly missed value in the
+     whole system: display type at 88px with 1.1 leading has a canyon between
+     the lines. At 0.95 the lines lock into one shape. See components/Hero.tsx.
+     Fluid rather than breakpointed because a stepped hero is visibly too small
+     just before every breakpoint. */
+  --t-hero: clamp(44px, 5.6vw, 88px);
+  --lh-hero: 0.95;
+  --tr-hero: -0.035em;
+
+  --t-display: 3.25rem;   /* 52px  large statement inside a section */
+  --t-title: 2.25rem;     /* 36px  section h2 */
+  --t-heading: 1.3125rem; /* 21px  panel / card title */
+  --t-body: 1.03125rem;   /* 16.5px */
+  --t-secondary: 0.875rem;/* 14px */
+  --t-small: 0.8125rem;   /* 13px */
+  --t-label: 0.6875rem;   /* 11px  uppercase eyebrow, the floor */
+
+  /* ---- Leading. 1.75 body is the single biggest "airy vs cramped" lever. */
+  --lh-display: 1.05;
+  --lh-title: 1.1;
+  --lh-heading: 1.25;
+  --lh-body: 1.75;
+  --lh-secondary: 1.6;
+
+  /* ---- Tracking -------------------------------------------------------- */
+  --tr-display: -0.028em; /* large type needs negative tracking */
+  --tr-label: 0.16em;     /* small caps need positive */
+
+  /* ---- Measure --------------------------------------------------------- */
+  --measure: 68ch;
+  --measure-lede: 46ch;  /* a lede beside a panel must break before the gutter */
+
+  /* ---- Motion. Mirrors lib/motion.ts. Keep the two in step. ------------ */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-hover: 220ms;
+  --dur-press: 100ms;
+  --dur-enter: 380ms;
+  --dur-exit: 280ms;   /* ALWAYS shorter than enter */
+}
+
+/* Two faces, strictly separated. The display face never appears below 20px and
+   the UI face never above 28px. Wire --font-display and --font-ui to whatever
+   loader you use. */
+.v-display {
+  font-family: var(--font-display), var(--font-ui), sans-serif;
+  font-weight: 600;
+  letter-spacing: var(--tr-display);
+}
+
+* { box-sizing: border-box; }
+
+/* Every ambient layer below is deliberately larger than the viewport, which
+   adds horizontal scroll unless clipped. `clip` rather than `hidden` so
+   position: sticky keeps working. */
+html, body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+body {
+  background: var(--v-bg);
+  color: var(--v-ink);
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}

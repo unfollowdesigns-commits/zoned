@@ -5,7 +5,7 @@ import Link from "@/components/SiteLink";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { EASE, useReducedMotion } from "@/lib/motion";
-import WaveField from "@/components/WaveField";
+import { WaveField } from "@/kit/components/WaveField";
 
 const WORDS = ["Professionals.", "Leaders.", "Solutions.", "Yours."] as const;
 

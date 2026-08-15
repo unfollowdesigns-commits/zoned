@@ -1,0 +1,243 @@
+/* ============================================================================
+   PRIMITIVES
+
+   Surfaces, and the small pieces every page needs. The rule underneath all of
+   it: ONE light source, top and slightly right. Every highlight, shadow and
+   gradient here agrees with it. Inconsistent lighting is the loudest single
+   tell of generated design, and it is invisible until you look for it.
+   ========================================================================= */
+
+/* ---- Glass panel. The workhorse. FIVE shadow layers, not one. ------------
+
+   Why each line exists:
+     surface gradient   the light source. Top lighter than bottom, ALWAYS.
+     inset top hairline the specular edge. Without it the panel looks printed on.
+     inner tint         stops the 1px border reading as a hard stroke.
+     three drop shadows increasing blur AND increasing negative spread, which is
+                        how real ambient occlusion falls off. One shadow always
+                        looks like a sticker.
+     saturate(125%)     what makes the blur read as glass rather than frosted
+                        plastic. Remove it and the panel goes grey and dead. */
+.g-glass {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.058), rgba(255, 255, 255, 0.022)),
+    var(--v-surface);
+  border: 1px solid var(--v-border);
+  border-radius: var(--radius);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.07) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 1px 2px 0 rgba(0, 0, 0, 0.4),
+    0 4px 12px -4px rgba(0, 0, 0, 0.55),
+    0 24px 48px -24px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
+}
+
+.g-glass-hover {
+  transition:
+    border-color var(--dur-hover) ease,
+    transform var(--dur-hover) var(--ease-out),
+    box-shadow var(--dur-hover) ease;
+}
+.g-glass-hover:hover {
+  border-color: var(--v-border-strong);
+  transform: translateY(-3px);   /* 3px. Not 8. */
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.09) inset,
+    0 4px 12px -4px rgba(0, 0, 0, 0.55),
+    0 40px 80px -28px rgba(0, 0, 0, 0.88),
+    0 0 0 1px rgba(62, 123, 250, 0.16),
+    0 0 40px -12px rgba(62, 123, 250, 0.28);
+}
+
+/* ---- Solid elevated surface: sidebar, top bar, rails. ------------------- */
+.v-elev {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+    var(--v-bg-2);
+  border: 1px solid var(--v-border);
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.05) inset;
+}
+
+/* ---- Recessed well: code blocks, live previews, inputs. -----------------
+   The lighting is INVERTED. A raised surface is lit on top; a recessed one is
+   lit on the bottom. Get this backwards and everything looks subtly wrong
+   without anyone being able to say why. */
+.v-well {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.16));
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  box-shadow:
+    0 1px 2px 0 rgba(0, 0, 0, 0.4) inset,
+    0 -1px 0 0 rgba(255, 255, 255, 0.03) inset;
+}
+
+/* ---- Gradient hairline ring, for the brightest surface on the page. -----
+   mask-composite punches out the interior so only a 1px ring paints. This is
+   the only way to get a gradient border without a wrapper element. */
+.g-ring-accent::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(140deg,
+    rgba(62, 123, 250, 0.6), rgba(47, 95, 214, 0.18) 42%, transparent 72%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ---- Diagonal sheen for hero surfaces ---------------------------------- */
+.v-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.05) 45%, transparent 60%);
+}
+
+/* ---- Cursor spotlight ----------------------------------------------------
+   Cheap, and it stops a grid of panels sitting there as one dead slab. Set
+   --mx / --my from a pointermove handler (see components/Spotlight). */
+.v-spotlight { position: relative; }
+.v-spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 320ms ease;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(62, 123, 250, 0.13), transparent 62%);
+}
+.v-spotlight:hover::before { opacity: 1; }
+
+/* ---- Text treatments ---------------------------------------------------- */
+.g-gradient-text {
+  background: linear-gradient(180deg, #ffffff, #c3c8de);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.v-accent-text {
+  background: linear-gradient(120deg, #9dbcff, var(--v-primary) 40%, var(--v-primary-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---- Eyebrow: the small uppercase label above a section title ---------- */
+.v-eyebrow {
+  font-size: var(--t-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-label);
+  color: var(--v-primary);
+}
+
+/* ---- Section divider that fades from the centre out -------------------- */
+.v-rule {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+/* ---- Keyboard hint chip ------------------------------------------------- */
+.v-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.32rem;
+  font-size: 11px;   /* the floor. The checker enforces it. */
+  font-weight: 600;
+  color: #b9bdcf;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.4);
+}
+
+/* ---- Range input --------------------------------------------------------
+   The native control is styled per engine and none of the three defaults
+   belong on this page. Height stays 20px so the hit target keeps the size a
+   finger needs, while the visible rail is 4px. */
+.v-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+.v-range:focus-visible {
+  outline: 2px solid var(--v-ring);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.v-range::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.09);
+}
+.v-range::-moz-range-track {
+  height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.09);
+}
+.v-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px; height: 14px; margin-top: -5px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--v-ring), var(--v-primary-deep));
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 8px -1px rgba(47, 95, 214, 0.9);
+  transition: transform var(--dur-hover) var(--ease-out);
+}
+.v-range::-moz-range-thumb {
+  width: 14px; height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--v-ring), var(--v-primary-deep));
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 8px -1px rgba(47, 95, 214, 0.9);
+  transition: transform var(--dur-hover) var(--ease-out);
+}
+.v-range:hover::-webkit-slider-thumb { transform: scale(1.18); }
+.v-range:hover::-moz-range-thumb { transform: scale(1.18); }
+
+/* ---- Focus, selection, scrollbar. Non-negotiable. ---------------------- */
+*:focus-visible {
+  outline: 2px solid var(--v-ring);
+  outline-offset: 2px;
+}
+::selection { background: color-mix(in srgb, var(--v-primary) 35%, transparent); color: #fff; }
+
+.v-shell ::-webkit-scrollbar { width: 9px; height: 9px; }
+.v-shell ::-webkit-scrollbar-track { background: transparent; }
+.v-shell ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.v-shell ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+  background-clip: content-box;
+}
+
+/* ---- Reduced motion backstop -------------------------------------------
+   A blunt global, deliberately. JS-driven animation needs its own check as
+   well: see lib/use-reduced-motion.ts, and read the comment in it, because
+   getting that wrong leaves elements permanently invisible. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

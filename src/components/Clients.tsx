@@ -1,39 +1,29 @@
 "use client";
 
 import { CLIENTS } from "@/lib/site";
+import { Marquee } from "@/kit/components/Interactions";
 
+/**
+ * Client wordmarks.
+ *
+ * A marquee is for texture, never for information: a ticker you cannot read at
+ * speed and cannot stop is decoration wearing the costume of content. These are
+ * names rather than claims, the strip pauses on hover, and the full list is
+ * readable in the footer, so nothing here is only available in motion.
+ */
 export default function Clients() {
   return (
-    <section className="py-14" aria-label="Selected clients">
-      <div className="v-marquee relative overflow-hidden">
-        {/* edge fades so names enter and leave rather than being cut */}
-        <div
-          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[var(--v-bg)] to-transparent"
-          aria-hidden="true"
-        />
-        <div
-          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[var(--v-bg)] to-transparent"
-          aria-hidden="true"
-        />
-        <div className="v-marquee-track">
-          {[0, 1].map((copy) => (
-            <ul
-              key={copy}
-              className="flex shrink-0 items-center gap-14 pr-14"
-              aria-hidden={copy === 1}
-            >
-              {CLIENTS.map((name) => (
-                <li
-                  key={name}
-                  className="v-display whitespace-nowrap text-[length:var(--t-body)] tracking-tight text-[var(--v-muted)] transition-colors duration-200 hover:text-[var(--v-ink)]"
-                >
-                  {name}
-                </li>
-              ))}
-            </ul>
-          ))}
-        </div>
-      </div>
+    <section className="py-16" aria-label="Selected clients">
+      <Marquee speed={46}>
+        {CLIENTS.map((name) => (
+          <span
+            key={name}
+            className="v-display whitespace-nowrap px-7 text-[length:var(--t-heading)] tracking-tight text-[var(--v-muted)] transition-colors duration-200 hover:text-[var(--v-ink)]"
+          >
+            {name}
+          </span>
+        ))}
+      </Marquee>
     </section>
   );
 }

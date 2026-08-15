@@ -1,0 +1,419 @@
+/* ============================================================================
+   PAPER
+
+   The whole site being one continuous dark surface makes a long page read as a
+   single undifferentiated scroll. Dropping to warm off-white for one or two
+   sections gives the page joints: you can feel where one argument ends and the
+   next begins, and it makes the dark sections read as a deliberate choice
+   rather than as the only option.
+
+   The critical part, and the part that gets skipped: paper sections need their
+   own atmosphere. Dark sections sit on an aurora, a dot field and grain.
+   Dropping to paper and losing all of that makes the light bands read as a
+   different, flatter website. What follows is the same three layers inverted.
+
+   Paired with components/LightBand.tsx, which carries the inverted palette.
+   ========================================================================= */
+
+/* ==== Cream band atmosphere =============================================== */
+/* The dark sections sit on an aurora, a dot field and grain. Dropping to paper
+   and losing all of that made the light bands read as a different, flatter
+   site. This is the same three layers inverted: warm ink dots instead of light
+   ones, and the brand violet and mint as blooms at an alpha low enough to tint
+   the paper without ever competing with body text.
+
+   All motion is CSS transform on composited layers, so it costs nothing on the
+   main thread, and it stops entirely for anyone who asked it to. */
+
+.v-paper-dots {
+  position: absolute;
+  inset: -10%;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(20, 18, 14, 0.085) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(120% 100% at 50% 0%, #000 20%, transparent 78%);
+  -webkit-mask-image: radial-gradient(120% 100% at 50% 0%, #000 20%, transparent 78%);
+  animation: v-paper-drift 42s linear infinite;
+}
+
+@keyframes v-paper-drift {
+  from { background-position: 0 0; }
+  to   { background-position: 220px 132px; }
+}
+
+.v-paper-bloom {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(72px);
+  will-change: transform;
+}
+
+/* Asymmetric periods so the two never fall into a visible loop together. */
+.v-paper-bloom-a {
+  width: 620px; height: 620px;
+  top: -14%; left: -8%;
+  background: radial-gradient(circle, rgba(47, 95, 214, 0.16), transparent 68%);
+  animation: v-bloom-a 27s ease-in-out infinite alternate;
+}
+.v-paper-bloom-b {
+  width: 520px; height: 520px;
+  bottom: -18%; right: -6%;
+  background: radial-gradient(circle, rgba(31, 157, 107, 0.13), transparent 68%);
+  animation: v-bloom-b 34s ease-in-out infinite alternate;
+}
+
+@keyframes v-bloom-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(90px, 60px, 0) scale(1.12); }
+}
+@keyframes v-bloom-b {
+  from { transform: translate3d(0, 0, 0) scale(1.08); }
+  to   { transform: translate3d(-70px, -50px, 0) scale(1); }
+}
+
+/* A hairline of brand colour where paper meets the dark sections, so the seam
+   reads as deliberate rather than as two pages stitched together. */
+.v-paper-seam::before,
+.v-paper-seam::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(47, 95, 214, 0.45), rgba(31, 157, 107, 0.35), transparent);
+}
+.v-paper-seam::before { top: 0; }
+.v-paper-seam::after { bottom: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .v-paper-dots, .v-paper-bloom { animation: none; }
+}
+
+/* ---- Second display weight -----------------------------------------------
+   For a large statement that should read as quieter than a headline. Weight
+   400 with slightly looser tracking, because a lighter weight at display size
+   needs less negative tracking to stay open. */
+.v-display-light {
+  font-family: var(--font-display), var(--font-ui), sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+/* ---- Curtain -------------------------------------------------------------
+   The pre-paint script in <head> stamps data-loaded on <html>. Scroll is locked
+   underneath the curtain while it is up, and overflow-y specifically, so the
+   overflow-x: clip from 00-tokens survives. See components/Curtain.tsx. */
+html:not([data-loaded]) {
+  overflow-y: hidden;
+}
+html[data-loaded] .v-curtain {
+  display: none;
+}
+
+@media print {
+  html, body { background: #ffffff !important; }
+  body * { visibility: hidden !important; }
+  #vero-dossier, #vero-dossier * { visibility: visible !important; }
+  #vero-dossier {
+    position: absolute !important;
+    left: 0; top: 0;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .no-print { display: none !important; }
+  @page { margin: 14mm; }
+}
+
+/* ==== Cream band atmosphere =============================================== */
+/* The dark sections sit on an aurora, a dot field and grain. Dropping to paper
+   and losing all of that made the light bands read as a different, flatter
+   site. This is the same three layers inverted: warm ink dots instead of light
+   ones, and the brand violet and mint as blooms at an alpha low enough to tint
+   the paper without ever competing with body text.
+
+   All motion is CSS transform on composited layers, so it costs nothing on the
+   main thread, and it stops entirely for anyone who asked it to. */
+
+.v-paper-dots {
+  position: absolute;
+  inset: -10%;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(20, 18, 14, 0.085) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(120% 100% at 50% 0%, #000 20%, transparent 78%);
+  -webkit-mask-image: radial-gradient(120% 100% at 50% 0%, #000 20%, transparent 78%);
+  animation: v-paper-drift 42s linear infinite;
+}
+
+@keyframes v-paper-drift {
+  from { background-position: 0 0; }
+  to   { background-position: 220px 132px; }
+}
+
+.v-paper-bloom {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(72px);
+  will-change: transform;
+}
+
+/* Asymmetric periods so the two never fall into a visible loop together. */
+.v-paper-bloom-a {
+  width: 620px; height: 620px;
+  top: -14%; left: -8%;
+  background: radial-gradient(circle, rgba(47, 95, 214, 0.16), transparent 68%);
+  animation: v-bloom-a 27s ease-in-out infinite alternate;
+}
+.v-paper-bloom-b {
+  width: 520px; height: 520px;
+  bottom: -18%; right: -6%;
+  background: radial-gradient(circle, rgba(31, 157, 107, 0.13), transparent 68%);
+  animation: v-bloom-b 34s ease-in-out infinite alternate;
+}
+
+@keyframes v-bloom-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(90px, 60px, 0) scale(1.12); }
+}
+@keyframes v-bloom-b {
+  from { transform: translate3d(0, 0, 0) scale(1.08); }
+  to   { transform: translate3d(-70px, -50px, 0) scale(1); }
+}
+
+/* A hairline of brand colour where paper meets the dark sections, so the seam
+   reads as deliberate rather than as two pages stitched together. */
+.v-paper-seam::before,
+.v-paper-seam::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(47, 95, 214, 0.45), rgba(31, 157, 107, 0.35), transparent);
+}
+.v-paper-seam::before { top: 0; }
+.v-paper-seam::after { bottom: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .v-paper-dots, .v-paper-bloom { animation: none; }
+}
+
+/* ==== Traveling border light ==============================================
+   A single point of light running around a button's edge, at constant size and
+   constant speed.
+
+   Two earlier attempts failed. Animating an @property angle inside a
+   conic-gradient interpolated correctly and never repainted, so the light sat
+   frozen. Rotating a conic gradient clipped to the button moved, but a conic
+   sweep clipped to a wide pill is not uniform: the visible arc is enormous when
+   it points along the long axis and a sliver when it points at the ends.
+
+   The light now travels the border itself via offset-path, so it is one blob of
+   fixed size moving at constant speed regardless of the button's proportions.
+   The hairline is a plain static border underneath, which also means the button
+   still has an edge in browsers without motion paths. */
+
+/* A third attempt was needed after that. Travelling the border fixed the speed
+   and the size, but the light was still a fat disc dropped on top of a clipped
+   pill, so half of it spilled across the face of the button and read as a
+   smudge rather than as light on an edge.
+
+   What it is now: the moving layer is masked down to the one-pixel stroke, so
+   the only thing that can be lit is the stroke. A short train of points runs
+   the path a few hundredths of a second apart, which draws a comet with a tail
+   that bends correctly around the caps, something a single rigid streak cannot
+   do. A separate soft point rides the same path unmasked to cast the bloom. */
+
+.v-edge {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.018);
+  --v-edge-dur: 3.8s;
+}
+
+/* Both layers are pushed out by the button's own border width so their border
+   box lands exactly on the stroke, which is the path the light has to follow. */
+.v-edge-ring,
+.v-edge-glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* The one-pixel band. Filling the padding box and then subtracting it leaves
+   only the frame, so anything inside this layer can paint the stroke and
+   nothing else. */
+.v-edge-ring {
+  padding: 1px;
+  background: linear-gradient(
+    170deg,
+    rgba(255, 255, 255, 0.26),
+    rgba(255, 255, 255, 0.06) 42%,
+    rgba(255, 255, 255, 0.02)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+/* The bloom, unclipped so it spills outward like real light. */
+.v-edge-glow {
+  z-index: -1;
+}
+
+.v-edge-ring > i,
+.v-edge-glow > i {
+  position: absolute;
+  border-radius: 999px;
+  offset-path: border-box;
+  offset-distance: 0%;
+  offset-anchor: 50% 50%;
+  offset-rotate: 0deg;
+  animation: v-edge-travel var(--v-edge-dur) linear infinite;
+  /* Negative, so a trailing point starts already behind the head instead of
+     waiting a beat at the origin on the first lap. */
+  animation-delay: calc(var(--v-edge-lag, 0s) - var(--v-edge-dur));
+}
+
+/* Head, then the tail, each dimmer, wider and softer than the one in front. */
+.v-edge-ring > i:nth-child(1) {
+  width: 14px; height: 14px;
+  background: radial-gradient(circle, #fff, #fff 18%, rgba(205, 222, 255, 0.72) 46%, transparent 74%);
+}
+.v-edge-ring > i:nth-child(2) {
+  --v-edge-lag: 0.05s;
+  width: 20px; height: 20px;
+  background: radial-gradient(circle, rgba(215, 230, 255, 0.55), transparent 68%);
+  filter: blur(1.5px);
+}
+.v-edge-ring > i:nth-child(3) {
+  --v-edge-lag: 0.12s;
+  width: 28px; height: 28px;
+  background: radial-gradient(circle, rgba(143, 176, 255, 0.32), transparent 66%);
+  filter: blur(3px);
+}
+.v-edge-ring > i:nth-child(4) {
+  --v-edge-lag: 0.22s;
+  width: 38px; height: 38px;
+  background: radial-gradient(circle, rgba(112, 152, 252, 0.16), transparent 64%);
+  filter: blur(5px);
+}
+
+/* Kept smaller than it wants to be. A wide bloom drifts away from the point
+   that is casting it and starts to read as a separate smudge again. */
+.v-edge-glow > i {
+  width: 34px; height: 34px;
+  background: radial-gradient(circle, rgba(143, 176, 255, 0.5), rgba(62, 123, 250, 0.16) 48%, transparent 72%);
+  filter: blur(8px);
+}
+
+/* Pointing at it should feel like the light picks up, not like a new
+   animation starts, so only the period changes. */
+.v-edge:hover { --v-edge-dur: 2.3s; }
+
+@keyframes v-edge-travel {
+  to { offset-distance: 100%; }
+}
+
+/* Without motion paths the points would stack in one corner, which looks like a
+   rendering fault rather than a quieter design. The stroke gradient remains. */
+@supports not (offset-path: border-box) {
+  .v-edge-ring > i, .v-edge-glow > i { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v-edge-ring > i, .v-edge-glow > i { display: none; }
+  .v-edge-ring { background: linear-gradient(170deg, rgba(255,255,255,0.3), rgba(255,255,255,0.06)); }
+}
+
+/* ==== Depth field ========================================================= */
+/* The shell had ambient light, a mesh and grain, all of which sit flat on the
+   same plane. This adds the thing that actually reads as space: three layers of
+   points at different scales, drifting at different rates. Parallax is the only
+   cue the eye needs, and it costs one composited transform per layer.
+   
+   Points are drawn with radial-gradient rather than box-shadow lists, so each
+   layer is a single tiled paint instead of several hundred shadow passes. */
+
+.v-depth {
+  position: fixed;
+  inset: -20%;
+  z-index: -2;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Every layer's two point grids share one tile size and differ only in offset.
+   That is not a shortcut, it is the reason the drift is seamless: the loop
+   travels exactly one tile in both axes, so the restart lands on an identical
+   field. The earlier version tiled at 190x210 but travelled -190x-105, which
+   snapped the whole sky sideways once a cycle. */
+
+.v-depth-far {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.55) 0.6px, transparent 0.6px),
+    radial-gradient(circle, rgba(143, 176, 255, 0.4) 0.5px, transparent 0.5px);
+  background-size: 190px 210px;
+  background-position: 0 0, 97px 131px;
+  opacity: 0.5;
+  animation: v-depth-drift-far 220s linear infinite;
+}
+
+.v-depth-mid {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.7) 0.9px, transparent 0.9px),
+    radial-gradient(circle, rgba(94, 179, 255, 0.5) 0.8px, transparent 0.8px);
+  background-size: 340px 320px;
+  background-position: 40px 10px, 211px 187px;
+  opacity: 0.45;
+  animation: v-depth-drift-mid 148s linear infinite;
+}
+
+.v-depth-near {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.9) 1.3px, transparent 1.3px);
+  background-size: 620px 560px;
+  background-position: 160px 80px;
+  opacity: 0.4;
+  animation: v-depth-drift-near 96s linear infinite;
+}
+
+/* Nearer layers cover more ground per second, which is the whole illusion.
+   Written to the translate property rather than transform so that the
+   scroll-driven parallax below can own transform without the two fighting. */
+@keyframes v-depth-drift-far {
+  to { translate: -190px -210px; }
+}
+@keyframes v-depth-drift-mid {
+  to { translate: -340px -320px; }
+}
+@keyframes v-depth-drift-near {
+  to { translate: -620px -560px; }
+}
+
+/* Scrolling should feel like moving through the field, not like sliding a page
+   over a fixed photograph of one. Scroll-driven animations do this on the
+   compositor with no scroll listener and no layout read, so it stays smooth
+   under load. Browsers without the timeline simply keep the ambient drift. */
+@supports (animation-timeline: scroll()) {
+  .v-depth-far {
+    animation: v-depth-drift-far 220s linear infinite, v-depth-par-far linear both;
+    animation-timeline: auto, scroll(root block);
+  }
+  .v-depth-mid {
+    animation: v-depth-drift-mid 148s linear infinite, v-depth-par-mid linear both;
+    animation-timeline: auto, scroll(root block);
+  }
+  .v-depth-near {
+    animation: v-depth-drift-near 96s linear infinite, v-depth-par-near linear both;
+    animation-timeline: auto, scroll(root block);
+  }
+}
