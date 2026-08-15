@@ -159,6 +159,22 @@ export const STATS: Stat[] = [
   { value: 100, unit: "%", label: "Placement on retainers" },
 ];
 
+/**
+ * Frequently placed positions.
+ *
+ * Read from the homepage screenshot, which is low resolution, so these need
+ * confirming against the live site before launch. Anything unreadable was left
+ * out rather than guessed at.
+ */
+export const PLACED_POSITIONS = [
+  "Chief Financial Officer (CFO)",
+  "Chief Human Resources Officer",
+  "VP of Engineering",
+  "Controller",
+  "Chief Product Officer (CPO)",
+  "Chief Information Security Officer (CISO)",
+];
+
 export const FOOTER_COLUMNS: NavGroup[] = [
   { heading: "What We Do", items: SERVICES },
   { heading: "Who We Serve", items: [...FUNCTIONS, ...INDUSTRIES.slice(0, 2)] },

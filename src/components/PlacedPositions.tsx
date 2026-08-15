@@ -1,0 +1,56 @@
+"use client";
+
+import * as React from "react";
+import { motion } from "framer-motion";
+import { EASE, useReducedMotion } from "@/lib/motion";
+import { PLACED_POSITIONS } from "@/lib/site";
+
+/**
+ * Frequently placed positions.
+ *
+ * A rail of role titles rather than a card grid. The hover is the point: a
+ * search firm's proof is the seniority of the seat, so pointing at a title
+ * lifts it out of the row and draws the accent rule beneath it, which acts out
+ * "this is the level we work at" rather than proving the chip is hoverable.
+ */
+export default function PlacedPositions() {
+  const reduced = useReducedMotion();
+
+  return (
+    <section className="mx-auto max-w-[1280px] px-6 pb-24">
+      <p className="v-eyebrow mb-7">Frequently Placed Positions</p>
+
+      <ul className="flex flex-wrap gap-2.5">
+        {PLACED_POSITIONS.map((title, i) => (
+          <motion.li
+            key={title}
+            className="v-reveal"
+            style={{ "--reveal-i": Math.min(i, 4) } as React.CSSProperties}
+            initial="rest"
+            animate="rest"
+            whileHover={reduced ? undefined : "hover"}
+            whileFocus={reduced ? undefined : "hover"}
+          >
+            <motion.span
+              tabIndex={0}
+              className="relative inline-flex cursor-default items-center rounded-full border border-[var(--v-border)] bg-white/[0.03] px-5 py-2.5 text-[length:var(--t-secondary)] text-[var(--v-muted)] outline-none transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+              variants={{
+                rest: { y: 0, color: "var(--v-muted)" },
+                hover: { y: -3, color: "var(--v-ink)" },
+              }}
+              transition={{ duration: 0.22, ease: EASE }}
+            >
+              {title}
+              <motion.span
+                aria-hidden="true"
+                className="absolute inset-x-5 -bottom-px h-px origin-left bg-[var(--v-primary)]"
+                variants={{ rest: { scaleX: 0 }, hover: { scaleX: 1 } }}
+                transition={{ duration: 0.28, ease: EASE }}
+              />
+            </motion.span>
+          </motion.li>
+        ))}
+      </ul>
+    </section>
+  );
+}

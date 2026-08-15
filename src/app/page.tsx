@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import Clients from "@/components/Clients";
 import Stats from "@/components/Stats";
 import StickyServices from "@/components/StickyServices";
+import PlacedPositions from "@/components/PlacedPositions";
 import Reveal from "@/components/Reveal";
 import LightBand from "@/components/ui/LightBand";
 
@@ -10,6 +11,8 @@ export default function Home() {
   return (
     <>
       <Hero />
+
+      <Stats />
 
       <LightBand>
         <div className="mx-auto max-w-[1280px] px-6 py-24 sm:py-32">
@@ -57,9 +60,9 @@ export default function Home() {
 
       <Clients />
 
-      <Stats />
-
       <StickyServices />
+
+      <PlacedPositions />
 
       <section className="mx-auto max-w-[1280px] px-6 pb-28">
         <Reveal>
