@@ -74,7 +74,11 @@
          viewport never reaches `entry 100%`, so a late end value leaves tall
          panels (a long form, a stacked section) frozen part-way through their
          own reveal. 35% is passed well before anything is centred. */
-      animation-range: entry 0% entry calc(35% + var(--reveal-i, 0) * 5%);
+      /* Short and nearly constant. The per-item stagger has to stay small:
+         it is added to the range END, so a late item needs more of the entry
+         phase to finish, and a tall element on a narrow screen never gets
+         there. That left a section frozen at 0.59 opacity at 390px. */
+      animation-range: entry 0% entry calc(22% + var(--reveal-i, 0) * 3%);
     }
   }
 }

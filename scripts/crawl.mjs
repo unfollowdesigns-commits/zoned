@@ -75,6 +75,28 @@ for (const width of WIDTHS) {
 
     await page.waitForTimeout(500);
 
+    // Can a real user scroll this page? scrollTo() bypasses an overflow lock
+    // on the document, so it reported success while the page was frozen. A
+    // wheel does not. This exact bug shipped: 04-paper.css locks scroll until
+    // a curtain stamps data-loaded, and importing it without mounting the
+    // Curtain left every page unscrollable while looking perfect.
+    const scrollable = await page.evaluate(
+      () => document.documentElement.scrollHeight > window.innerHeight + 40,
+    );
+    if (scrollable) {
+      const y0 = await page.evaluate(() => window.scrollY);
+      for (let k = 0; k < 6; k++) {
+        await page.mouse.wheel(0, 400);
+        await page.waitForTimeout(50);
+      }
+      await page.waitForTimeout(300);
+      const y1 = await page.evaluate(() => window.scrollY);
+      if (y1 <= y0) {
+        failures.push(`${route} @${width}: wheel does not scroll (document overflow locked)`);
+      }
+      await page.evaluate(() => window.scrollTo(0, 0));
+    }
+
     // full scroll pass so every whileInView reveal fires
     const H = await page.evaluate(() => document.documentElement.scrollHeight);
     for (let y = 0; y <= H; y += 400) {

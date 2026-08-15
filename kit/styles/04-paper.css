@@ -104,7 +104,13 @@
    The pre-paint script in <head> stamps data-loaded on <html>. Scroll is locked
    underneath the curtain while it is up, and overflow-y specifically, so the
    overflow-x: clip from 00-tokens survives. See components/Curtain.tsx. */
-html:not([data-loaded]) {
+/* Scoped to :has(.v-curtain) deliberately. Unscoped, this rule locks scroll
+   permanently in any project that imports this stylesheet without also
+   mounting the Curtain, because nothing ever stamps data-loaded. That failure
+   is silent: the page renders, looks correct, and simply cannot be scrolled.
+   With the guard, the lock exists only while a curtain is actually in the DOM
+   to justify it. */
+html:not([data-loaded]):has(.v-curtain) {
   overflow-y: hidden;
 }
 html[data-loaded] .v-curtain {
