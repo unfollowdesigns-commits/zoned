@@ -1,0 +1,301 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+
+  --v-bg: #060814;              /* ground, navy-biased */
+  --v-bg-2: #0a0d1c;            /* raised ground: header, top bars */
+  --v-surface: #0d1122;         /* panels */
+  --v-surface-2: rgba(17, 22, 41, 0.44); /* panels over panels */
+  --v-ink: #f5f7fc;             /* text */
+  --v-muted: #9aa1ba;           /* secondary text */
+  --v-border: rgba(255, 255, 255, 0.09);
+  --v-border-strong: rgba(255, 255, 255, 0.16);
+  --v-primary: #3e7bfa;         /* accent: District Partners blue */
+  --v-primary-deep: #2f5fd6;    /* accent, pressed / gradient end */
+  --v-mint: #4ade9b;            /* positive */
+  --v-ring: #8fb0ff;            /* focus ring, accent lightened */
+  --radius: 0.9rem;
+
+  --font-ui: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-manrope), var(--font-inter), ui-sans-serif, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+body {
+  background: var(--v-bg);
+  color: var(--v-ink);
+  font-family: var(--font-ui);
+}
+
+::selection {
+  background: rgba(62, 123, 250, 0.35);
+  color: #fff;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--v-ring);
+  outline-offset: 2px;
+}
+
+.v-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+}
+
+.v-measure {
+  max-width: 68ch;
+}
+
+.v-eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--v-primary);
+}
+
+/* ---- Glass panel: five shadow layers, not one ---- */
+.g-glass {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.058), rgba(255, 255, 255, 0.022)),
+    var(--v-surface);
+  border: 1px solid var(--v-border);
+  border-radius: var(--radius);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.07) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 1px 2px 0 rgba(0, 0, 0, 0.4),
+    0 4px 12px -4px rgba(0, 0, 0, 0.55),
+    0 24px 48px -24px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
+  transition: border-color 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.g-glass:hover {
+  border-color: var(--v-border-strong);
+}
+
+/* ---- Gradient hairline ring ---- */
+.g-ring-accent {
+  position: relative;
+}
+.g-ring-accent::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    140deg,
+    rgba(62, 123, 250, 0.6),
+    rgba(47, 95, 214, 0.18) 42%,
+    transparent 72%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ---- Recessed well ---- */
+.v-well {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.16));
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  box-shadow:
+    0 1px 2px 0 rgba(0, 0, 0, 0.4) inset,
+    0 -1px 0 0 rgba(255, 255, 255, 0.03) inset;
+}
+
+/* ---- Cursor spotlight ---- */
+.v-spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(62, 123, 250, 0.13),
+    transparent 62%
+  );
+}
+.v-spotlight:hover::before,
+.v-spotlight:focus-within::before {
+  opacity: 1;
+}
+
+/* ---- Client wordmark marquee ---- */
+@keyframes v-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.v-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: v-marquee 46s linear infinite;
+}
+.v-marquee:hover .v-marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .v-marquee-track {
+    animation: none !important;
+    transform: none;
+  }
+  .v-marquee {
+    overflow-x: auto;
+  }
+}
+
+/* ---- Section divider ---- */
+.v-rule {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+/* ---- Atmosphere stack ---- */
+@keyframes v-aurora {
+  0% {
+    transform: translate3d(-8%, -4%, 0) rotate(0deg) scale(1.15);
+  }
+  33% {
+    transform: translate3d(6%, 3%, 0) rotate(38deg) scale(1.3);
+  }
+  66% {
+    transform: translate3d(-4%, 6%, 0) rotate(-26deg) scale(1.2);
+  }
+  100% {
+    transform: translate3d(-8%, -4%, 0) rotate(0deg) scale(1.15);
+  }
+}
+
+.v-aurora {
+  position: fixed;
+  inset: -25%;
+  z-index: -3;
+  pointer-events: none;
+  opacity: 0.5;
+  filter: blur(90px) saturate(140%);
+  background:
+    radial-gradient(38% 44% at 22% 20%, rgba(62, 123, 250, 0.55), transparent 62%),
+    radial-gradient(32% 38% at 74% 16%, rgba(47, 95, 214, 0.45), transparent 60%),
+    radial-gradient(34% 40% at 62% 76%, rgba(74, 222, 155, 0.07), transparent 62%),
+    radial-gradient(30% 34% at 28% 78%, rgba(143, 176, 255, 0.28), transparent 60%);
+  animation: v-aurora 34s ease-in-out infinite;
+  will-change: transform;
+}
+
+.v-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(1100px 640px at 82% -12%, rgba(62, 123, 250, 0.2), transparent 60%),
+    radial-gradient(760px 520px at 4% 2%, rgba(47, 95, 214, 0.14), transparent 55%),
+    radial-gradient(1200px 820px at 50% 120%, rgba(74, 222, 155, 0.03), transparent 60%),
+    radial-gradient(140% 120% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.v-shell::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(1200px 820px at 60% 0%, #000 28%, transparent 78%);
+}
+
+.v-grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.05;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- Hero starfield (local to hero, not global atmosphere) ---- */
+.v-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.4px 1.4px at 12% 22%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1.2px 1.2px at 28% 65%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.6px 1.6px at 44% 18%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(1.2px 1.2px at 58% 42%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1.4px 1.4px at 72% 70%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1.2px 1.2px at 85% 30%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1.6px 1.6px at 93% 60%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1.2px 1.2px at 20% 85%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1.2px 1.2px at 65% 88%, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(1.4px 1.4px at 38% 40%, rgba(255, 255, 255, 0.6), transparent);
+  background-repeat: no-repeat;
+  mask-image: linear-gradient(180deg, #000 55%, transparent 92%);
+}
+
+/* Atmospheric bloom rising off the horizon line. */
+.v-hero-sky {
+  position: absolute;
+  left: 50%;
+  bottom: 16%;
+  width: 130%;
+  height: 78%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background:
+    radial-gradient(46% 62% at 50% 100%, rgba(84, 142, 255, 0.5), transparent 70%),
+    radial-gradient(70% 46% at 50% 100%, rgba(47, 95, 214, 0.34), transparent 72%),
+    radial-gradient(26% 90% at 30% 100%, rgba(62, 123, 250, 0.2), transparent 70%),
+    radial-gradient(26% 90% at 70% 100%, rgba(62, 123, 250, 0.2), transparent 70%);
+  filter: blur(26px);
+}
+
+/* The dark body below, lit along its top edge only. */
+.v-hero-planet {
+  position: absolute;
+  left: 50%;
+  top: 68%;
+  width: 190%;
+  aspect-ratio: 1 / 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: #03050e;
+  pointer-events: none;
+  box-shadow:
+    0 0 40px 2px rgba(150, 190, 255, 0.7),
+    0 0 90px 14px rgba(62, 123, 250, 0.45),
+    0 0 220px 60px rgba(47, 95, 214, 0.28);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
