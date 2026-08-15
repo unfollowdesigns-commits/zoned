@@ -5,6 +5,7 @@ import Link from "@/components/SiteLink";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { EASE, useReducedMotion } from "@/lib/motion";
+import Reveal from "@/components/Reveal";
 import {
   ExecutiveSearchGlyph,
   ProfessionalSearchGlyph,
@@ -82,12 +83,9 @@ function Tile({ service, index }: { service: Service; index: number }) {
       className={`v-spotlight g-glass group relative flex min-h-[168px] flex-col justify-between overflow-hidden p-6 ${service.span}`}
       variants={{ rest: {}, hover: {} }}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
-        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: true, amount: 0 }}
-        transition={{ duration: 0.5, ease: EASE, delay: Math.min(index * 0.07, 0.3) }}
-        className="flex h-full flex-col justify-between"
+      <div
+        className="v-reveal flex h-full flex-col justify-between"
+        style={{ "--reveal-i": Math.min(index, 4) } as React.CSSProperties}
       >
         <h3 className="v-display max-w-[14ch] text-[21px] leading-[1.25]">{service.title}</h3>
 
@@ -111,7 +109,7 @@ function Tile({ service, index }: { service: Service; index: number }) {
             <ArrowRight size={15} strokeWidth={2} />
           </motion.span>
         </Link>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
@@ -119,15 +117,11 @@ function Tile({ service, index }: { service: Service; index: number }) {
 export default function WhatWeDo() {
   return (
     <section className="mx-auto max-w-[1280px] px-6 py-24 sm:pb-28 sm:pt-24">
-      <motion.h2
-        initial={{ opacity: 0, y: 16, filter: "blur(6px)" }}
-        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: true, amount: 0 }}
-        transition={{ duration: 0.5, ease: EASE }}
-        className="v-display mb-10 text-[clamp(1.75rem,4vw,2.25rem)] italic leading-[1.1] text-[var(--v-primary)]"
-      >
-        What We Do:
-      </motion.h2>
+      <Reveal className="mb-10">
+        <h2 className="v-display text-[clamp(1.75rem,4vw,2.25rem)] italic leading-[1.1] text-[var(--v-primary)]">
+          What We Do:
+        </h2>
+      </Reveal>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
         {SERVICES.map((service, i) => (

@@ -164,6 +164,36 @@ body {
   }
 }
 
+/* ---- Scroll reveal ----
+   Driven by a scroll timeline rather than an IntersectionObserver, so it does
+   not depend on hydration having finished. The base style is the visible one:
+   if the timeline is inactive (page too short to scroll), unsupported, or the
+   user prefers reduced motion, content simply shows. An observer-based reveal
+   can strand content forever when the element is scrolled past before the
+   observer attaches; this cannot. */
+@keyframes v-reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .v-reveal {
+      animation: v-reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover calc(18% + var(--reveal-i, 0) * 6%);
+    }
+  }
+}
+
 /* ---- Section divider ---- */
 .v-rule {
   height: 1px;

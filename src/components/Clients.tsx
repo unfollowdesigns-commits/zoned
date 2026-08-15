@@ -1,17 +1,6 @@
 "use client";
 
-// Client names as shown on the District Partners homepage logo strip.
-// Rendered as wordmarks rather than reproduced logo artwork.
-const CLIENTS = [
-  "Walker & Dunlop",
-  "Riveron",
-  "OTJ",
-  "Guidehouse",
-  "BRG",
-  "Washington Commanders",
-  "ChamberOfCommerce.com",
-  "MAI Capital Management",
-];
+import { CLIENTS } from "@/lib/site";
 
 export default function Clients() {
   return (
