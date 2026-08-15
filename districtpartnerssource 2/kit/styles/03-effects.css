@@ -1,0 +1,182 @@
+/* ============================================================================
+   EFFECTS
+
+   The pieces that are not surfaces: the travelling edge light, the bento tile,
+   and the hero orb. Optional in the sense that a page works without them, and
+   not optional in the sense that a page without any of them looks like every
+   other dark template.
+   ========================================================================= */
+
+.v-edge {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.018);
+  --v-edge-dur: 3.8s;
+}
+
+/* Both layers are pushed out by the button's own border width so their border
+   box lands exactly on the stroke, which is the path the light has to follow. */
+.v-edge-ring,
+.v-edge-glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* The one-pixel band. Filling the padding box and then subtracting it leaves
+   only the frame, so anything inside this layer can paint the stroke and
+   nothing else. */
+.v-edge-ring {
+  padding: 1px;
+  background: linear-gradient(
+    170deg,
+    rgba(255, 255, 255, 0.26),
+    rgba(255, 255, 255, 0.06) 42%,
+    rgba(255, 255, 255, 0.02)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+/* The bloom, unclipped so it spills outward like real light. */
+.v-edge-glow {
+  z-index: -1;
+}
+
+.v-edge-ring > i,
+.v-edge-glow > i {
+  position: absolute;
+  border-radius: 999px;
+  offset-path: border-box;
+  offset-distance: 0%;
+  offset-anchor: 50% 50%;
+  offset-rotate: 0deg;
+  animation: v-edge-travel var(--v-edge-dur) linear infinite;
+  /* Negative, so a trailing point starts already behind the head instead of
+     waiting a beat at the origin on the first lap. */
+  animation-delay: calc(var(--v-edge-lag, 0s) - var(--v-edge-dur));
+}
+
+/* Head, then the tail, each dimmer, wider and softer than the one in front. */
+.v-edge-ring > i:nth-child(1) {
+  width: 14px; height: 14px;
+  background: radial-gradient(circle, #fff, #fff 18%, rgba(205, 222, 255, 0.72) 46%, transparent 74%);
+}
+.v-edge-ring > i:nth-child(2) {
+  --v-edge-lag: 0.05s;
+  width: 20px; height: 20px;
+  background: radial-gradient(circle, rgba(215, 230, 255, 0.55), transparent 68%);
+  filter: blur(1.5px);
+}
+.v-edge-ring > i:nth-child(3) {
+  --v-edge-lag: 0.12s;
+  width: 28px; height: 28px;
+  background: radial-gradient(circle, rgba(143, 176, 255, 0.32), transparent 66%);
+  filter: blur(3px);
+}
+.v-edge-ring > i:nth-child(4) {
+  --v-edge-lag: 0.22s;
+  width: 38px; height: 38px;
+  background: radial-gradient(circle, rgba(112, 152, 252, 0.16), transparent 64%);
+  filter: blur(5px);
+}
+
+/* Kept smaller than it wants to be. A wide bloom drifts away from the point
+   that is casting it and starts to read as a separate smudge again. */
+.v-edge-glow > i {
+  width: 34px; height: 34px;
+  background: radial-gradient(circle, rgba(143, 176, 255, 0.5), rgba(62, 123, 250, 0.16) 48%, transparent 72%);
+  filter: blur(8px);
+}
+
+/* Pointing at it should feel like the light picks up, not like a new
+   animation starts, so only the period changes. */
+.v-edge:hover { --v-edge-dur: 2.3s; }
+
+@keyframes v-edge-travel {
+  to { offset-distance: 100%; }
+}
+
+/* Without motion paths the points would stack in one corner, which looks like a
+   rendering fault rather than a quieter design. The stroke gradient remains. */
+@supports not (offset-path: border-box) {
+  .v-edge-ring > i, .v-edge-glow > i { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v-edge-ring > i, .v-edge-glow > i { display: none; }
+  .v-edge-ring { background: linear-gradient(170deg, rgba(255,255,255,0.3), rgba(255,255,255,0.06)); }
+}
+
+/* ==== Depth field ========================================================= */
+/* The shell had ambient light, a mesh and grain, all of which sit flat on the
+   same plane. This adds the thing that actually reads as space: three layers of
+   points at different scales, drifting at different rates. Parallax is the only
+
+/* Tiles that hold a live piece of the interface rather than an icon and a
+   paragraph. The surface sits in a recessed well so it reads as something
+   dropped into the page from the application, and the tile lights from the
+   pointer so a grid of six does not sit there as one dead slab. */
+
+.v-bento {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.016)),
+    var(--v-surface);
+  border: 1px solid var(--v-border);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+    0 2px 4px -2px rgba(0, 0, 0, 0.5),
+    0 28px 56px -28px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  transition:
+    border-color 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.v-bento:hover {
+  transform: translateY(-3px);
+  border-color: rgba(62, 123, 250, 0.28);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.09) inset,
+    0 2px 4px -2px rgba(0, 0, 0, 0.5),
+    0 40px 76px -30px rgba(0, 0, 0, 0.9),
+    0 0 44px -14px rgba(62, 123, 250, 0.34);
+}
+
+/* A single soft light in the top corner. It sits under the well rather than
+   over it, so it lifts the tile without washing out the interface inside. */
+.v-bento::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(90% 70% at 82% -10%, rgba(62, 123, 250, 0.16), transparent 62%);
+  opacity: 0;
+  transition: opacity 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.v-bento:hover::before { opacity: 1; }
+
+.v-bento-well {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.16));
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  box-shadow:
+    0 1px 2px 0 rgba(0, 0, 0, 0.4) inset,
+    0 -1px 0 0 rgba(255, 255, 255, 0.03) inset;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v-bento, .v-bento::before { transition: none; }
+  .v-bento:hover { transform: none; }
+}
+
+/* --------------------------------------------------------------- controls */
+/* The range input in the article tools. The native control is styled per
+   engine and none of the three defaults belong on this page, so the track and
+   the thumb are both drawn here. Height stays at 20px so the hit target keeps

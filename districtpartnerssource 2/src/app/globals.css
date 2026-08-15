@@ -1,0 +1,259 @@
+@import "tailwindcss";
+@import "../../kit/styles/00-tokens.css";
+@import "../../kit/styles/01-atmosphere.css";
+@import "../../kit/styles/02-primitives.css";
+@import "../../kit/styles/03-effects.css";
+@import "../../kit/styles/04-paper.css";
+
+/* ============================================================================
+   PROJECT LOCAL
+
+   Everything above is the kit, unmodified apart from the four SWAP values in
+   00-tokens.css and the accent re-hue. Only what is genuinely specific to this
+   site lives below: the two extra fluid type steps, the cream ground token
+   overrides, the sticky rail, and the scroll-timeline reveal.
+   ========================================================================= */
+
+:root {
+  /* MD2 names two fluid display steps, a lede and an action label as the four
+     additions over part one's seven, without restating their values. These are
+     derived; check them against the source project. */
+  --t-display-fluid: clamp(32px, 3.6vw, 52px);
+  --t-lede: 1.1875rem;   /* 19px */
+  --t-action: 0.9375rem; /* 15px */
+
+  /* Three faces, each with one job.
+
+     The kit specifies two, strictly separated. This brand system names a third
+     for eyebrows and labels, so the separation rule still holds: no face is
+     ever used for two roles. Space Grotesk appears only in small caps, DM Sans
+     only in body and UI, the display face only above 20px. */
+  --font-body: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
+  --font-ui: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), var(--font-body-face), sans-serif;
+  --font-label: var(--font-label-face), var(--font-body-face), sans-serif;
+
+  /* The brand system specifies 8 to 10 percent on labels. That overrides the
+     kit's 0.16em, which was tuned for a different face: Space Grotesk is wider
+     than Inter at the same size and needs less added tracking to stay open. */
+  --tr-label: 0.09em;
+}
+
+/* ---- Scroll reveal ----
+   Driven by a scroll timeline rather than an IntersectionObserver, so it does
+   not depend on hydration having finished. The base style is the visible one:
+   if the timeline is inactive (page too short to scroll), unsupported, or the
+   user prefers reduced motion, content simply shows. An observer-based reveal
+   can strand content forever when the element is scrolled past before the
+   observer attaches; this cannot. */
+@keyframes v-reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .v-reveal {
+      /* `forwards`, never `both`. The backwards fill of `both` paints the
+         hidden first keyframe whenever the element sits outside its range,
+         which strands anything the range never completes over: the last
+         section on a short page, or any element on a page that cannot
+         scroll. With `forwards` the element falls back to its base style,
+         which is the visible one. */
+      animation: v-reveal-in linear forwards;
+      animation-timeline: view();
+      /* Completes early in the entry phase. An element taller than the
+         viewport never reaches `entry 100%`, so a late end value leaves tall
+         panels (a long form, a stacked section) frozen part-way through their
+         own reveal. 35% is passed well before anything is centred. */
+      animation-range: entry 0% entry calc(35% + var(--reveal-i, 0) * 5%);
+    }
+  }
+}
+
+
+/* ---- Light ground -------------------------------------------------------
+   Alternating cream sections against the dark ground. Rather than a second
+   set of components, this redefines the ink and border tokens for its own
+   subtree, so every primitive already built (ledgers, eyebrows, rules,
+   reveals) adapts without touching them.
+
+   Cream, not white: a pure #fff surface reads as unfinished, and next to a
+   near-black ground it glares. This carries a little of the warm side so the
+   navy reads as deliberate rather than as "dark mode with a white section". */
+.v-light {
+  --v-cream: #f2efe7;
+  --v-cream-2: #e9e5da;
+  --v-ink: #12151f;
+  --v-muted: #565d70;
+  --v-border: rgba(18, 21, 31, 0.13);
+  --v-border-strong: rgba(18, 21, 31, 0.26);
+  --v-surface: #ffffff;
+
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--v-cream);
+  color: var(--v-ink);
+}
+
+/* The eyebrow accent needs to darken on cream or it vibrates against it. */
+.v-light .v-eyebrow {
+  color: var(--v-primary-deep);
+}
+
+.v-light .v-rule {
+  background: linear-gradient(90deg, transparent, rgba(18, 21, 31, 0.16), transparent);
+}
+
+/* Panels on cream are lit the same way, just inverted in value. */
+.v-light .g-glass {
+  background: linear-gradient(180deg, #ffffff, #fbfaf6);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.9) inset,
+    0 1px 2px 0 rgba(18, 21, 31, 0.06),
+    0 4px 12px -4px rgba(18, 21, 31, 0.08),
+    0 24px 48px -24px rgba(18, 21, 31, 0.18);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.v-light .v-well {
+  background: linear-gradient(180deg, rgba(18, 21, 31, 0.045), rgba(18, 21, 31, 0.02));
+  border: 1px solid rgba(18, 21, 31, 0.1);
+  box-shadow:
+    0 1px 2px 0 rgba(18, 21, 31, 0.07) inset,
+    0 -1px 0 0 rgba(255, 255, 255, 0.7) inset;
+}
+
+.v-light .v-spotlight::before {
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(62, 123, 250, 0.09),
+    transparent 62%
+  );
+}
+
+
+/* ---- Paper atmosphere ---------------------------------------------------
+   The critical part, and the part that gets skipped: paper sections need
+   their own atmosphere. Warm ink dots instead of light ones, and the brand
+   blue as a bloom at an alpha low enough to tint the paper without ever
+   competing with body text. All motion is transform on composited layers, so
+   it costs nothing on the main thread and stops entirely on request. */
+.v-paper-dots {
+  position: absolute;
+  inset: -10%;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(20, 18, 14, 0.085) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(120% 100% at 50% 0%, #000 20%, transparent 78%);
+  -webkit-mask-image: radial-gradient(120% 100% at 50% 0%, #000 20%, transparent 78%);
+  animation: v-paper-drift 42s linear infinite;
+}
+
+@keyframes v-paper-drift {
+  from { background-position: 0 0; }
+  to { background-position: 220px 132px; }
+}
+
+.v-paper-bloom {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(72px);
+  will-change: transform;
+}
+
+/* Asymmetric periods so the two never fall into a visible loop together. */
+.v-paper-bloom-a {
+  width: 620px;
+  height: 620px;
+  top: -14%;
+  left: -8%;
+  background: radial-gradient(circle, rgba(47, 95, 214, 0.16), transparent 68%);
+  animation: v-bloom-a 27s ease-in-out infinite alternate;
+}
+.v-paper-bloom-b {
+  width: 520px;
+  height: 520px;
+  bottom: -18%;
+  right: -6%;
+  background: radial-gradient(circle, rgba(62, 123, 250, 0.11), transparent 68%);
+  animation: v-bloom-b 34s ease-in-out infinite alternate;
+}
+
+@keyframes v-bloom-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(90px, 60px, 0) scale(1.12); }
+}
+@keyframes v-bloom-b {
+  from { transform: translate3d(0, 0, 0) scale(1.08); }
+  to { transform: translate3d(-70px, -50px, 0) scale(1); }
+}
+
+/* A hairline of brand colour where paper meets dark, so the seam reads as
+   deliberate rather than as two pages stitched together. */
+.v-paper-seam::before,
+.v-paper-seam::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(62, 123, 250, 0.45),
+    rgba(47, 95, 214, 0.35),
+    transparent
+  );
+}
+.v-paper-seam::before { top: 0; }
+.v-paper-seam::after { bottom: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .v-paper-dots,
+  .v-paper-bloom {
+    animation: none;
+  }
+}
+
+/* ---- Sticky scroll rail -------------------------------------------------
+   The heading pins while its items pass. `clip` on html/body rather than
+   `hidden` is what keeps this working, see the tokens file. */
+.v-sticky-rail {
+  position: sticky;
+  top: 6rem;
+  align-self: start;
+}
+
+/* ---- Section divider ---- */
+.v-rule {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+/* ---- Eyebrow: the brand's label face ------------------------------------
+   Overrides the kit's .v-eyebrow, which inherits the UI face. Declared after
+   the kit imports so it wins without !important. */
+.v-eyebrow {
+  font-family: var(--font-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-label);
+  font-size: var(--t-label);
+  color: var(--v-primary);
+}
