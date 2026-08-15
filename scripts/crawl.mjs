@@ -118,6 +118,30 @@ for (const width of WIDTHS) {
     if (realStranded.length) {
       failures.push(`${route} @${width}: stranded invisible ${JSON.stringify(realStranded)}`);
     }
+
+    // CSS scroll-timeline reveals carry no inline opacity, so the sweep above
+    // cannot see them. Bring each one to the middle of the viewport, where its
+    // animation must have completed, and check it actually resolved to visible.
+    const revealCount = await page.evaluate(() => document.querySelectorAll(".v-reveal").length);
+    for (let i = 0; i < revealCount; i++) {
+      await page.evaluate((idx) => {
+        document.querySelectorAll(".v-reveal")[idx]?.scrollIntoView({ block: "center" });
+      }, i);
+      await page.waitForTimeout(120);
+      const reveal = await page.evaluate((idx) => {
+        const el = document.querySelectorAll(".v-reveal")[idx];
+        if (!el) return null;
+        return {
+          op: parseFloat(getComputedStyle(el).opacity),
+          text: (el.textContent || "").trim().slice(0, 36),
+        };
+      }, i);
+      if (reveal && reveal.op < 0.9) {
+        failures.push(
+          `${route} @${width}: reveal stuck at ${reveal.op} "${reveal.text}"`,
+        );
+      }
+    }
     // A 404 route legitimately logs a failed document load; that is the
     // response under test, not a defect.
     const realProblems = expect404

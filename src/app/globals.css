@@ -187,9 +187,15 @@ body {
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     .v-reveal {
-      animation: v-reveal-in linear both;
+      /* `forwards`, never `both`. The backwards fill of `both` paints the
+         hidden first keyframe whenever the element sits outside its range,
+         which strands anything the range never completes over: the last
+         section on a short page, or any element on a page that cannot
+         scroll. With `forwards` the element falls back to its base style,
+         which is the visible one. */
+      animation: v-reveal-in linear forwards;
       animation-timeline: view();
-      animation-range: entry 0% cover calc(18% + var(--reveal-i, 0) * 6%);
+      animation-range: entry 0% entry calc(70% + var(--reveal-i, 0) * 7%);
     }
   }
 }
