@@ -7,7 +7,8 @@ import { ArrowRight } from "lucide-react";
 import { SPRING_SOFT, useReducedMotion } from "@/lib/motion";
 import { SERVICES } from "@/lib/site";
 import LightBand from "@/components/ui/LightBand";
-import Reveal from "@/components/Reveal";
+import SectionHeading from "@/components/ui/SectionHeading";
+import StickyStack from "@/components/ui/StickyStack";
 import {
   ExecutiveSearchGlyph,
   ProfessionalSearchGlyph,
@@ -25,12 +26,19 @@ const GLYPHS = [
 ];
 
 /**
- * The services, as a sticky rail rather than a grid.
+ * The services, as a stack that deals itself.
  *
- * The heading and progress pin while the five panels pass them, so the section
- * reads as one continuous move through the offer instead of five boxes seen at
- * once. Pinning is CSS `position: sticky`, not a scroll listener, so it stays
- * on the compositor and cannot desync from the scroll position.
+ * The previous version pinned only the heading and let five cards scroll past
+ * it, which is the weakest form of a sticky section: the pin is real but
+ * nothing happens, so it reads as a two-column layout that happens not to move.
+ * Here both halves are pinned. The heading holds while the cards arrive one at
+ * a time and come to rest on each other, each parked card shrinking and dimming
+ * under the weight of the next, so the section has actual depth and scrolling
+ * through it is the thing that reveals the offer.
+ *
+ * The cards are deliberately tall and the type inside them large. A stack only
+ * works if each card is worth stopping on; a stack of small cards is a list
+ * with extra steps.
  */
 export default function StickyServices() {
   const trackRef = React.useRef<HTMLDivElement>(null);
@@ -46,27 +54,18 @@ export default function StickyServices() {
 
   return (
     <LightBand>
-      <div className="mx-auto grid max-w-[1280px] gap-12 px-6 py-24 sm:py-32 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
+      <div className="mx-auto grid max-w-[1280px] gap-12 px-6 py-24 sm:py-32 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
         {/* pinned rail */}
         <div className="v-sticky-rail">
-          <p className="v-eyebrow mb-4">What We Do</p>
-          <h2
-            className="v-display text-balance"
-            style={{
-              fontSize: "var(--t-display-fluid)",
-              lineHeight: 1.05,
-              letterSpacing: "-0.03em",
-            }}
-          >
-            Search and interim solutions, under one partner.
-          </h2>
-          <p className="mt-6 max-w-[42ch] text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
-            Five ways we work, depending on whether the need is permanent, urgent,
-            partial, or bounded by a project.
-          </p>
+          <SectionHeading
+            eyebrow="What We Do"
+            title="Search and interim,"
+            turn="under one partner."
+            lede="Five ways we work, depending on whether the need is permanent, urgent, partial, or bounded by a project."
+          />
 
           <div className="mt-10 flex items-center gap-4">
-            {/* progress rail: fills as the panels pass */}
+            {/* progress rail: fills as the cards land */}
             <div
               aria-hidden="true"
               className="relative h-24 w-0.5 overflow-hidden rounded-full bg-[var(--v-border)]"
@@ -90,64 +89,58 @@ export default function StickyServices() {
           </div>
         </div>
 
-        {/* the panels that pass it */}
-        <div ref={trackRef} className="flex flex-col gap-5">
-          {SERVICES.map((service, i) => {
-            const Glyph = GLYPHS[i];
-            return (
-              <Reveal key={service.href} delay={Math.min(i, 4) * 0.07}>
-              {/* motion.article, not article: the glyphs declare what the
-                  parent's "hover" variant means for them and own no state of
-                  their own, so without a motion parent to propagate it their
-                  variants never resolve and they render as a few stray marks.
-                  whileFocus is listed alongside so a keyboard reaches the same
-                  animation a pointer does. */}
-              <motion.article
-                initial="rest"
-                animate="rest"
-                whileHover={reduced ? undefined : "hover"}
-                whileFocus={reduced ? undefined : "hover"}
-                className="v-spotlight group relative overflow-hidden rounded-[var(--radius)] border border-[var(--v-border)] bg-[linear-gradient(150deg,#ffffff_0%,#ffffff_55%,color-mix(in_srgb,var(--v-primary)_7%,#ffffff)_100%)] p-7 transition-colors duration-300 hover:border-[var(--v-primary)]/45 sm:p-8"
-                onPointerMove={(e) => {
-                  const el = e.currentTarget;
-                  const r = el.getBoundingClientRect();
-                  el.style.setProperty("--mx", `${e.clientX - r.left}px`);
-                  el.style.setProperty("--my", `${e.clientY - r.top}px`);
-                }}
-              >
-                <div className="flex items-start justify-between gap-6">
-                  <div className="min-w-0">
-                    <p className="mb-3 text-[length:var(--t-small)] font-semibold tabular-nums text-[var(--v-muted)]">
+        {/* the stack that deals against it */}
+        <div ref={trackRef}>
+          <StickyStack>
+            {SERVICES.map((service, i) => {
+              const Glyph = GLYPHS[i];
+              return (
+                <motion.article
+                  key={service.href}
+                  initial="rest"
+                  animate="rest"
+                  whileHover={reduced ? undefined : "hover"}
+                  whileFocus={reduced ? undefined : "hover"}
+                  className="v-spotlight group relative overflow-hidden rounded-[var(--radius)] border border-[var(--v-border)] p-8 shadow-[0_2px_4px_-2px_rgba(18,21,31,0.08),0_24px_48px_-28px_rgba(18,21,31,0.28)] transition-colors duration-300 hover:border-[var(--v-primary)]/45 sm:p-10 bg-[linear-gradient(150deg,#ffffff_0%,#ffffff_52%,color-mix(in_srgb,var(--v-primary)_9%,#ffffff)_100%)]"
+                  onPointerMove={(e) => {
+                    const el = e.currentTarget;
+                    const r = el.getBoundingClientRect();
+                    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+                    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-6">
+                    <p className="text-[length:var(--t-small)] font-semibold tabular-nums text-[var(--v-primary-deep)]">
                       {String(i + 1).padStart(2, "0")}
                     </p>
-                    <h3 className="v-display text-[length:var(--t-heading)] leading-[1.25] sm:text-[length:var(--t-heading)]">
-                      {service.label}
-                    </h3>
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none h-14 w-28 shrink-0 [color:var(--v-ink)]"
+                    >
+                      <Glyph />
+                    </div>
                   </div>
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none h-14 w-28 shrink-0 [color:var(--v-ink)]"
-                  >
-                    <Glyph />
-                  </div>
-                </div>
 
-                <Link
-                  href={service.href}
-                  className="mt-7 inline-flex items-center gap-2 rounded-full border border-[var(--v-border)] py-2 pl-4 pr-3 text-[length:var(--t-small)] font-medium transition-colors duration-200 hover:border-[var(--v-primary)] hover:text-[var(--v-primary-deep)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
-                >
-                  <span className="sr-only">{service.label}: </span>
-                  Explore
-                  <ArrowRight
-                    size={15}
-                    strokeWidth={2}
-                    className="transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
-                  />
-                </Link>
-              </motion.article>
-              </Reveal>
-            );
-          })}
+                  <h3 className="v-display mt-8 max-w-[14ch] text-[length:var(--t-title)] leading-[1.1]">
+                    {service.label}
+                  </h3>
+
+                  <Link
+                    href={service.href}
+                    className="mt-8 inline-flex items-center gap-2 rounded-full border border-[var(--v-border)] py-2.5 pl-5 pr-4 text-[length:var(--t-small)] font-medium transition-colors duration-200 hover:border-[var(--v-primary)] hover:text-[var(--v-primary-deep)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+                  >
+                    <span className="sr-only">{service.label}: </span>
+                    Explore
+                    <ArrowRight
+                      size={15}
+                      strokeWidth={2}
+                      className="transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+                    />
+                  </Link>
+                </motion.article>
+              );
+            })}
+          </StickyStack>
         </div>
       </div>
     </LightBand>

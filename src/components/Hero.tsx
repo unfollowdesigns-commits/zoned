@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { EASE, useReducedMotion, staggerDelay } from "@/lib/motion";
 import { WaveField } from "@/kit/components/WaveField";
 import { CLIENTS } from "@/lib/site";
@@ -27,13 +27,37 @@ import GlowButton from "@/components/ui/GlowButton";
  * The rotating word is a cross-fade in place, never AnimatePresence with
  * mode="wait": that leaves a frame with nothing on screen between exit and
  * enter, which is a visible dead beat every cycle.
+ *
+ * Scrolling out of the hero is its own move. The statement drifts up faster
+ * than the page, shrinks slightly and blurs, so the next section reads as
+ * arriving over it rather than the whole page sliding as one flat sheet. The
+ * wave field behind travels at a different rate again, which is what gives the
+ * fold depth: two planes moving at two speeds is parallax, one plane moving is
+ * a scroll. Everything here is transform and opacity on composited layers, so
+ * it costs nothing on the main thread.
  */
 
 const WORDS = ["Professionals.", "Leaders.", "Solutions.", "Yours."] as const;
 
 export default function Hero() {
   const reduced = useReducedMotion();
+  const sectionRef = React.useRef<HTMLElement>(null);
   const [tick, setTick] = React.useState(0);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+
+  /* The copy leaves faster than the page and softens as it goes. Blur is worth
+     the cost here and nowhere else: it is what makes the layer read as passing
+     behind the next section rather than simply moving up. */
+  const copyY = useTransform(scrollYProgress, [0, 1], [0, -110]);
+  const copyScale = useTransform(scrollYProgress, [0, 1], [1, 0.94]);
+  const copyOpacity = useTransform(scrollYProgress, [0, 0.72], [1, 0]);
+  const copyBlur = useTransform(scrollYProgress, [0, 1], ["blur(0px)", "blur(6px)"]);
+  /* The field behind travels the other way and slower. Two planes, two rates. */
+  const fieldY = useTransform(scrollYProgress, [0, 1], [0, 70]);
 
   React.useEffect(() => {
     if (reduced) return;
@@ -50,10 +74,26 @@ export default function Hero() {
   });
 
   return (
-    <section className="relative">
-      <WaveField height={0.86} opacity={1} />
+    <section ref={sectionRef} className="relative">
+      <motion.div style={reduced ? undefined : { y: fieldY }}>
+        <WaveField height={0.86} opacity={1} />
+      </motion.div>
 
-      <div className="relative mx-auto max-w-[1280px] px-6 pb-16 pt-28 lg:pb-20 lg:pt-36">
+      <motion.div
+        className="relative mx-auto max-w-[1280px] px-6 pb-16 pt-28 lg:pb-20 lg:pt-36"
+        style={
+          reduced
+            ? undefined
+            : {
+                y: copyY,
+                scale: copyScale,
+                opacity: copyOpacity,
+                filter: copyBlur,
+                transformOrigin: "0% 0%",
+                willChange: "transform, opacity",
+              }
+        }
+      >
         <motion.p {...rise(0)} className="v-eyebrow">
           Talent Infrastructure
         </motion.p>
@@ -111,7 +151,7 @@ export default function Hero() {
           <span aria-hidden="true" className="h-px w-6 bg-white/20" />
           Partner-led from first call to close.
         </motion.p>
-      </div>
+      </motion.div>
 
       <TrustStrip />
     </section>

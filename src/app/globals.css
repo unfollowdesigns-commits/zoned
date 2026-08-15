@@ -79,7 +79,14 @@
 
   position: relative;
   z-index: 1;
-  overflow: hidden;
+  /* `clip`, never `hidden`. The band has to contain its own bloom layers, but
+     `overflow: hidden` makes this element a scroll container, and every
+     `position: sticky` descendant then sticks relative to a box that does not
+     scroll, which means it does not stick at all. No error, no warning, the
+     pinning simply stops. `clip` contains the bloom without creating a
+     scrollport, so the sticky rail and the card stack keep working. Same
+     reasoning as html/body in the tokens file. */
+  overflow: clip;
   isolation: isolate;
   background: var(--v-cream);
   color: var(--v-ink);
