@@ -3,7 +3,7 @@ import Stats from "@/components/Stats";
 import StickyServices from "@/components/StickyServices";
 import Industries from "@/components/Industries";
 import PlacedPositions from "@/components/PlacedPositions";
-import CtaBand from "@/components/CtaBand";
+import AskAI from "@/components/AskAI";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
 import LightBand from "@/components/ui/LightBand";
@@ -13,6 +13,10 @@ import LightBand from "@/components/ui/LightBand";
  *
  * The order is an argument, not a list of available components: who we are,
  * what it is worth, what we do, where we do it, at what level, then the ask.
+ *
+ * The close does two jobs in one band rather than two. A separate "ask an AI"
+ * section followed by a separate call to action gives the page two endings,
+ * and the second one always reads as the page not knowing when to stop.
  *
  * The grounds alternate, and the rule is that no two adjacent sections share
  * one. Paper for the two sections that are mostly reading, the lit dark band
@@ -68,7 +72,7 @@ export default function Home() {
 
       <StickyServices />
 
-      <CtaBand />
+      <AskAI />
     </>
   );
 }
