@@ -25,7 +25,7 @@ export default function Clients() {
               {CLIENTS.map((name) => (
                 <li
                   key={name}
-                  className="v-display whitespace-nowrap text-[19px] tracking-tight text-[var(--v-muted)] transition-colors duration-200 hover:text-[var(--v-ink)]"
+                  className="v-display whitespace-nowrap text-[length:var(--t-body)] tracking-tight text-[var(--v-muted)] transition-colors duration-200 hover:text-[var(--v-ink)]"
                 >
                   {name}
                 </li>

@@ -59,8 +59,8 @@ export default function Logo({ className = "" }: { className?: string }) {
       <LogoMark className="h-8 w-8 shrink-0 text-[var(--v-ink)]" />
       <span aria-hidden="true" className="h-8 w-px shrink-0 bg-[var(--v-border-strong)]" />
       <span className="v-display flex flex-col leading-none">
-        <span className="text-[15px] tracking-[0.02em]">DISTRICT</span>
-        <span className="mt-[3px] text-[11px] font-medium tracking-[0.26em] text-[var(--v-muted)]">
+        <span className="text-[length:var(--t-secondary)] tracking-[0.02em]">DISTRICT</span>
+        <span className="mt-[3px] text-[length:var(--t-label)] font-medium tracking-[0.26em] text-[var(--v-muted)]">
           PARTNERS
         </span>
       </span>

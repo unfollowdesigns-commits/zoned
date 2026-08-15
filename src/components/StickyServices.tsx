@@ -4,8 +4,9 @@ import * as React from "react";
 import Link from "@/components/SiteLink";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { EASE, useReducedMotion } from "@/lib/motion";
+import { EASE, SPRING_SOFT, useReducedMotion } from "@/lib/motion";
 import { SERVICES } from "@/lib/site";
+import LightBand from "@/components/ui/LightBand";
 import {
   ExecutiveSearchGlyph,
   ProfessionalSearchGlyph,
@@ -39,15 +40,11 @@ export default function StickyServices() {
     offset: ["start 60%", "end 85%"],
   });
   // Softened so the bar settles rather than tracking every wheel tick exactly.
-  const progress = useSpring(scrollYProgress, {
-    stiffness: 180,
-    damping: 30,
-    mass: 0.5,
-  });
+  const progress = useSpring(scrollYProgress, SPRING_SOFT);
   const scaleY = useTransform(progress, (v) => (reduced ? 1 : v));
 
   return (
-    <section className="v-light">
+    <LightBand>
       <div className="mx-auto grid max-w-[1280px] gap-12 px-6 py-24 sm:py-32 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
         {/* pinned rail */}
         <div className="v-sticky-rail">
@@ -55,14 +52,14 @@ export default function StickyServices() {
           <h2
             className="v-display text-balance"
             style={{
-              fontSize: "clamp(32px, 3.6vw, 52px)",
+              fontSize: "var(--t-display-fluid)",
               lineHeight: 1.05,
               letterSpacing: "-0.03em",
             }}
           >
             Search and interim solutions, under one partner.
           </h2>
-          <p className="mt-6 max-w-[42ch] text-[16.5px] leading-[1.75] text-[var(--v-muted)]">
+          <p className="mt-6 max-w-[42ch] text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
             Five ways we work, depending on whether the need is permanent, urgent,
             partial, or bounded by a project.
           </p>
@@ -80,7 +77,7 @@ export default function StickyServices() {
             </div>
             <Link
               href="/what-we-do"
-              className="group inline-flex items-center gap-2 text-[14.5px] font-semibold text-[var(--v-ink)] transition-colors hover:text-[var(--v-primary-deep)]"
+              className="group inline-flex items-center gap-2 text-[length:var(--t-secondary)] font-semibold text-[var(--v-ink)] transition-colors hover:text-[var(--v-primary-deep)]"
             >
               All services
               <ArrowRight
@@ -113,10 +110,10 @@ export default function StickyServices() {
               >
                 <div className="flex items-start justify-between gap-6">
                   <div className="min-w-0">
-                    <p className="mb-3 text-[12px] font-semibold tabular-nums text-[var(--v-muted)]">
+                    <p className="mb-3 text-[length:var(--t-small)] font-semibold tabular-nums text-[var(--v-muted)]">
                       {String(i + 1).padStart(2, "0")}
                     </p>
-                    <h3 className="v-display text-[21px] leading-[1.25] sm:text-[24px]">
+                    <h3 className="v-display text-[length:var(--t-heading)] leading-[1.25] sm:text-[length:var(--t-heading)]">
                       {service.label}
                     </h3>
                   </div>
@@ -130,7 +127,7 @@ export default function StickyServices() {
 
                 <Link
                   href={service.href}
-                  className="mt-7 inline-flex items-center gap-2 rounded-full border border-[var(--v-border)] py-2 pl-4 pr-3 text-[13.5px] font-medium transition-colors duration-200 hover:border-[var(--v-primary)] hover:text-[var(--v-primary-deep)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+                  className="mt-7 inline-flex items-center gap-2 rounded-full border border-[var(--v-border)] py-2 pl-4 pr-3 text-[length:var(--t-small)] font-medium transition-colors duration-200 hover:border-[var(--v-primary)] hover:text-[var(--v-primary-deep)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
                 >
                   <span className="sr-only">{service.label}: </span>
                   Explore
@@ -145,6 +142,6 @@ export default function StickyServices() {
           })}
         </div>
       </div>
-    </section>
+    </LightBand>
   );
 }

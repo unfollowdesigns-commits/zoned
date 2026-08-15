@@ -31,7 +31,7 @@ function validate(values: Fields): Errors {
 }
 
 const fieldClass =
-  "v-well w-full rounded-[10px] px-4 py-3 text-[15px] text-[var(--v-ink)] placeholder:text-[var(--v-muted)]/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]";
+  "v-well w-full rounded-[10px] px-4 py-3 text-[length:var(--t-secondary)] text-[var(--v-ink)] placeholder:text-[var(--v-muted)]/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]";
 
 export default function ContactForm() {
   const [values, setValues] = React.useState<Fields>(EMPTY);
@@ -66,10 +66,10 @@ export default function ContactForm() {
         role="status"
       >
         <p className="v-eyebrow mb-3">Not yet connected</p>
-        <h2 className="v-display text-[21px] leading-[1.3]">
+        <h2 className="v-display text-[length:var(--t-heading)] leading-[1.3]">
           The form validates, but there is nowhere for it to send.
         </h2>
-        <p className="mt-4 max-w-[62ch] text-[15px] leading-[1.7] text-[var(--v-muted)]">
+        <p className="mt-4 max-w-[62ch] text-[length:var(--t-secondary)] leading-[1.7] text-[var(--v-muted)]">
           Everything you typed passed validation. No message was transmitted, because no
           destination has been configured yet. Point this at an inbox, form service, or CRM
           endpoint and it will submit for real.
@@ -81,7 +81,7 @@ export default function ContactForm() {
             setValues(EMPTY);
             setErrors({});
           }}
-          className="mt-7 rounded-full border border-[var(--v-border)] px-5 py-2.5 text-[14px] font-medium transition-colors duration-200 hover:border-[var(--v-border-strong)]"
+          className="mt-7 rounded-full border border-[var(--v-border)] px-5 py-2.5 text-[length:var(--t-secondary)] font-medium transition-colors duration-200 hover:border-[var(--v-border-strong)]"
         >
           Start over
         </button>
@@ -108,7 +108,7 @@ export default function ContactForm() {
               role="alert"
               className="mb-6 rounded-[10px] border border-[#ff6b6b]/40 bg-[#ff6b6b]/10 p-4"
             >
-              <p className="text-[14px] font-semibold text-[var(--v-ink)]">
+              <p className="text-[length:var(--t-secondary)] font-semibold text-[var(--v-ink)]">
                 {errorList.length === 1
                   ? "There is 1 problem with this form"
                   : `There are ${errorList.length} problems with this form`}
@@ -118,7 +118,7 @@ export default function ContactForm() {
                   <li key={key}>
                     <a
                       href={`#field-${key}`}
-                      className="text-[13.5px] text-[var(--v-muted)] underline underline-offset-2 hover:text-[var(--v-ink)]"
+                      className="text-[length:var(--t-small)] text-[var(--v-muted)] underline underline-offset-2 hover:text-[var(--v-ink)]"
                     >
                       {errors[key]}
                     </a>
@@ -141,7 +141,7 @@ export default function ContactForm() {
                 type="button"
                 aria-pressed={active}
                 onClick={() => setIntent(option)}
-                className={`rounded-full border px-4 py-2 text-[13.5px] transition-colors duration-200 ${
+                className={`rounded-full border px-4 py-2 text-[length:var(--t-small)] transition-colors duration-200 ${
                   active
                     ? "border-[var(--v-primary)] bg-[var(--v-primary)]/15 text-[var(--v-ink)]"
                     : "border-[var(--v-border)] text-[var(--v-muted)] hover:border-[var(--v-border-strong)] hover:text-[var(--v-ink)]"
@@ -192,7 +192,7 @@ export default function ContactForm() {
       </div>
 
       <div className="mt-5">
-        <label htmlFor="field-message" className="mb-2 block text-[13.5px] font-medium">
+        <label htmlFor="field-message" className="mb-2 block text-[length:var(--t-small)] font-medium">
           What are you looking for?{" "}
           <span className="text-[var(--v-muted)]">(required)</span>
         </label>
@@ -206,7 +206,7 @@ export default function ContactForm() {
           className={`${fieldClass} resize-y`}
         />
         {errors.message && (
-          <p id="error-message" className="mt-2 text-[13px] text-[#ff9b9b]">
+          <p id="error-message" className="mt-2 text-[length:var(--t-small)] text-[#ff9b9b]">
             {errors.message}
           </p>
         )}
@@ -214,7 +214,7 @@ export default function ContactForm() {
 
       <button
         type="submit"
-        className="mt-7 rounded-full bg-[var(--v-primary)] px-7 py-3.5 text-[15px] font-semibold text-white transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[var(--v-primary-deep)] active:scale-[0.98]"
+        className="mt-7 rounded-full bg-[var(--v-primary)] px-7 py-3.5 text-[length:var(--t-secondary)] font-semibold text-white transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[var(--v-primary-deep)] active:scale-[0.98]"
       >
         Send
       </button>
@@ -245,7 +245,7 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={`field-${id}`} className="mb-2 block text-[13.5px] font-medium">
+      <label htmlFor={`field-${id}`} className="mb-2 block text-[length:var(--t-small)] font-medium">
         {label}{" "}
         <span className="text-[var(--v-muted)]">{required ? "(required)" : optional ? "(optional)" : ""}</span>
       </label>
@@ -260,7 +260,7 @@ function Field({
         className={fieldClass}
       />
       {error && (
-        <p id={`error-${id}`} className="mt-2 text-[13px] text-[#ff9b9b]">
+        <p id={`error-${id}`} className="mt-2 text-[length:var(--t-small)] text-[#ff9b9b]">
           {error}
         </p>
       )}

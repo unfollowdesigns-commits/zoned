@@ -14,7 +14,7 @@ export default function TermsPage() {
       />
       <Section className="py-16 sm:py-20">
         <AwaitingCopy page="Terms of Use">
-          <p className="mt-4 max-w-[62ch] text-[15px] leading-[1.7] text-[var(--v-muted)]">
+          <p className="mt-4 max-w-[62ch] text-[length:var(--t-secondary)] leading-[1.7] text-[var(--v-muted)]">
             Terms of use are a legal document. They need to come from the firm or its
             counsel rather than be drafted here.
           </p>

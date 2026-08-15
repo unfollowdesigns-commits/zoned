@@ -34,7 +34,7 @@ export default function NavLedger({ items }: { items: NavItem[] }) {
                 />
                 <span
                   aria-hidden="true"
-                  className="w-7 shrink-0 text-[12px] tabular-nums text-[var(--v-muted)]"
+                  className="w-7 shrink-0 text-[length:var(--t-small)] tabular-nums text-[var(--v-muted)]"
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
@@ -44,17 +44,17 @@ export default function NavLedger({ items }: { items: NavItem[] }) {
                   </span>
                 )}
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="v-display text-[17px] leading-[1.3] sm:text-[19px]">
+                  <span className="v-display text-[length:var(--t-body)] leading-[1.3] sm:text-[length:var(--t-body)]">
                     {item.label}
                   </span>
                   {item.note && (
-                    <span className="mt-1 text-[13.5px] leading-[1.6] text-[var(--v-muted)]">
+                    <span className="mt-1 text-[length:var(--t-small)] leading-[1.6] text-[var(--v-muted)]">
                       {item.note}
                     </span>
                   )}
                 </span>
                 {item.badge && (
-                  <span className="hidden rounded-full border border-[var(--v-primary)]/40 bg-[var(--v-primary)]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--v-primary)] sm:inline">
+                  <span className="hidden rounded-full border border-[var(--v-primary)]/40 bg-[var(--v-primary)]/10 px-2.5 py-1 text-[length:var(--t-label)] font-semibold uppercase tracking-wide text-[var(--v-primary)] sm:inline">
                     {item.badge}
                   </span>
                 )}

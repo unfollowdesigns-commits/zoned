@@ -34,7 +34,7 @@ export default function ContactPage() {
                   href={LINKEDIN_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-[15px] text-[var(--v-muted)] transition-colors hover:text-[var(--v-ink)]"
+                  className="inline-flex items-center gap-2 text-[length:var(--t-secondary)] text-[var(--v-muted)] transition-colors hover:text-[var(--v-ink)]"
                 >
                   <LinkedInIcon size={17} />
                   LinkedIn
@@ -45,7 +45,7 @@ export default function ContactPage() {
 
               <div>
                 <p className="v-eyebrow mb-3">Note</p>
-                <p className="max-w-[40ch] text-[14.5px] leading-[1.7] text-[var(--v-muted)]">
+                <p className="max-w-[40ch] text-[length:var(--t-secondary)] leading-[1.7] text-[var(--v-muted)]">
                   Postal address, phone number and direct contacts are not published here yet.
                   Send them through and they will sit in this column.
                 </p>

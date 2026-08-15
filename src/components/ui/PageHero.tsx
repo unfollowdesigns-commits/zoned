@@ -27,7 +27,7 @@ export default function PageHero({
       <div className="relative mx-auto max-w-[1280px] px-6 pb-16 pt-14 sm:pb-20 sm:pt-16">
         {crumbs.length > 0 && (
           <nav aria-label="Breadcrumb" className="mb-7">
-            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-[var(--v-muted)]">
+            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[length:var(--t-small)] text-[var(--v-muted)]">
               {crumbs.map((crumb, i) => (
                 <li key={`${crumb.label}-${i}`} className="flex items-center gap-2">
                   {crumb.href ? (
@@ -56,11 +56,11 @@ export default function PageHero({
         <Reveal>
           <div>
             {eyebrow && <p className="v-eyebrow mb-4">{eyebrow}</p>}
-            <h1 className="v-display max-w-[20ch] text-[clamp(2.1rem,5.2vw,3.25rem)] leading-[1.05]">
+            <h1 className="v-display max-w-[20ch] text-[length:var(--t-display-fluid)] leading-[1.05]">
               {title}
             </h1>
             {standfirst && (
-              <p className="mt-6 max-w-[62ch] text-[16.5px] leading-[1.75] text-[var(--v-muted)]">
+              <p className="mt-6 max-w-[62ch] text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
                 {standfirst}
               </p>
             )}

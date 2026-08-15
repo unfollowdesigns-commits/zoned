@@ -40,7 +40,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
 
       <Section className="py-16 sm:py-20">
         <AwaitingCopy page="article">
-          <p className="mt-4 max-w-[62ch] text-[15px] leading-[1.7] text-[var(--v-muted)]">
+          <p className="mt-4 max-w-[62ch] text-[length:var(--t-secondary)] leading-[1.7] text-[var(--v-muted)]">
             The title and publication date shown above are the real ones, taken from the
             District Partners navigation. The article body is what is still needed.
           </p>
@@ -49,7 +49,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         <div className="mt-10">
           <Link
             href="/resources/blog"
-            className="text-[14px] font-medium text-[var(--v-muted)] transition-colors hover:text-[var(--v-primary)]"
+            className="text-[length:var(--t-secondary)] font-medium text-[var(--v-muted)] transition-colors hover:text-[var(--v-primary)]"
           >
             &larr; All Articles
           </Link>

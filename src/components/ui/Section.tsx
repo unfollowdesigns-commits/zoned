@@ -21,12 +21,12 @@ export default function Section({
           <div>
             {eyebrow && <p className="v-eyebrow mb-3">{eyebrow}</p>}
             {title && (
-              <h2 className="v-display max-w-[24ch] text-[clamp(1.6rem,3.6vw,1.95rem)] leading-[1.1]">
+              <h2 className="v-display max-w-[24ch] text-[length:var(--t-heading)] leading-[1.1]">
                 {title}
               </h2>
             )}
             {note && (
-              <p className="mt-4 max-w-[62ch] text-[15px] leading-[1.7] text-[var(--v-muted)]">
+              <p className="mt-4 max-w-[62ch] text-[length:var(--t-secondary)] leading-[1.7] text-[var(--v-muted)]">
                 {note}
               </p>
             )}

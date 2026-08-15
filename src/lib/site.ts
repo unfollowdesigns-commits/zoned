@@ -142,11 +142,21 @@ export const CLIENTS = [
 ];
 
 /** Figures as published on the homepage. */
-export const STATS = [
-  { value: "1,100+", label: "Professionals delivered to 187 clients" },
-  { value: "30+", label: "Clients who've engaged us 5+ times" },
-  { value: ">90%", label: "Of clients through referrals" },
-  { value: "100%", label: "Placement on retainers" },
+export type Stat = {
+  /** The figure itself, so it can count rather than sit there. */
+  value: number;
+  /** Rendered before the figure at full size. */
+  prefix?: string;
+  /** Rendered after the figure as a superscript. */
+  unit?: string;
+  label: string;
+};
+
+export const STATS: Stat[] = [
+  { value: 1100, unit: "+", label: "Professionals delivered to 187 clients" },
+  { value: 30, unit: "+", label: "Clients who've engaged us 5+ times" },
+  { value: 90, prefix: ">", unit: "%", label: "Of clients through referrals" },
+  { value: 100, unit: "%", label: "Placement on retainers" },
 ];
 
 export const FOOTER_COLUMNS: NavGroup[] = [

@@ -45,9 +45,9 @@ export default function Hero() {
           // paragraph; at 0.95 the lines lock into one shape. Tracking tightens
           // as size grows or large type looks loose.
           style={{
-            fontSize: "clamp(44px, 5.6vw, 88px)",
-            lineHeight: 0.95,
-            letterSpacing: "-0.035em",
+            fontSize: "var(--t-hero)",
+            lineHeight: "var(--lh-hero)",
+            letterSpacing: "var(--tr-hero)",
           }}
         >
           Our Talent is Finding{" "}
@@ -74,11 +74,11 @@ export default function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: EASE, delay: 0.16 }}
-          className="mt-9 max-w-[54ch] text-[16.5px] leading-[1.75] text-[var(--v-ink)]/80"
+          className="mt-9 max-w-[54ch] text-[length:var(--t-body)] leading-[1.75] text-[var(--v-ink)]/80"
         >
           When the talent decisions are as consequential as the capital decisions, you
           need more than a search firm. We design talent strategy from the boardroom
-          down — and execute from day one.
+          down, and execute from day one.
         </motion.p>
 
         <motion.div
@@ -89,7 +89,7 @@ export default function Hero() {
         >
           <Link
             href="/contact"
-            className="group inline-flex items-center gap-3 rounded-full bg-[var(--v-primary)] px-7 py-3.5 text-[15px] font-semibold text-white transition-colors duration-200 hover:bg-[var(--v-primary-deep)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+            className="group inline-flex items-center gap-3 rounded-full bg-[var(--v-primary)] px-7 py-3.5 text-[length:var(--t-secondary)] font-semibold text-white transition-colors duration-200 hover:bg-[var(--v-primary-deep)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
           >
             Let&rsquo;s Talk
             <ArrowRight
@@ -100,7 +100,7 @@ export default function Hero() {
           </Link>
           <Link
             href="/what-we-do"
-            className="rounded-full border border-[var(--v-border)] px-7 py-3.5 text-[15px] font-medium text-[var(--v-ink)] transition-colors duration-200 hover:border-[var(--v-border-strong)]"
+            className="rounded-full border border-[var(--v-border)] px-7 py-3.5 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)] transition-colors duration-200 hover:border-[var(--v-border-strong)]"
           >
             What We Do
           </Link>

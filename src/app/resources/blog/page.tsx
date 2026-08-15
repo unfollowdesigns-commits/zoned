@@ -32,10 +32,10 @@ export default function BlogPage() {
             className="g-glass g-ring-accent group block overflow-hidden p-8 sm:p-10"
           >
             <p className="v-eyebrow mb-4">Latest</p>
-            <h2 className="v-display max-w-[24ch] text-[clamp(1.5rem,3.4vw,2rem)] leading-[1.15] transition-colors duration-200 group-hover:text-[var(--v-primary)]">
+            <h2 className="v-display max-w-[24ch] text-[length:var(--t-display-fluid)] leading-[1.15] transition-colors duration-200 group-hover:text-[var(--v-primary)]">
               {lead.title}
             </h2>
-            <p className="mt-5 text-[13px] text-[var(--v-muted)]">
+            <p className="mt-5 text-[length:var(--t-small)] text-[var(--v-muted)]">
               <time dateTime={lead.iso}>{lead.date}</time>
             </p>
           </Link>
@@ -52,11 +52,11 @@ export default function BlogPage() {
                 >
                   <time
                     dateTime={post.iso}
-                    className="shrink-0 text-[12.5px] tabular-nums text-[var(--v-muted)] sm:w-28"
+                    className="shrink-0 text-[length:var(--t-small)] tabular-nums text-[var(--v-muted)] sm:w-28"
                   >
                     {post.date}
                   </time>
-                  <span className="v-display max-w-[52ch] text-[18px] leading-[1.35] transition-colors duration-200 group-hover:text-[var(--v-primary)] sm:text-[20px]">
+                  <span className="v-display max-w-[52ch] text-[length:var(--t-heading)] leading-[1.35] transition-colors duration-200 group-hover:text-[var(--v-primary)] sm:text-[length:var(--t-heading)]">
                     {post.title}
                   </span>
                 </Link>

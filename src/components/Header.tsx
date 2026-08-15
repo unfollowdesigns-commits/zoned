@@ -46,16 +46,16 @@ function MenuLink({ item }: { item: NavItem }) {
         </span>
       )}
       <span className="flex min-w-0 flex-col">
-        <span className="flex items-center gap-2 text-[14.5px] font-medium text-[var(--v-ink)]">
+        <span className="flex items-center gap-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)]">
           {item.label}
           {item.badge && (
-            <span className="rounded-full border border-[var(--v-primary)]/40 bg-[var(--v-primary)]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--v-primary)]">
+            <span className="rounded-full border border-[var(--v-primary)]/40 bg-[var(--v-primary)]/10 px-2 py-0.5 text-[length:var(--t-label)] font-semibold uppercase tracking-wide text-[var(--v-primary)]">
               {item.badge}
             </span>
           )}
         </span>
         {item.note && (
-          <span className="mt-0.5 text-[13px] leading-snug text-[var(--v-muted)]">{item.note}</span>
+          <span className="mt-0.5 text-[length:var(--t-small)] leading-snug text-[var(--v-muted)]">{item.note}</span>
         )}
       </span>
     </Link>
@@ -130,7 +130,7 @@ export default function Header() {
               <button
                 key={name}
                 type="button"
-                className="relative rounded-full px-4 py-2 text-[14.5px] font-medium text-[var(--v-ink)] transition-colors hover:text-white"
+                className="relative rounded-full px-4 py-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)] transition-colors hover:text-white"
                 aria-expanded={open === name}
                 aria-current={active ? "true" : undefined}
                 onMouseEnter={() => {
@@ -165,7 +165,7 @@ export default function Header() {
         <div className="hidden lg:block">
           <Link
             href="/contact"
-            className="rounded-full bg-[var(--v-primary)] px-5 py-2.5 text-[14.5px] font-semibold text-white transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[var(--v-primary-deep)] active:scale-[0.97]"
+            className="rounded-full bg-[var(--v-primary)] px-5 py-2.5 text-[length:var(--t-secondary)] font-semibold text-white transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[var(--v-primary-deep)] active:scale-[0.97]"
           >
             Get Started
           </Link>
@@ -261,7 +261,7 @@ export default function Header() {
                             <Link
                               key={item.href}
                               href={item.href}
-                              className="rounded-xl px-2.5 py-2 text-[14.5px] font-medium text-[var(--v-ink)] transition-colors hover:bg-white/[0.05]"
+                              className="rounded-xl px-2.5 py-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)] transition-colors hover:bg-white/[0.05]"
                             >
                               {item.label}
                             </Link>
@@ -269,7 +269,7 @@ export default function Header() {
                         </div>
                         <Link
                           href="/contact"
-                          className="mt-4 rounded-full bg-[var(--v-primary)] px-4 py-2.5 text-center text-[14px] font-semibold text-white transition-colors hover:bg-[var(--v-primary-deep)]"
+                          className="mt-4 rounded-full bg-[var(--v-primary)] px-4 py-2.5 text-center text-[length:var(--t-secondary)] font-semibold text-white transition-colors hover:bg-[var(--v-primary-deep)]"
                         >
                           Contact
                         </Link>
@@ -283,15 +283,15 @@ export default function Header() {
                               href={`/resources/blog/${post.slug}`}
                               className="rounded-xl p-2 transition-colors hover:bg-white/[0.05]"
                             >
-                              <p className="text-[13.5px] font-medium leading-snug text-[var(--v-ink)]">
+                              <p className="text-[length:var(--t-small)] font-medium leading-snug text-[var(--v-ink)]">
                                 {post.title}
                               </p>
-                              <p className="mt-1 text-[12px] text-[var(--v-muted)]">{post.date}</p>
+                              <p className="mt-1 text-[length:var(--t-small)] text-[var(--v-muted)]">{post.date}</p>
                             </Link>
                           ))}
                           <Link
                             href="/resources/blog"
-                            className="px-2 text-[13px] font-semibold text-[var(--v-muted)] hover:text-[var(--v-primary)]"
+                            className="px-2 text-[length:var(--t-small)] font-semibold text-[var(--v-muted)] hover:text-[var(--v-primary)]"
                           >
                             All Articles
                           </Link>
@@ -303,7 +303,7 @@ export default function Header() {
                       href={LINKEDIN_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-4 inline-flex items-center gap-2 text-[13.5px] text-[var(--v-muted)] hover:text-[var(--v-ink)]"
+                      className="mt-4 inline-flex items-center gap-2 text-[length:var(--t-small)] text-[var(--v-muted)] hover:text-[var(--v-ink)]"
                     >
                       <LinkedInIcon size={16} />
                       LinkedIn
@@ -345,7 +345,7 @@ export default function Header() {
               />
               <Link
                 href="/contact"
-                className="mt-4 rounded-full bg-[var(--v-primary)] px-5 py-3 text-center text-[15px] font-semibold text-white"
+                className="mt-4 rounded-full bg-[var(--v-primary)] px-5 py-3 text-center text-[length:var(--t-secondary)] font-semibold text-white"
               >
                 Get Started
               </Link>
@@ -371,7 +371,7 @@ function MobileSection({
     <div className="border-b border-[var(--v-border)] py-1">
       <button
         type="button"
-        className="flex w-full items-center justify-between py-3 text-[15px] font-semibold"
+        className="flex w-full items-center justify-between py-3 text-[length:var(--t-secondary)] font-semibold"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
@@ -400,7 +400,7 @@ function MobileSection({
                     key={item.href}
                     href={item.href}
                     aria-current={active ? "page" : undefined}
-                    className={`py-2.5 pl-6 text-[14px] ${
+                    className={`py-2.5 pl-6 text-[length:var(--t-secondary)] ${
                       active ? "text-[var(--v-primary)]" : "text-[var(--v-muted)]"
                     }`}
                   >

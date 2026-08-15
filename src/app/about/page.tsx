@@ -24,12 +24,12 @@ export default function AboutPage() {
       <section className="mx-auto max-w-[1280px] px-6 py-16 sm:py-20">
         <div className="flex max-w-[68ch] flex-col gap-6">
           <Reveal>
-            <p className="text-[16px] font-semibold italic leading-[1.6] text-[var(--v-ink)]">
+            <p className="text-[length:var(--t-body)] font-semibold italic leading-[1.6] text-[var(--v-ink)]">
               When your business evolves, your talent strategy should too.
             </p>
           </Reveal>
           <Reveal delay={0.08}>
-            <p className="text-[16.5px] leading-[1.75] text-[var(--v-muted)]">
+            <p className="text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
               District Partners is an independent, partner-led firm built to serve clients
               wherever they need us most, bringing deep expertise to solve complex business
               challenges. Whether you&rsquo;re scaling after an acquisition, building a new
@@ -39,7 +39,7 @@ export default function AboutPage() {
             </p>
           </Reveal>
           <Reveal delay={0.14}>
-            <p className="text-[16.5px] leading-[1.75] text-[var(--v-muted)]">
+            <p className="text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
               We understand that our success isn&rsquo;t measured by the people we place or the
               professionals we deploy, but by the outcomes and impact we help our clients
               achieve. We&rsquo;re proud to{" "}

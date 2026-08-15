@@ -12,7 +12,7 @@ export default function Footer() {
             <Link href="/" aria-label="District Partners home">
               <Logo />
             </Link>
-            <p className="mt-5 max-w-[30ch] text-[13.5px] leading-[1.6] text-[var(--v-muted)]">
+            <p className="mt-5 max-w-[30ch] text-[length:var(--t-small)] leading-[1.6] text-[var(--v-muted)]">
               An independent, partner-led firm built to serve clients wherever they need us
               most.
             </p>
@@ -20,7 +20,7 @@ export default function Footer() {
               href={LINKEDIN_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-2 text-[13.5px] text-[var(--v-muted)] transition-colors hover:text-[var(--v-ink)]"
+              className="mt-5 inline-flex items-center gap-2 text-[length:var(--t-small)] text-[var(--v-muted)] transition-colors hover:text-[var(--v-ink)]"
             >
               <LinkedInIcon size={16} />
               LinkedIn
@@ -35,7 +35,7 @@ export default function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-[13.5px] leading-[1.5] text-[var(--v-muted)] transition-colors hover:text-[var(--v-ink)]"
+                      className="text-[length:var(--t-small)] leading-[1.5] text-[var(--v-muted)] transition-colors hover:text-[var(--v-ink)]"
                     >
                       {link.label}
                     </Link>
@@ -48,7 +48,7 @@ export default function Footer() {
 
         <div className="v-rule my-10" />
 
-        <div className="flex flex-col gap-3 text-[13px] text-[var(--v-muted)] sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 text-[length:var(--t-small)] text-[var(--v-muted)] sm:flex-row sm:items-center sm:justify-between">
           <p>&copy; {new Date().getFullYear()} District Partners. All rights reserved.</p>
           <div className="flex gap-6">
             <Link href="/privacy" className="transition-colors hover:text-[var(--v-ink)]">
