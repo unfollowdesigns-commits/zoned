@@ -1,35 +1,61 @@
+"use client";
+
+import * as React from "react";
+import { motion } from "framer-motion";
+import { EASE, staggerDelay, useReducedMotion } from "@/lib/motion";
+import { whenReached } from "@/lib/in-view";
+
 /**
  * Scroll reveal.
  *
- * Deliberately not a Framer whileInView: that reveals via an
- * IntersectionObserver attached after hydration, so an element scrolled past
- * during the hydration window never intersects again and stays invisible
- * permanently. This uses a CSS scroll timeline instead. The element's base
- * style is the visible one, and the animation only ever plays as an
- * enhancement, so no code path can leave content hidden.
- *
- * `delay` is kept as a stagger index rather than a duration, since a
- * scroll-driven animation has no time axis to delay along.
+ * The "has this been reached" question is answered by lib/in-view, which is
+ * level-triggered rather than edge-triggered. Read the comment in that file
+ * before replacing it with an IntersectionObserver: the observer version of
+ * this component shipped twice and stranded content invisible both times.
  */
+
 export default function Reveal({
   children,
   delay = 0,
   className,
 }: {
   children: React.ReactNode;
-  /** Stagger hint. Values are treated as steps, matching the old delay scale. */
+  /** Stagger hint in seconds, clamped by the shared cap. */
   delay?: number;
   className?: string;
 }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [shown, setShown] = React.useState(false);
+  const reduced = useReducedMotion();
+
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    return whenReached(el, () => setShown(true));
+  }, []);
+
   const index = Math.round(delay / 0.07);
+
   return (
-    <div className={className}>
-      <div
-        className="v-reveal"
-        style={index ? ({ "--reveal-i": index } as React.CSSProperties) : undefined}
+    <div ref={ref} className={className}>
+      <motion.div
+        // `shown` starts false on server and client alike, so the two renders
+        // agree. Branching on the motion preference to emit different markup is
+        // what leaves elements invisible forever.
+        initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+        animate={
+          shown
+            ? { opacity: 1, y: 0, filter: "blur(0px)" }
+            : { opacity: 0, y: 20, filter: "blur(8px)" }
+        }
+        transition={
+          reduced
+            ? { duration: 0 }
+            : { duration: 0.55, ease: EASE, delay: staggerDelay(index) }
+        }
       >
         {children}
-      </div>
+      </motion.div>
     </div>
   );
 }

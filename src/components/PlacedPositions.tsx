@@ -4,6 +4,7 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { EASE, useReducedMotion } from "@/lib/motion";
 import { PLACED_POSITIONS } from "@/lib/site";
+import Reveal from "@/components/Reveal";
 
 /**
  * Frequently placed positions.
@@ -20,12 +21,11 @@ export default function PlacedPositions() {
     <section className="mx-auto max-w-[1280px] px-6 pb-24">
       <p className="v-eyebrow mb-7">Frequently Placed Positions</p>
 
+      <Reveal>
       <ul className="flex flex-wrap gap-2.5">
-        {PLACED_POSITIONS.map((title, i) => (
+        {PLACED_POSITIONS.map((title) => (
           <motion.li
             key={title}
-            className="v-reveal"
-            style={{ "--reveal-i": Math.min(i, 4) } as React.CSSProperties}
             initial="rest"
             animate="rest"
             whileHover={reduced ? undefined : "hover"}
@@ -51,6 +51,7 @@ export default function PlacedPositions() {
           </motion.li>
         ))}
       </ul>
+      </Reveal>
     </section>
   );
 }

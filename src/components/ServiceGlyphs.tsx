@@ -12,6 +12,13 @@ import { SPRING, SPRING_SOFT, EASE } from "@/lib/motion";
 const ACCENT = "var(--v-primary)";
 const MUTED = "var(--v-muted)";
 
+/* The neutral parts of every glyph are `currentColor` at alpha, never a fixed
+   white at alpha. These were drawn against the dark ground; once the service
+   cards moved to paper, every white-alpha fill went invisible and only the
+   accent strokes survived, so each glyph read as two or three stray marks in
+   the corner of a card. Tracking currentColor means one drawing works on both
+   grounds, which is the same rule the logo follows. */
+
 /** Executive Search: a reticle closes in and locks onto one candidate. */
 export function ExecutiveSearchGlyph() {
   return (
@@ -22,7 +29,7 @@ export function ExecutiveSearchGlyph() {
           cx={18 + i * 21}
           cy={36}
           r={4}
-          fill={i === 2 ? ACCENT : "rgba(255,255,255,0.18)"}
+          fill={i === 2 ? ACCENT : `color-mix(in srgb, currentColor 18%, transparent)`}
           variants={{
             rest: { r: 4, opacity: i === 2 ? 0.75 : 1 },
             hover: { r: i === 2 ? 6.5 : 3, opacity: i === 2 ? 1 : 0.35 },
@@ -76,7 +83,7 @@ export function ProfessionalSearchGlyph() {
               width={92}
               height={11}
               rx={3}
-              fill={isPick ? ACCENT : "rgba(255,255,255,0.14)"}
+              fill={isPick ? ACCENT : `color-mix(in srgb, currentColor 14%, transparent)`}
               opacity={isPick ? 0.9 : 1}
             />
             <rect
@@ -85,7 +92,7 @@ export function ProfessionalSearchGlyph() {
               width={isPick ? 44 : 30 + i * 7}
               height={4}
               rx={2}
-              fill={isPick ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.28)"}
+              fill={isPick ? `color-mix(in srgb, currentColor 85%, transparent)` : `color-mix(in srgb, currentColor 28%, transparent)`}
             />
           </motion.g>
         );
@@ -98,8 +105,8 @@ export function ProfessionalSearchGlyph() {
 export function InterimGlyph() {
   return (
     <svg viewBox="0 0 120 72" className="h-full w-full" aria-hidden="true">
-      <rect x={14} y={30} width={34} height={12} rx={3} fill="rgba(255,255,255,0.16)" />
-      <rect x={72} y={30} width={34} height={12} rx={3} fill="rgba(255,255,255,0.16)" />
+      <rect x={14} y={30} width={34} height={12} rx={3} fill={`color-mix(in srgb, currentColor 16%, transparent)`} />
+      <rect x={72} y={30} width={34} height={12} rx={3} fill={`color-mix(in srgb, currentColor 16%, transparent)`} />
       {/* the gap outline */}
       <motion.rect
         x={52}
@@ -133,7 +140,7 @@ export function InterimGlyph() {
 export function FractionalGlyph() {
   return (
     <svg viewBox="0 0 120 72" className="h-full w-full" aria-hidden="true">
-      <rect x={14} y={30} width={92} height={12} rx={3} fill="rgba(255,255,255,0.12)" />
+      <rect x={14} y={30} width={92} height={12} rx={3} fill={`color-mix(in srgb, currentColor 12%, transparent)`} />
       <motion.rect
         y={30}
         height={12}
@@ -161,7 +168,7 @@ export function ProjectSupportGlyph() {
   const nodes = [20, 45, 70, 95];
   return (
     <svg viewBox="0 0 120 72" className="h-full w-full" aria-hidden="true">
-      <line x1={20} y1={36} x2={95} y2={36} stroke="rgba(255,255,255,0.14)" strokeWidth={1.5} />
+      <line x1={20} y1={36} x2={95} y2={36} stroke={`color-mix(in srgb, currentColor 14%, transparent)`} strokeWidth={1.5} />
       <motion.line
         x1={20}
         y1={36}

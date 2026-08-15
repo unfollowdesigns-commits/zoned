@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { SPRING_SOFT, useReducedMotion } from "@/lib/motion";
 import { SERVICES } from "@/lib/site";
 import LightBand from "@/components/ui/LightBand";
+import Reveal from "@/components/Reveal";
 import {
   ExecutiveSearchGlyph,
   ProfessionalSearchGlyph,
@@ -94,14 +95,19 @@ export default function StickyServices() {
           {SERVICES.map((service, i) => {
             const Glyph = GLYPHS[i];
             return (
-              <article
-                key={service.href}
-                // CSS scroll timeline, not whileInView. An observer attached
-                // after hydration never fires for an element already scrolled
-                // past, which strands the panel at opacity 0 permanently. The
-                // reveal's base style is the visible one, so it cannot.
-                style={{ "--reveal-i": Math.min(i, 4) } as React.CSSProperties}
-                className="v-reveal v-spotlight group relative overflow-hidden rounded-[var(--radius)] border border-[var(--v-border)] bg-white p-7 transition-colors duration-300 hover:border-[var(--v-primary)]/45 sm:p-8"
+              <Reveal key={service.href} delay={Math.min(i, 4) * 0.07}>
+              {/* motion.article, not article: the glyphs declare what the
+                  parent's "hover" variant means for them and own no state of
+                  their own, so without a motion parent to propagate it their
+                  variants never resolve and they render as a few stray marks.
+                  whileFocus is listed alongside so a keyboard reaches the same
+                  animation a pointer does. */}
+              <motion.article
+                initial="rest"
+                animate="rest"
+                whileHover={reduced ? undefined : "hover"}
+                whileFocus={reduced ? undefined : "hover"}
+                className="v-spotlight group relative overflow-hidden rounded-[var(--radius)] border border-[var(--v-border)] bg-[linear-gradient(150deg,#ffffff_0%,#ffffff_55%,color-mix(in_srgb,var(--v-primary)_7%,#ffffff)_100%)] p-7 transition-colors duration-300 hover:border-[var(--v-primary)]/45 sm:p-8"
                 onPointerMove={(e) => {
                   const el = e.currentTarget;
                   const r = el.getBoundingClientRect();
@@ -120,7 +126,7 @@ export default function StickyServices() {
                   </div>
                   <div
                     aria-hidden="true"
-                    className="pointer-events-none h-14 w-28 shrink-0 opacity-70 [color:var(--v-primary-deep)]"
+                    className="pointer-events-none h-14 w-28 shrink-0 [color:var(--v-ink)]"
                   >
                     <Glyph />
                   </div>
@@ -138,7 +144,8 @@ export default function StickyServices() {
                     className="transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
                   />
                 </Link>
-              </article>
+              </motion.article>
+              </Reveal>
             );
           })}
         </div>

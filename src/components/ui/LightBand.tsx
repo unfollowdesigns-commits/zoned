@@ -12,8 +12,11 @@
  * below are the same ones inverted.
  *
  * Rules that come with it:
- *   - Never more than two paper sections in a page. A third stops being a
- *     joint and starts being a second website.
+ *   - Never two paper sections in a row. What makes paper work is the
+ *     alternation, so the constraint is on adjacency, not on the total: a
+ *     seven-section page alternating cleanly carries three paper bands without
+ *     strain, while two consecutive ones stop being a joint and start being a
+ *     second website.
  *   - The accent darkens for paper. The blue that reads well on near-black is
  *     weak on cream, so `.v-light` swaps the eyebrow to --v-primary-deep.
  *   - Seam the boundary, so the join reads as deliberate.

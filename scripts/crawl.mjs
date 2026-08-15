@@ -73,6 +73,12 @@ for (const width of WIDTHS) {
       failures.push(`${route} @${width}: HTTP ${status}`);
     }
 
+    // The preloader holds the scroll lock until it stamps data-loaded. Waiting
+    // for the attribute rather than a fixed delay means the wheel check below
+    // tests the page, not the curtain.
+    await page.waitForFunction(() => document.documentElement.hasAttribute("data-loaded"), {
+      timeout: 8000,
+    });
     await page.waitForTimeout(500);
 
     // Can a real user scroll this page? scrollTo() bypasses an overflow lock
@@ -103,7 +109,11 @@ for (const width of WIDTHS) {
       await page.evaluate((s) => window.scrollTo(0, s), y);
       await page.waitForTimeout(90);
     }
-    await page.waitForTimeout(700);
+    // Long enough for the slowest reveal to have finished, not just started.
+    // A staggered item can carry the full stagger cap before its own 0.55s
+    // duration begins, so anything under about 1.2s reports the last cards in a
+    // staggered group as stranded when they are simply still animating.
+    await page.waitForTimeout(1500);
 
     const checks = await page.evaluate(() => {
       const de = document.documentElement;

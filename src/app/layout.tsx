@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { DM_Sans, Familjen_Grotesk, Space_Grotesk } from "next/font/google";
 import { Shell, Atmosphere } from "@/kit/components/Atmosphere";
+import { prePaintScript } from "@/lib/preload";
+import Preloader from "@/components/Preloader";
 import MotionProvider from "@/components/MotionProvider";
 import { ScrollProgress } from "@/kit/components/Scroll";
 import Header from "@/components/Header";
@@ -37,7 +39,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${body.variable} ${display.variable} ${label.variable} h-full antialiased`}
     >
+      <head>
+        {/* Must be inline and synchronous. Anything deferred runs after the
+            first paint, which is the exact flash the curtain exists to
+            prevent. */}
+        <script dangerouslySetInnerHTML={{ __html: prePaintScript() }} />
+      </head>
       <body className="min-h-full">
+        <Preloader />
         <Shell className="flex min-h-screen flex-col">
         <a
           href="#main"

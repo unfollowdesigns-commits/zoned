@@ -10,15 +10,29 @@
 
    Everything above is the kit, unmodified apart from the four SWAP values in
    00-tokens.css and the accent re-hue. Only what is genuinely specific to this
-   site lives below: the two extra fluid type steps, the cream ground token
-   overrides, the sticky rail, and the scroll-timeline reveal.
+   site lives below: the extra fluid type steps, the cream ground token
+   overrides, the section-heading and dark-band treatments, the preloader
+   assembly, the footer wordmark, the glow control and the sticky rail.
    ========================================================================= */
 
 :root {
   /* MD2 names two fluid display steps, a lede and an action label as the four
      additions over part one's seven, without restating their values. These are
-     derived; check them against the source project. */
-  --t-display-fluid: clamp(32px, 3.6vw, 52px);
+     derived; check them against the source project.
+
+     Section headings are FLUID and much larger than a stepped scale suggests,
+     for the same reason the hero is. The first pass capped this at 52px and
+     every section title on the site read as a card heading: a page whose h1 is
+     88px and whose h2 is 52px has no second voice, it has a headline and some
+     labels. At 76px the section titles carry their own sections.
+
+     Leading goes below 1 for the same reason it does on the hero. A two-line
+     section title at 1.1 has a canyon between the lines; at 0.98 the two lines
+     lock into one shape. */
+  --t-display-fluid: clamp(34px, 5vw, 76px);
+  --lh-display-fluid: 0.98;
+  --tr-display-fluid: -0.032em;
+
   --t-lede: 1.1875rem;   /* 19px */
   --t-action: 0.9375rem; /* 15px */
 
@@ -39,50 +53,11 @@
   --tr-label: 0.09em;
 }
 
-/* ---- Scroll reveal ----
-   Driven by a scroll timeline rather than an IntersectionObserver, so it does
-   not depend on hydration having finished. The base style is the visible one:
-   if the timeline is inactive (page too short to scroll), unsupported, or the
-   user prefers reduced motion, content simply shows. An observer-based reveal
-   can strand content forever when the element is scrolled past before the
-   observer attaches; this cannot. */
-@keyframes v-reveal-in {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-    filter: blur(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-    filter: blur(0);
-  }
-}
-
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .v-reveal {
-      /* `forwards`, never `both`. The backwards fill of `both` paints the
-         hidden first keyframe whenever the element sits outside its range,
-         which strands anything the range never completes over: the last
-         section on a short page, or any element on a page that cannot
-         scroll. With `forwards` the element falls back to its base style,
-         which is the visible one. */
-      animation: v-reveal-in linear forwards;
-      animation-timeline: view();
-      /* Completes early in the entry phase. An element taller than the
-         viewport never reaches `entry 100%`, so a late end value leaves tall
-         panels (a long form, a stacked section) frozen part-way through their
-         own reveal. 35% is passed well before anything is centred. */
-      /* Short and nearly constant. The per-item stagger has to stay small:
-         it is added to the range END, so a late item needs more of the entry
-         phase to finish, and a tall element on a narrow screen never gets
-         there. That left a section frozen at 0.59 opacity at 390px. */
-      animation-range: entry 0% entry calc(22% + var(--reveal-i, 0) * 3%);
-    }
-  }
-}
-
+/* The scroll reveal used to live here as a CSS scroll timeline. It was
+   removed: `animation-timeline: view()` exists only in Chromium, so the
+   @supports guard failed in Safari and Firefox and the site had no scroll
+   animation at all in those browsers. It now lives in lib/in-view.ts, which
+   works everywhere and cannot strand content. */
 
 /* ---- Light ground -------------------------------------------------------
    Alternating cream sections against the dark ground. Rather than a second
@@ -248,6 +223,218 @@
   height: 1px;
   border: 0;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+/* ---- Section heading ----------------------------------------------------
+   One class so every section title on the site is the same object. The size,
+   leading and tracking are a set: changing the size alone is what produces a
+   heading that is technically large and still reads as small, because the
+   leading stays at a body value and the lines never lock together. */
+.v-section-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--t-display-fluid);
+  line-height: var(--lh-display-fluid);
+  letter-spacing: var(--tr-display-fluid);
+  text-wrap: balance;
+}
+
+/* The second half of a title, in the accent.
+
+   This is the device the whole page hangs on: a statement that starts in ink
+   and finishes in brand colour. It works because the turn lands on the phrase
+   that carries the meaning, so the colour is doing the emphasis a designer
+   would otherwise ask bold to do, at a size where bold would be shouting.
+   Never colour the whole heading: the contrast between the two halves is the
+   effect, and an all-accent heading has none. */
+.v-section-title .turn {
+  color: var(--v-primary);
+}
+
+.v-light .v-section-title .turn {
+  color: var(--v-primary-deep);
+}
+
+/* ---- Dark band ----------------------------------------------------------
+   A dark section that carries light rather than sitting flat.
+
+   The reference sites all do the same thing and it is easy to miss because it
+   is subtle: the dark ground is not one colour. A wide, very soft radial of
+   the brand hue sits off-centre behind the content, so the panel has a lit
+   side and a dark side. Without it a dark section is a black rectangle and the
+   page reads as cheap no matter how good the type is.
+
+   Two radials, not one: a large low-alpha wash for the overall lift, and a
+   tighter, slightly brighter core for the hot spot. One radial alone either
+   covers too little to lift the section or is so large it flattens back out. */
+.v-dark-band {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      120% 90% at 12% 0%,
+      color-mix(in srgb, var(--v-primary) 17%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      80% 70% at 88% 108%,
+      color-mix(in srgb, var(--v-primary-deep) 22%, transparent),
+      transparent 62%
+    ),
+    linear-gradient(180deg, var(--v-bg-2), var(--v-bg));
+}
+
+/* A hairline of accent at each edge, so the band reads as a deliberate joint
+   rather than as the page changing colour by accident. */
+.v-dark-band::before,
+.v-dark-band::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--v-primary) 55%, transparent),
+    transparent
+  );
+}
+.v-dark-band::before { top: 0; }
+.v-dark-band::after { bottom: 0; }
+
+/* ---- Preloader mark assembly --------------------------------------------
+   CSS rather than Framer, because the curtain ships in the server HTML and a
+   Framer element renders at its `initial` values there. An `initial` of
+   opacity 0 means an invisible mark from first paint until hydration, which is
+   most of the curtain's life on a cold load. See components/Preloader.tsx.
+
+   Translations are in SVG user units, since CSS transforms on SVG children
+   operate in the element's local coordinate system, not in screen pixels.
+
+   `both` fill is correct here in a way it is not for a scroll-driven reveal:
+   the backwards fill is what holds each piece off-stage through its delay. */
+@keyframes dp-pre-bracket {
+  from { transform: translateX(-64px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes dp-pre-drop {
+  from { transform: translateY(-58px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+@keyframes dp-pre-rise {
+  from { transform: translateY(58px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes dp-pre-word {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+/* Slow out, hard settle: the pieces arrive quickly and stop dead, which is what
+   makes an interlock read as locking rather than as floating into place. */
+.dp-pre-bracket,
+.dp-pre-blue,
+.dp-pre-ink,
+.dp-pre-word {
+  animation-duration: 0.66s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+}
+
+.dp-pre-bracket { animation-name: dp-pre-bracket; animation-delay: 0.06s; }
+.dp-pre-blue    { animation-name: dp-pre-drop;    animation-delay: 0.2s; }
+.dp-pre-ink     { animation-name: dp-pre-rise;    animation-delay: 0.34s; }
+.dp-pre-word    { animation-name: dp-pre-word;    animation-delay: 0.78s; animation-duration: 0.5s; }
+
+/* The curtain is skipped entirely under reduced motion, but if it is ever
+   shown, nothing here should move. */
+@media (prefers-reduced-motion: reduce) {
+  .dp-pre-bracket,
+  .dp-pre-blue,
+  .dp-pre-ink,
+  .dp-pre-word {
+    animation: none;
+  }
+}
+
+/* ---- Footer wordmark ----------------------------------------------------
+   The name set enormous and almost invisible, sitting behind the footer's last
+   row. It closes the page the way a colophon closes a book: the brand gets the
+   last word, at a size no other element on the site is allowed, and at a
+   contrast low enough that it never competes for a read.
+
+   `cqw` rather than `vw` so it scales to the footer's own width, and a mask so
+   the letterforms fade out at the baseline instead of ending on a hard edge. */
+.v-footer-wordmark {
+  container-type: inline-size;
+  overflow: hidden;
+  line-height: 0.78;
+  user-select: none;
+}
+
+.v-footer-wordmark span {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  /* "DISTRICT PARTNERS" is 17 characters. At a grotesque's average advance of
+     roughly 0.62em that is about 10.6em of text, so anything above ~9cqw
+     overflows the container and the name gets guillotined mid-word. */
+  font-size: 8.9cqw;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  color: transparent;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.085),
+    rgba(255, 255, 255, 0.012) 78%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* ---- Glow control -------------------------------------------------------
+   A pill that carries its own light. The glow is a blurred copy of the shape
+   behind it rather than a box-shadow, because a shadow cannot bloom past its
+   own spread and the result reads as a border. On hover the copy widens and
+   brightens, so the control looks like it is powering up rather than changing
+   colour.
+
+   The blurred layer is a separate composited element with no paint of its own
+   on the main thread, so this stays free at 60fps. */
+.v-glow {
+  position: relative;
+  isolation: isolate;
+}
+
+.v-glow::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(120deg, var(--v-primary), var(--v-ring), var(--v-primary-deep));
+  filter: blur(14px);
+  opacity: 0.5;
+  transform: scale(0.94);
+  transition:
+    opacity 0.35s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform 0.35s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.v-glow:hover::before,
+.v-glow:focus-visible::before {
+  opacity: 0.92;
+  transform: scale(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v-glow::before {
+    transition: none;
+  }
 }
 
 /* ---- Eyebrow: the brand's label face ------------------------------------

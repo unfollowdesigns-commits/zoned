@@ -48,6 +48,14 @@ export default function Footer() {
 
         <div className="v-rule my-10" />
 
+        {/* The name at a size nothing else on the site gets, and a contrast low
+            enough that it reads as ground rather than as a heading. */}
+        <div className="v-footer-wordmark" aria-hidden="true">
+          <span>DISTRICT PARTNERS</span>
+        </div>
+
+        <div className="v-rule my-10" />
+
         <div className="flex flex-col gap-3 text-[length:var(--t-small)] text-[var(--v-muted)] sm:flex-row sm:items-center sm:justify-between">
           <p>&copy; {new Date().getFullYear()} District Partners. All rights reserved.</p>
           <div className="flex gap-6">
