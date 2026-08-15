@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { Inter, Familjen_Grotesk } from "next/font/google";
 import Atmosphere from "@/components/Atmosphere";
 import MotionProvider from "@/components/MotionProvider";
 import Header from "@/components/Header";
@@ -11,10 +11,9 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const display = Familjen_Grotesk({
+  variable: "--font-display-face",
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -27,7 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${manrope.variable} h-full antialiased`}
+      className={`${inter.variable} ${display.variable} h-full antialiased`}
     >
       <body className="v-shell v-grain min-h-full flex flex-col">
         <a

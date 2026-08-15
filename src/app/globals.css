@@ -18,7 +18,7 @@
   --radius: 0.9rem;
 
   --font-ui: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-manrope), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-display: var(--font-display-face), var(--font-inter), ui-sans-serif, sans-serif;
 }
 
 * {
@@ -49,7 +49,7 @@ body {
 
 .v-display {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.028em;
 }
 
@@ -273,59 +273,6 @@ body {
   opacity: 0.05;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* ---- Hero starfield (local to hero, not global atmosphere) ---- */
-.v-stars {
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(1.4px 1.4px at 12% 22%, rgba(255, 255, 255, 0.85), transparent),
-    radial-gradient(1.2px 1.2px at 28% 65%, rgba(255, 255, 255, 0.6), transparent),
-    radial-gradient(1.6px 1.6px at 44% 18%, rgba(255, 255, 255, 0.75), transparent),
-    radial-gradient(1.2px 1.2px at 58% 42%, rgba(255, 255, 255, 0.5), transparent),
-    radial-gradient(1.4px 1.4px at 72% 70%, rgba(255, 255, 255, 0.7), transparent),
-    radial-gradient(1.2px 1.2px at 85% 30%, rgba(255, 255, 255, 0.55), transparent),
-    radial-gradient(1.6px 1.6px at 93% 60%, rgba(255, 255, 255, 0.8), transparent),
-    radial-gradient(1.2px 1.2px at 20% 85%, rgba(255, 255, 255, 0.5), transparent),
-    radial-gradient(1.2px 1.2px at 65% 88%, rgba(255, 255, 255, 0.45), transparent),
-    radial-gradient(1.4px 1.4px at 38% 40%, rgba(255, 255, 255, 0.6), transparent);
-  background-repeat: no-repeat;
-  mask-image: linear-gradient(180deg, #000 55%, transparent 92%);
-}
-
-/* Atmospheric bloom rising off the horizon line. */
-.v-hero-sky {
-  position: absolute;
-  left: 50%;
-  bottom: 16%;
-  width: 130%;
-  height: 78%;
-  transform: translateX(-50%);
-  pointer-events: none;
-  background:
-    radial-gradient(46% 62% at 50% 100%, rgba(84, 142, 255, 0.5), transparent 70%),
-    radial-gradient(70% 46% at 50% 100%, rgba(47, 95, 214, 0.34), transparent 72%),
-    radial-gradient(26% 90% at 30% 100%, rgba(62, 123, 250, 0.2), transparent 70%),
-    radial-gradient(26% 90% at 70% 100%, rgba(62, 123, 250, 0.2), transparent 70%);
-  filter: blur(26px);
-}
-
-/* The dark body below, lit along its top edge only. */
-.v-hero-planet {
-  position: absolute;
-  left: 50%;
-  top: 68%;
-  width: 190%;
-  aspect-ratio: 1 / 1;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: #03050e;
-  pointer-events: none;
-  box-shadow:
-    0 0 40px 2px rgba(150, 190, 255, 0.7),
-    0 0 90px 14px rgba(62, 123, 250, 0.45),
-    0 0 220px 60px rgba(47, 95, 214, 0.28);
 }
 
 @media (prefers-reduced-motion: reduce) {
