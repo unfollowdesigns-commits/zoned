@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Familjen_Grotesk } from "next/font/google";
+import { DM_Sans, Familjen_Grotesk, Space_Grotesk } from "next/font/google";
 import { Shell, Atmosphere } from "@/kit/components/Atmosphere";
 import MotionProvider from "@/components/MotionProvider";
 import { ScrollProgress } from "@/kit/components/Scroll";
@@ -7,9 +7,17 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+/* Body and copy. */
+const body = DM_Sans({
+  variable: "--font-body-face",
   subsets: ["latin"],
+});
+
+/* Eyebrows and labels only. Never used for body or display. */
+const label = Space_Grotesk({
+  variable: "--font-label-face",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 const display = Familjen_Grotesk({
@@ -27,7 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${display.variable} h-full antialiased`}
+      className={`${body.variable} ${display.variable} ${label.variable} h-full antialiased`}
     >
       <body className="min-h-full">
         <Shell className="flex min-h-screen flex-col">

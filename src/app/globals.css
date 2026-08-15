@@ -22,8 +22,21 @@
   --t-lede: 1.1875rem;   /* 19px */
   --t-action: 0.9375rem; /* 15px */
 
-  --font-display: var(--font-display-face), var(--font-inter), ui-sans-serif, sans-serif;
-  --font-ui: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Three faces, each with one job.
+
+     The kit specifies two, strictly separated. This brand system names a third
+     for eyebrows and labels, so the separation rule still holds: no face is
+     ever used for two roles. Space Grotesk appears only in small caps, DM Sans
+     only in body and UI, the display face only above 20px. */
+  --font-body: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
+  --font-ui: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), var(--font-body-face), sans-serif;
+  --font-label: var(--font-label-face), var(--font-body-face), sans-serif;
+
+  /* The brand system specifies 8 to 10 percent on labels. That overrides the
+     kit's 0.16em, which was tuned for a different face: Space Grotesk is wider
+     than Inter at the same size and needs less added tracking to stay open. */
+  --tr-label: 0.09em;
 }
 
 /* ---- Scroll reveal ----
@@ -231,4 +244,16 @@
   height: 1px;
   border: 0;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+/* ---- Eyebrow: the brand's label face ------------------------------------
+   Overrides the kit's .v-eyebrow, which inherits the UI face. Declared after
+   the kit imports so it wins without !important. */
+.v-eyebrow {
+  font-family: var(--font-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-label);
+  font-size: var(--t-label);
+  color: var(--v-primary);
 }
