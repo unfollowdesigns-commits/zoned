@@ -200,6 +200,77 @@ body {
   }
 }
 
+
+/* ---- Light ground -------------------------------------------------------
+   Alternating cream sections against the dark ground. Rather than a second
+   set of components, this redefines the ink and border tokens for its own
+   subtree, so every primitive already built (ledgers, eyebrows, rules,
+   reveals) adapts without touching them.
+
+   Cream, not white: a pure #fff surface reads as unfinished, and next to a
+   near-black ground it glares. This carries a little of the warm side so the
+   navy reads as deliberate rather than as "dark mode with a white section". */
+.v-light {
+  --v-cream: #f2efe7;
+  --v-cream-2: #e9e5da;
+  --v-ink: #12151f;
+  --v-muted: #565d70;
+  --v-border: rgba(18, 21, 31, 0.13);
+  --v-border-strong: rgba(18, 21, 31, 0.26);
+  --v-surface: #ffffff;
+
+  position: relative;
+  z-index: 1;
+  background: var(--v-cream);
+  color: var(--v-ink);
+}
+
+/* The eyebrow accent needs to darken on cream or it vibrates against it. */
+.v-light .v-eyebrow {
+  color: var(--v-primary-deep);
+}
+
+.v-light .v-rule {
+  background: linear-gradient(90deg, transparent, rgba(18, 21, 31, 0.16), transparent);
+}
+
+/* Panels on cream are lit the same way, just inverted in value. */
+.v-light .g-glass {
+  background: linear-gradient(180deg, #ffffff, #fbfaf6);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.9) inset,
+    0 1px 2px 0 rgba(18, 21, 31, 0.06),
+    0 4px 12px -4px rgba(18, 21, 31, 0.08),
+    0 24px 48px -24px rgba(18, 21, 31, 0.18);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.v-light .v-well {
+  background: linear-gradient(180deg, rgba(18, 21, 31, 0.045), rgba(18, 21, 31, 0.02));
+  border: 1px solid rgba(18, 21, 31, 0.1);
+  box-shadow:
+    0 1px 2px 0 rgba(18, 21, 31, 0.07) inset,
+    0 -1px 0 0 rgba(255, 255, 255, 0.7) inset;
+}
+
+.v-light .v-spotlight::before {
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(62, 123, 250, 0.09),
+    transparent 62%
+  );
+}
+
+/* ---- Sticky scroll rail -------------------------------------------------
+   The heading pins while its items pass. `clip` on html/body rather than
+   `hidden` is what keeps this working, see the tokens file. */
+.v-sticky-rail {
+  position: sticky;
+  top: 6rem;
+  align-self: start;
+}
+
 /* ---- Section divider ---- */
 .v-rule {
   height: 1px;
