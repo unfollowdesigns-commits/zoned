@@ -28,19 +28,18 @@ import { useReducedMotion } from "@/lib/motion";
  * animation, which is a flash of the entire finished headline before it plays.
  */
 
-/* Local paths, deliberately, and neither file exists yet.
+/* The video stays. The dashboard mockup that came with it did not: that was a
+   screenshot of somebody else's task-management product, complete with their
+   logo and their invented users, which on a search firm's homepage reads as
+   another company's product presented as this one's.
    
-   The brief supplied two third-party CDN URLs and they were shipped once, which
-   was a mistake: the "dashboard mockup" is a screenshot of somebody else's task
-   management product, complete with their logo, their Kanban board and their
-   invented users. On a search firm's homepage that is not a placeholder, it is
-   a different company's product being passed off as this one's. Flagging it in
-   a commit message was not good enough; it should never have rendered.
-   
-   Drop real assets at these paths and both slots fill. Until then the video
-   element renders nothing and the section is type on the brand ground, which is
-   honest and still reads. */
-const VIDEO_SRC = "/hero.mp4";
+   Worth doing before launch, though not blocking: this is a third-party CDN, so
+   the hero's largest asset is served from a host nobody here controls. If it
+   moves or rate-limits, the hero loses its background. Self-hosting it at
+   /hero.mp4 removes that dependency and lets it be compressed for the crop it
+   is actually shown in. */
+const VIDEO_SRC =
+  "https://cdn.sceneai.art/Hero%20Section%20Video/973fa3f6-7715-4e73-9cfd-100ee86285b5.mp4";
 
 const HEADLINE = "Our talent is finding yours.";
 const LEDE =
