@@ -159,35 +159,28 @@ export default function Assistant() {
 
   return (
     <>
-      {/* Launcher. Bottom-left, deliberately: the bottom-right corner is where
-          every accessibility widget, cookie banner and live-chat bubble already
-          lives, and a third thing stacked there is the reason people learn to
-          ignore that corner entirely. */}
+      {/* Launcher, bottom right: the corner people reach for an assistant in.
+          The earlier argument for the left was that the right is crowded with
+          accessibility and chat widgets, which is true of sites that have them
+          and not of this one, and putting a control where nobody looks for it to
+          win an argument about clutter is the wrong trade. */}
       {/* The fixed positioning lives on a wrapper, NOT on the button.
           `.v-edge` and `.v-glass` both declare `position: relative`, and the
           kit stylesheet is imported after Tailwind, so those class rules win
           against Tailwind's `fixed` at equal specificity. Put both on one
           element and the control silently lays out in document flow: this one
           ended up six thousand pixels down the page. */}
-      <div className="fixed bottom-6 left-6 z-[60]">
+      <div className="fixed bottom-6 right-6 z-[60]">
       <motion.button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="dp-assistant"
-        className="v-edge flex items-center gap-3 rounded-full py-3 pl-3 pr-5 text-[length:var(--t-small)] font-semibold text-[var(--v-ink)] outline-none backdrop-blur-xl focus-visible:ring-2 focus-visible:ring-[var(--v-ring)]"
+        className="v-ios flex items-center gap-3 rounded-full py-2.5 pl-2.5 pr-5 text-[length:var(--t-small)] font-semibold text-white outline-none transition-[transform,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--v-ring)]"
         initial={reduced ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: EASE, delay: 1.1 }}
       >
-        <span aria-hidden="true" className="v-edge-glow">
-          <i />
-        </span>
-        <span aria-hidden="true" className="v-edge-ring">
-          {[0, 1, 2, 3].map((i) => (
-            <i key={i} />
-          ))}
-        </span>
         <span
           aria-hidden="true"
           className="relative grid h-8 w-8 place-items-center rounded-full bg-[var(--v-primary)]/15 text-[length:var(--t-small)] font-bold text-[var(--v-ring)]"
@@ -200,7 +193,7 @@ export default function Assistant() {
 
       <AnimatePresence>
         {open && (
-          <div className="fixed bottom-24 left-6 z-[60]">
+          <div className="fixed bottom-24 right-6 z-[60]">
           <motion.div
             // Same reason as the launcher: `.v-glass` sets position: relative,
             // so the fixed placement goes on this wrapper instead.
@@ -209,15 +202,15 @@ export default function Assistant() {
             tabIndex={-1}
             role="dialog"
             aria-label="Find the right engagement"
-            className="v-glass v-glass-panel w-[min(24rem,calc(100vw-3rem))] overflow-hidden outline-none"
+            className="v-ios v-ios-panel w-[min(24rem,calc(100vw-3rem))] overflow-hidden rounded-[26px] outline-none"
             /* ORIGIN-AWARE. The panel is anchored to a launcher in the
-               bottom-left corner, so it has to grow OUT of that corner. Scaling
+               bottom-right corner, so it has to grow OUT of that corner. Scaling
                from the centre, which is the default and what this did first,
                makes the panel appear to arrive from somewhere the visitor was
                not looking, and no amount of tuning the curve fixes a wrong
                origin. This is the single highest-leverage detail on any popover
                and the one most often skipped. */
-            style={{ transformOrigin: "0% 100%" }}
+            style={{ transformOrigin: "100% 100%" }}
             initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.97 }}

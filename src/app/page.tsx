@@ -1,4 +1,4 @@
-import CinematicHero from "@/components/CinematicHero";
+import VideoHero from "@/components/VideoHero";
 import Stats from "@/components/Stats";
 import StickyServices from "@/components/StickyServices";
 import Specializations from "@/components/Specializations";
@@ -31,7 +31,7 @@ import LightBand from "@/components/ui/LightBand";
 export default function Home() {
   return (
     <>
-      <CinematicHero />
+      <VideoHero />
 
       <LightBand>
         <div className="mx-auto max-w-[1280px] px-6 py-24 sm:py-32">

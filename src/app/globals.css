@@ -73,9 +73,14 @@
      Leading goes below 1 for the same reason it does on the hero. A two-line
      section title at 1.1 has a canyon between the lines; at 0.98 the two lines
      lock into one shape. */
-  --t-display-fluid: clamp(34px, 5vw, 76px);
+  /* Capped at 64px, not 76px. Against an 80px hero, a 76px section title is
+     not a second voice, it is the same voice: the page had one enormous size
+     used twice and no hierarchy between them, which reads as shouting rather
+     than as structure. The reference runs its section titles around a fifth
+     smaller than its hero, and that gap is what lets both sit on the same page. */
+  --t-display-fluid: clamp(32px, 4.4vw, 64px);
   --lh-display-fluid: 0.98;
-  --tr-display-fluid: -0.032em;
+  --tr-display-fluid: -0.034em;
 
   --t-lede: 1.1875rem;   /* 19px */
   --t-action: 0.9375rem; /* 15px */
@@ -92,6 +97,16 @@
   --font-label: var(--font-label-face), var(--font-body-face), sans-serif;
   /* The logo's own face, pinned so the lockup never follows a type change. */
   --font-wordmark: var(--font-wordmark-face), var(--font-body-face), sans-serif;
+
+  /* Display type is 700, not 600.
+     
+     This is the difference that reads as quality and it is easy to miss because
+     it is invisible in isolation: at 600 a neo-grotesque at hero size looks
+     underweight and slightly soft, and the fix people reach for is more SIZE,
+     which is why the headings kept growing. The reference sets its display face
+     near-bold and slightly smaller, and the result is denser, blacker and
+     calmer all at once. */
+  --fw-display: 700;
 
   /* The brand system specifies 8 to 10 percent on labels. That overrides the
      kit's 0.16em, which was tuned for a different face: Space Grotesk is wider
@@ -278,6 +293,12 @@
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
 }
 
+/* Display weight, overriding the kit's 600. Declared after the kit imports so
+   it wins without !important. See --fw-display above for why. */
+.v-display {
+  font-weight: var(--fw-display);
+}
+
 /* ---- Section heading ----------------------------------------------------
    One class so every section title on the site is the same object. The size,
    leading and tracking are a set: changing the size alone is what produces a
@@ -364,6 +385,148 @@
 }
 .v-dark-band::before { top: 0; }
 .v-dark-band::after { bottom: 0; }
+
+/* ---- iOS-style glass ----------------------------------------------------
+   What separates Apple's material from the usual web "glassmorphism" is not the
+   blur. It is four things, and leaving any of them out is what makes a panel
+   look like a translucent div:
+
+     1. SATURATION, not just blur. `saturate(180%)` is what makes colour behind
+        the surface bloom through it rather than turning to grey mud. This is
+        the single most-skipped value and it does most of the work.
+     2. A HALF-PIXEL RIM, not a 1px border. An inset hairline at sub-pixel width
+        catches light on the edge the way a real bevel does; a full pixel reads
+        as a drawn outline.
+     3. A LAYERED SHADOW: one tight and dark for contact, one wide and soft for
+        ambience. A single shadow always looks either stuck on or floating.
+     4. A GENEROUS RADIUS. Apple's panels are far rounder than the web default,
+        and the radius is what makes the material read as a physical tile.
+
+   The fill stays low so the blur has something to do. Raising it is the instinct
+   when a panel looks weak, and it is exactly backwards: an opaque panel is not
+   glass, it is a card. */
+.v-ios {
+  position: relative;
+  isolation: isolate;
+  background: rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.18),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+    0 2px 8px -2px rgba(0, 0, 0, 0.4),
+    0 20px 48px -16px rgba(0, 0, 0, 0.55);
+}
+
+.v-ios:hover {
+  background: rgba(255, 255, 255, 0.13);
+}
+
+/* A floating panel passes over arbitrary content, so it needs more body than a
+   control does or the page reads straight through the copy. The blur and the
+   rim are unchanged; only the fill thickens. */
+.v-ios-panel {
+  background:
+    linear-gradient(
+      170deg,
+      rgba(255, 255, 255, 0.11),
+      rgba(255, 255, 255, 0.05) 55%,
+      rgba(255, 255, 255, 0.03)
+    ),
+    linear-gradient(180deg, rgba(12, 16, 32, 0.82), rgba(6, 8, 20, 0.88));
+}
+
+.v-ios-panel:hover {
+  background:
+    linear-gradient(
+      170deg,
+      rgba(255, 255, 255, 0.11),
+      rgba(255, 255, 255, 0.05) 55%,
+      rgba(255, 255, 255, 0.03)
+    ),
+    linear-gradient(180deg, rgba(12, 16, 32, 0.82), rgba(6, 8, 20, 0.88));
+}
+
+/* Where the blur is unsupported the fill has to carry the whole surface, or the
+   panel renders as near-transparent and unreadable. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .v-ios {
+    background: rgba(20, 26, 46, 0.94);
+  }
+}
+
+/* ---- Hero entrance ------------------------------------------------------
+   A four-second staggered load sequence: words, then controls, then the image.
+
+   CSS rather than Framer for the same reason the preloader is: this runs above
+   the fold on load, and a Framer element renders at its `initial` values in the
+   server HTML, so an `initial` of opacity 0 leaves the headline invisible until
+   hydration. On a cold connection that is most of the sequence.
+
+   `both` fill on every one of them. The backwards fill is what holds a word
+   off-stage through its own delay; without it each word paints at full opacity
+   first and then snaps back to the start of its animation, which shows the
+   entire finished headline in a flash before it plays. */
+@keyframes dp-word {
+  from { opacity: 0; transform: translateY(0.42em); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes dp-rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes dp-scale-in {
+  from { opacity: 0; transform: scale(0.965); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* inline-block so the word can be transformed at all, and so the mask of the
+   line above never clips its descenders. */
+.dp-word {
+  display: inline-block;
+  animation: dp-word 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.dp-rise {
+  animation: dp-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dp-scale-in {
+  animation: dp-scale-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* THE SEQUENCE WAITS FOR THE CURTAIN.
+   
+   These start on page load, and the preloader covers the page for its first
+   second and a half, so the whole four-second entrance was playing underneath
+   it and was already finished by the time the curtain lifted. Measured: all
+   thirty-one words were at full opacity 0.7s after the curtain released.
+   
+   Declaring them paused and running them off `html[data-loaded]` fixes it
+   without any JavaScript: `both` fill holds each element at its start state
+   while paused, and the curtain stamps that attribute on the way out. Returning
+   visitors, for whom the pre-paint script sets the attribute before first
+   paint, get the sequence immediately, which is also correct. */
+.dp-word,
+.dp-rise,
+.dp-scale-in {
+  animation-play-state: paused;
+}
+
+html[data-loaded] .dp-word,
+html[data-loaded] .dp-rise,
+html[data-loaded] .dp-scale-in {
+  animation-play-state: running;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-word,
+  .dp-rise,
+  .dp-scale-in {
+    animation: none;
+  }
+}
 
 /* ---- Preloader assembly -------------------------------------------------
    CSS rather than Framer, because the curtain ships in the server HTML and a
