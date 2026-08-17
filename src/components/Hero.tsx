@@ -1,227 +1,179 @@
 "use client";
 
+import Link from "@/components/SiteLink";
 import * as React from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { EASE, useReducedMotion, staggerDelay } from "@/lib/motion";
-import { WaveField } from "@/kit/components/WaveField";
-import { CLIENTS } from "@/lib/site";
-import GlowButton from "@/components/ui/GlowButton";
+import { STATS } from "@/lib/site";
 
 /**
- * The hero.
+ * The hero, rebuilt by subtraction.
  *
- * One column, not two. The previous version put a panel of function and
- * industry chips beside the headline, and it was the weakest thing on the site:
- * twelve pills at twelve different widths is a ragged block that reads as a
- * filter UI with nothing to filter, and it stole half the width from the only
- * sentence that has to land. Those twelve labels already have a home in the
- * navigation and in the sections below, which is where a visitor looks for
- * them. What replaced it is width: the statement now runs at full measure, and
- * the space under it goes to proof rather than to a widget.
+ * WHAT WAS HERE BEFORE, AND WHY IT IS GONE: a canvas particle field, two radial
+ * blooms, a glass panel, two filled pill buttons, a line of microcopy and a
+ * client strip. Nine or ten separate effects in one viewport. The reference
+ * this is measured against has a photograph, an eyebrow, a heading, one
+ * paragraph, one text link and three figures, and it looks better. It looks
+ * better BECAUSE of that, not despite it.
  *
- * The three numbers that carry the type: clamp(44px, 5.6vw, 88px) fluid rather
- * than stepped, leading BELOW one so the lines lock into a single shape rather
- * than sitting as a large paragraph, and tracking tightened to -0.035em,
- * because tracking has to decrease as size increases.
+ * The mistake was systematic: with no photography available, effects kept
+ * getting added to fill the hole, and effects cannot do that job. They read as
+ * decoration precisely because there is nothing underneath them. The correct
+ * response to having no image is to leave the space and go and get one.
  *
- * THE ROTATING WORD IS GONE. A headline that cycles through four nouns is one
- * of the most recognisable signatures of a generated landing page, and it costs
- * the sentence its meaning: a claim that swaps its own object every 2.6 seconds
- * is not a claim, it is a demo of a text effect. The line now says one thing and
- * commits to it.
+ * The rules this section now follows, each read off the reference:
  *
- * The headline arrives as a mask reveal, word by word, which is the section's
- * actual animation. See the comment on the h1: the distinction between that and
- * a fade is the whole difference between a hero that looks composed and one
- * that looks like it finished loading.
+ *   TWO COLOURS. Ink and one accent. No gradient on the type, none on the
+ *   control, no accent rim on an accent panel over an accent radial.
  *
- * Scrolling out of the hero is its own move. The statement drifts up faster
- * than the page, shrinks slightly and blurs, so the next section reads as
- * arriving over it rather than the whole page sliding as one flat sheet. The
- * wave field behind travels at a different rate again, which is what gives the
- * fold depth: two planes moving at two speeds is parallax, one plane moving is
- * a scroll. Everything here is transform and opacity on composited layers, so
- * it costs nothing on the main thread.
+ *   TWO TYPE SIZES in the viewport, plus the eyebrow and the figures. Every
+ *   additional size is one more thing competing to be read first.
+ *
+ *   THE GROUND IS NOT BLACK. A warm near-black with a slow vertical fall-off.
+ *   Pure black carrying coloured radials is the palette that reads as a dark
+ *   template no matter what sits on top of it.
+ *
+ *   THE HEADING STARTS A THIRD OF THE WAY DOWN. The space above it is doing
+ *   work. Filling it is what makes a page feel cheap.
+ *
+ *   ONE CALL TO ACTION, and it is a text link. Two filled pills is a section
+ *   that has not decided what it wants and is asking the visitor to.
+ *
+ * THE IMAGE SLOT IS DELIBERATELY EMPTY UNTIL A REAL PHOTOGRAPH EXISTS. Drop a
+ * file at public/hero.jpg and it fills, already treated: desaturated, tinted to
+ * the brand hue, bled off the right edge and masked so it dissolves into the
+ * ground rather than ending on a hard edge. Until then the space stays open,
+ * which is honest, and still better than filling it with a widget.
  */
+
+const HERO_IMAGE = "/hero.jpg";
 
 export default function Hero() {
   const reduced = useReducedMotion();
-  const sectionRef = React.useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"],
-  });
 
-  /* The copy leaves faster than the page and softens as it goes. Blur is worth
-     the cost here and nowhere else: it is what makes the layer read as passing
-     behind the next section rather than simply moving up. */
-  const copyY = useTransform(scrollYProgress, [0, 1], [0, -110]);
-  const copyScale = useTransform(scrollYProgress, [0, 1], [1, 0.94]);
-  const copyOpacity = useTransform(scrollYProgress, [0, 0.72], [1, 0]);
-  const copyBlur = useTransform(scrollYProgress, [0, 1], ["blur(0px)", "blur(6px)"]);
-  /* The field behind travels the other way and slower. Two planes, two rates. */
-  const fieldY = useTransform(scrollYProgress, [0, 1], [0, 70]);
+  /* The treatment only mounts once the photograph actually loads.
+     Rendering the layers unconditionally meant the colour-blend layer painted
+     against bare ground and left a hard vertical seam at its own edge, which is
+     a worse artefact than the empty space it was covering. Probing the file
+     costs one request that the browser caches for the real element anyway, and
+     it means this section degrades to clean empty ground with no seam at all
+     until a real image exists. */
+  const [hasPhoto, setHasPhoto] = React.useState(false);
+  React.useEffect(() => {
+    const img = new Image();
+    img.onload = () => setHasPhoto(true);
+    img.src = HERO_IMAGE;
+  }, []);
 
   const rise = (i: number) => ({
-    initial: { opacity: 0, y: 18, filter: "blur(8px)" },
-    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-    transition: { duration: 0.6, ease: EASE, delay: staggerDelay(i) },
+    initial: reduced ? false : { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.7, ease: EASE, delay: staggerDelay(i) },
   });
 
   return (
-    <section ref={sectionRef} className="relative">
-      <motion.div style={reduced ? undefined : { y: fieldY }}>
-        <WaveField height={0.86} opacity={1} />
-      </motion.div>
+    <section className="relative isolate overflow-hidden bg-[linear-gradient(180deg,#22242a_0%,#181a20_46%,#0e1016_100%)]">
+      {hasPhoto && (
+        <>
+          {/* The photograph. Treated in CSS so a raw file dropped in still
+              lands correctly: desaturated, bled off the right edge, and masked
+              to nothing on the left so it never ends on a visible boundary. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 hidden w-[56%] lg:block"
+            style={{
+              backgroundImage: `url(${HERO_IMAGE})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center 20%",
+              filter: "grayscale(1) contrast(1.05) brightness(0.7)",
+              WebkitMaskImage: "linear-gradient(90deg, transparent 0%, #000 44%)",
+              maskImage: "linear-gradient(90deg, transparent 0%, #000 44%)",
+            }}
+          />
+          {/* The tint is its own layer so the photograph underneath can be
+              swapped without re-grading it, and it carries the SAME mask: an
+              unmasked blend layer ends on a hard edge of its own. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 hidden w-[56%] mix-blend-color lg:block"
+            style={{
+              background: "var(--v-primary)",
+              opacity: 0.3,
+              WebkitMaskImage: "linear-gradient(90deg, transparent 0%, #000 44%)",
+              maskImage: "linear-gradient(90deg, transparent 0%, #000 44%)",
+            }}
+          />
+        </>
+      )}
 
-      <motion.div
-        className="relative mx-auto max-w-[1280px] px-6 pb-16 pt-28 lg:pb-20 lg:pt-36"
-        style={
-          reduced
-            ? undefined
-            : {
-                y: copyY,
-                scale: copyScale,
-                opacity: copyOpacity,
-                filter: copyBlur,
-                transformOrigin: "0% 0%",
-                willChange: "transform, opacity",
-              }
-        }
-      >
-        <motion.p {...rise(0)} className="v-eyebrow">
+      <div className="relative mx-auto max-w-[1280px] px-6 pb-14 pt-40 lg:pb-16 lg:pt-56">
+        <motion.p {...rise(0)} className="v-eyebrow text-[var(--v-muted)]">
           Talent Infrastructure
         </motion.p>
 
-        {/* The headline is the hero's animation, and it is a mask reveal
-            rather than a fade. Each word sits inside its own overflow-hidden
-            box and rises from fully below it, so the letters are wiped into
-            existence by the edge of the mask instead of appearing at reduced
-            opacity. That difference is the whole effect: a fade says "this
-            content loaded", a mask reveal says "this was composed". It is also
-            why the words must not be spaced with a plain space character. A
-            space inside the mask gets clipped with everything else, so the
-            gap is padding on the mask box itself.
-
-            Slow, and slower than it feels it should be: 0.9s per word with a
-            small stagger. Display type at this size needs the extra time or
-            the reveal reads as a flicker. */}
         <motion.h1
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.01, delay: 0.12 }}
-          /* The word gaps are padding on the mask boxes, not space characters,
-             because a space inside a mask gets clipped along with everything
-             else. The cost is that the accessible name concatenates to
-             "OurTalentisFindingYours." unless it is stated explicitly, so it
-             is: the visible spans are hidden from assistive technology and the
-             heading carries the real sentence. This also fixes copy and paste. */
-          aria-label="Our Talent is Finding Yours."
-          className="v-display mt-8 max-w-[15ch] text-balance"
+          {...rise(1)}
+          className="v-display mt-8 max-w-[13ch] text-balance"
           style={{
             fontSize: "var(--t-hero)",
             lineHeight: "var(--lh-hero)",
             letterSpacing: "var(--tr-hero)",
           }}
         >
-          {["Our", "Talent", "is", "Finding"].map((word, i) => (
-            <span
-              key={word}
-              aria-hidden="true"
-              className="inline-block overflow-hidden align-bottom pr-[0.26em]"
-              style={{ paddingBottom: "0.12em", marginBottom: "-0.12em" }}
-            >
-              <motion.span
-                className="inline-block"
-                initial={reduced ? false : { y: "115%" }}
-                animate={{ y: "0%" }}
-                transition={{ duration: 0.9, ease: EASE, delay: 0.18 + i * 0.075 }}
-              >
-                {word}
-              </motion.span>
-            </span>
-          ))}
-          <span
-            aria-hidden="true"
-            className="inline-block overflow-hidden align-bottom"
-            style={{ paddingBottom: "0.12em", marginBottom: "-0.12em" }}
-          >
-            <motion.span
-              className="v-accent-text inline-block"
-              initial={reduced ? false : { y: "115%" }}
-              animate={{ y: "0%" }}
-              transition={{ duration: 0.9, ease: EASE, delay: 0.18 + 4 * 0.075 }}
-            >
-              Yours.
-            </motion.span>
-          </span>
+          Our talent is finding <span className="text-[var(--v-primary)]">yours.</span>
         </motion.h1>
 
         <motion.p
           {...rise(2)}
-          className="mt-9 max-w-[54ch] text-pretty text-[length:var(--t-lede)] leading-[1.55] text-[var(--v-muted)]"
+          className="mt-9 max-w-[46ch] text-pretty text-[length:var(--t-lede)] leading-[1.6] text-[var(--v-muted)]"
         >
           When the talent decisions are as consequential as the capital decisions, you
           need more than a search firm. We design talent strategy from the boardroom
           down, and execute from day one.
         </motion.p>
 
-        <motion.div {...rise(3)} className="mt-11 flex flex-wrap items-center gap-3">
-          <GlowButton href="/contact">Let&rsquo;s Talk</GlowButton>
-          <GlowButton href="/what-we-do" tone="quiet">
-            What We Do
-          </GlowButton>
+        {/* One action, and it is a link rather than a button. */}
+        <motion.div {...rise(3)} className="mt-12">
+          <Link
+            href="/contact"
+            className="group inline-flex items-center gap-2.5 text-[length:var(--t-action)] font-semibold text-[var(--v-primary)] transition-colors duration-200 hover:text-[var(--v-ring)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--v-ring)]"
+          >
+            Start a conversation
+            <ArrowRight
+              size={17}
+              strokeWidth={2.2}
+              aria-hidden="true"
+              className="transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+            />
+          </Link>
         </motion.div>
-
-        {/* One quiet line that removes an objection. */}
-        <motion.p
-          {...rise(4)}
-          className="mt-8 flex items-center gap-2.5 text-[length:var(--t-small)] text-[var(--v-muted)]"
-        >
-          <span aria-hidden="true" className="h-px w-6 bg-white/20" />
-          Partner-led from first call to close.
-        </motion.p>
-      </motion.div>
-
-      <TrustStrip />
-    </section>
-  );
-}
-
-/**
- * The proof strip that closes the hero.
- *
- * A hero that ends at the buttons ends on a claim. Ending it on names ends it
- * on evidence, and it puts something one screen down that is worth scrolling
- * to, which is what stops the fold reading as the whole page.
- *
- * Names only. The reference site pairs each logo with the role it placed there,
- * and it is a better strip for it, but this site has the client list and the
- * placed-role list as two separate facts. Pairing them would invent a
- * placement that may not have happened, so the roles keep their own section
- * below and nothing here claims more than the source does.
- */
-function TrustStrip() {
-  return (
-    <div className="relative border-t border-[var(--v-border)] bg-[var(--v-bg-2)]/50 backdrop-blur-sm">
-      <div className="mx-auto max-w-[1280px] px-6 py-10">
-        <p className="v-eyebrow mb-7 text-[var(--v-muted)]">
-          Trusted by teams building something great
-        </p>
-        <ul className="grid grid-cols-2 gap-x-10 gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
-          {CLIENTS.map((name, i) => (
-            <motion.li
-              key={name}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: EASE, delay: 0.5 + staggerDelay(i) }}
-              className="v-display text-[length:var(--t-secondary)] leading-[1.3] tracking-tight text-[var(--v-muted)] transition-colors duration-200 hover:text-[var(--v-ink)]"
-            >
-              {name}
-            </motion.li>
-          ))}
-        </ul>
       </div>
-    </div>
+
+      {/* Three figures, unboxed. No cards, no rules, no borders: the numbers are
+          large enough to be the object themselves, and a box around each would
+          say they are three unrelated facts. Three rather than four, because the
+          fourth was there to complete a grid, and a grid is not a reason. */}
+      <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-6 pb-20 sm:grid-cols-3 lg:pb-28">
+        {STATS.slice(0, 3).map((stat, i) => (
+          <motion.div key={stat.label} {...rise(4 + i)}>
+            <p className="v-display flex items-start leading-[0.9]">
+              <span className="text-[length:var(--t-display)] font-bold tracking-[-0.04em]">
+                {stat.prefix}
+                {stat.value.toLocaleString()}
+              </span>
+              {stat.unit && (
+                <span className="mt-[0.15em] text-[length:var(--t-heading)] font-bold text-[var(--v-primary)]">
+                  {stat.unit}
+                </span>
+              )}
+            </p>
+            <p className="mt-4 max-w-[28ch] text-[length:var(--t-secondary)] leading-[1.55] text-[var(--v-muted)]">
+              {stat.label}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+    </section>
   );
 }
