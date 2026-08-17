@@ -759,12 +759,27 @@ html[data-loaded] .dp-scale-in {
   position: relative;
   isolation: isolate;
   border-radius: var(--radius);
-  background: linear-gradient(
-    160deg,
-    rgba(255, 255, 255, 0.09),
-    rgba(255, 255, 255, 0.045) 46%,
-    rgba(255, 255, 255, 0.022)
-  );
+  /* A LIT FILL OVER AN OPAQUE BASE, not a translucent pane.
+  
+     These cards stack, and a translucent card in a stack shows the card behind
+     it straight through its own face: three headings render on top of each
+     other and none of them can be read. The previous answer was to black the
+     parked cards out with a near-solid scrim, which fixed the bleed by making
+     them unreadable a different way.
+  
+     So the base is opaque and the glass is what sits ON it: the same lit
+     gradient, the same rim, the same sheen, over a solid ground. Nothing shows
+     through, the scrim can stay light enough to read under, and the front card
+     still reads as glass because glass has always needed something solid behind
+     it anyway. */
+  background:
+    linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.09),
+      rgba(255, 255, 255, 0.045) 46%,
+      rgba(255, 255, 255, 0.022)
+    ),
+    linear-gradient(160deg, #161d33 0%, #111729 55%, #0c1120 100%);
   backdrop-filter: blur(22px) saturate(1.5);
   -webkit-backdrop-filter: blur(22px) saturate(1.5);
   box-shadow:
@@ -820,11 +835,7 @@ html[data-loaded] .dp-scale-in {
 
 /* Unsupported in a few embedded browsers, where the card would otherwise
    render nearly transparent. The fill thickens so it is always readable. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .v-glass {
-    background: linear-gradient(160deg, rgba(24, 30, 52, 0.94), rgba(13, 17, 34, 0.96));
-  }
-}
+
 
 @media (prefers-reduced-motion: reduce) {
   .v-glass::after {

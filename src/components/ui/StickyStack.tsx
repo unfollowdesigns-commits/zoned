@@ -97,12 +97,13 @@ function Card({
    * and a light scrim brought the same soup straight back: card 2 was showing
    * card 1's heading through its own backdrop.
    *
-   * So the scrim goes almost solid. Only the front card reads as lit glass;
-   * everything parked behind it becomes a dark plate. That is also what makes
-   * the front card convincing, because glass needs something solid behind it
-   * to refract, and a stack of glass on glass has nothing.
+   * The cards are opaque now (see .v-glass), so nothing bleeds through and the
+   * scrim no longer has to hide anything. It only has to say "this one is
+   * behind", so it dims rather than extinguishes: a parked card stays legible,
+   * which matters because the whole point of a stack is that you can still see
+   * what you have already passed.
    */
-  const scrim = useTransform(progress, [start, end], [0, isLast ? 0 : 0.88]);
+  const scrim = useTransform(progress, [start, end], [0, isLast ? 0 : 0.42]);
 
   return (
     <motion.div

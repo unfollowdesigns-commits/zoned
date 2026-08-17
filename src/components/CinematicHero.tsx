@@ -231,8 +231,14 @@ export default function CinematicHero() {
      a paragraph still fading while an image slides under it reads as a
      collision rather than a hand-off. The services and the call to action
      arrive at the far end to take its place, so the frame is never empty. */
-  const ledeOpacity = useTransform(scrollYProgress, [0, 0.22], [1, 0], opts);
-  const ledeY = useTransform(scrollYProgress, [0, 0.22], [0, -26], opts);
+  /* The lede shares the headline's travel, and only its opacity is its own.
+     Giving it a separate Y made the two pull apart the moment the scroll
+     started, so the block came unglued: the headline moved down into the image
+     while the paragraph slid up out of it. They are one block of type and they
+     move as one. It fades a little later than the headline's own handover so
+     the paragraph is gone before the image edge reaches it, which is the only
+     part that needs to differ. */
+  const ledeOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0], opts);
 
   /* ---- Supporting content --------------------------------------------- */
   /* Arrives only in the last quarter, once the image is effectively full bleed.
@@ -348,7 +354,7 @@ export default function CinematicHero() {
 
             <motion.p
               className="mt-8 max-w-[52ch] text-pretty text-[length:var(--t-lede)] leading-[1.6] text-[var(--v-muted)]"
-              style={{ opacity: ledeOpacity, y: ledeY }}
+              style={{ opacity: ledeOpacity, y: titleY }}
             >
               {reduced
                 ? LEDE
