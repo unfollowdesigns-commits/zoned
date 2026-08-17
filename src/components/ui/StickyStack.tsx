@@ -48,8 +48,17 @@ function Card({
   progress: MotionValue<number>;
   reduced: boolean;
 }) {
-  // How far through the section this card gets covered by the next one.
-  const start = index / count;
+  /* THE RECEDE TRACKS THE NEXT CARD'S ARRIVAL, NOT THIS CARD'S OWN SEGMENT.
+  
+     Each card used to darken across its whole slice, [i/n, (i+1)/n], which
+     starts the moment that card lands. Card one therefore began fading on the
+     very first pixel of scroll, with nothing on top of it yet, and by the time
+     card three arrived the two beneath were already black. A card should only
+     recede while something is actually coming over it.
+  
+     So the window is the back half of the slice: card i holds at full strength
+     until card i+1 is genuinely on its way, then darkens as it lands. */
+  const start = (index + 0.5) / count;
   const end = (index + 1) / count;
 
   // Parked cards shrink and darken. The last card never gets covered, so it is
@@ -62,7 +71,12 @@ function Card({
      anything happened at all: the pin was real, the maths was right, and it
      read as a static two-column layout. An effect nobody notices is the same
      as no effect. 14 percent, plus a lift and a backward tilt, is unmistakable
-     without tipping into novelty. */
+     without tipping into novelty.
+     
+     All of it runs on the cover window above, so a card holds its full size and
+     brightness until the next one is arriving over it, then recedes as that one
+     lands. Scaling on its own segment meant every card was already shrinking
+     while it was still the front of the stack. */
   const scale = useTransform(progress, [start, end], [1, isLast ? 1 : 0.86]);
   /* Parked cards lift as they recede, so the stack fans upward and each card
      underneath keeps a visible edge instead of hiding behind the one above. */
@@ -125,7 +139,7 @@ function Card({
 export default function StickyStack({
   children,
   className = "",
-  gap = "5rem",
+  gap = "11rem",
 }: {
   children: React.ReactNode;
   className?: string;
@@ -135,9 +149,16 @@ export default function StickyStack({
   const ref = React.useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
+  /* The longest range the track can give: progress 0 when its top reaches the
+     viewport top, 1 when its bottom reaches the bottom. The previous window was
+     short enough that 900px of scroll consumed 80 percent of it, so four cards
+     receded inside one flick and the stack looked like it had skipped. Paired
+     with a much larger gap between cards, which is what actually buys the
+     scroll distance: the track is only as tall as its content, so the gap is
+     the only lever on how long each card gets. */
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start 40%", "end 90%"],
+    offset: ["start start", "end end"],
   });
 
   const items = React.Children.toArray(children);

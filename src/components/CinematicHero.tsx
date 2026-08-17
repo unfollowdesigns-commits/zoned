@@ -13,6 +13,7 @@ import {
 } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useReducedMotion } from "@/lib/motion";
+import { WaveField } from "@/kit/components/WaveField";
 import { SERVICES } from "@/lib/site";
 
 /**
@@ -81,6 +82,8 @@ const VIDEO_SRC =
 const HEADLINE = "Our talent is finding";
 /* Longest first: the slot is sized by measuring this one. */
 const ROTATING = ["Professionals.", "Executives.", "Operators.", "Yours."];
+const LEDE =
+  "When the talent decisions are as consequential as the capital decisions, you need more than a search firm. We design talent strategy from the boardroom down, and execute from day one.";
 
 /* easeInOutCubic. Used for every interpolation in the section so the whole
    transformation reads as one move rather than several.
@@ -219,6 +222,17 @@ export default function CinematicHero() {
   const titleY = useTransform(scrollYProgress, [0, 0.74], ["0vh", "52vh"], opts);
   const titleScale = useTransform(scrollYProgress, [0, 0.74], [0.96, 1], opts);
   const eyebrowOpacity = useTransform(scrollYProgress, [0, 0.16], [1, 0], opts);
+  /* The lede reads at rest and leaves as the card opens.
+  
+     It belongs at the top, not at the end: it is the sentence that explains why
+     the headline matters, and a visitor who has to scroll a full section before
+     getting it has already decided. So it sits under the headline where it is
+     read first, then clears out slightly ahead of the card reaching it, because
+     a paragraph still fading while an image slides under it reads as a
+     collision rather than a hand-off. The services and the call to action
+     arrive at the far end to take its place, so the frame is never empty. */
+  const ledeOpacity = useTransform(scrollYProgress, [0, 0.22], [1, 0], opts);
+  const ledeY = useTransform(scrollYProgress, [0, 0.22], [0, -26], opts);
 
   /* ---- Supporting content --------------------------------------------- */
   /* Arrives only in the last quarter, once the image is effectively full bleed.
@@ -231,7 +245,7 @@ export default function CinematicHero() {
      correct here. Animating the same thing faster is not. */
   if (reduced) {
     return (
-      <section className="relative h-screen overflow-hidden bg-[var(--v-bg)]">
+      <section className="relative h-screen overflow-hidden">
         <Media />
         <div className="absolute inset-x-0 bottom-0 mx-auto max-w-[1280px] px-6 pb-14">
           <h1
@@ -244,6 +258,9 @@ export default function CinematicHero() {
           >
             Our talent is finding yours.
           </h1>
+          <p className="mb-10 max-w-[52ch] text-[length:var(--t-lede)] leading-[1.6] text-white/70">
+            {LEDE}
+          </p>
           <Tail />
         </div>
       </section>
@@ -256,7 +273,18 @@ export default function CinematicHero() {
        short enough that nobody is scrolling through a section that has already
        finished. */
     <div ref={wrap} className="relative h-[360vh]">
-      <div className="sticky top-0 h-screen overflow-hidden bg-[var(--v-bg)]">
+      {/* No background fill: the site's ambient layer (kit Atmosphere, mounted
+            in the layout) shows through, so the hero shares the moving ground
+            the rest of the page sits on rather than covering it with a flat
+            colour. */}
+      <div className="sticky top-0 h-screen overflow-hidden">
+        {/* The wave field, back. It was removed when the hero was rebuilt by
+            subtraction, and that was the wrong thing to cut: it is the site's
+            ambient ground rather than an effect competing with the content, and
+            without it the dark sections are flat colour. It sits behind the
+            card, so the card opening over it is a real occlusion rather than a
+            crossfade between two backgrounds. */}
+        <WaveField height={1} opacity={0.85} />
         {/* Echoes first, so they sit behind the card. Furthest back drawn first. */}
         <Echo progress={scrollYProgress} depth={2} rest={rest} />
         <Echo progress={scrollYProgress} depth={1} rest={rest} />
@@ -317,6 +345,24 @@ export default function CinematicHero() {
                 <FlipWord words={ROTATING} reduced={reduced} />
               </span>
             </motion.h1>
+
+            <motion.p
+              className="mt-8 max-w-[52ch] text-pretty text-[length:var(--t-lede)] leading-[1.6] text-[var(--v-muted)]"
+              style={{ opacity: ledeOpacity, y: ledeY }}
+            >
+              {reduced
+                ? LEDE
+                : LEDE.split(" ").map((word, i) => (
+                    <React.Fragment key={`${word}-${i}`}>
+                      <span
+                        className="dp-word"
+                        style={{ animationDelay: `${(1.0 + i * 0.026).toFixed(3)}s` }}
+                      >
+                        {word}
+                      </span>{" "}
+                    </React.Fragment>
+                  ))}
+            </motion.p>
           </div>
 
           <motion.div
