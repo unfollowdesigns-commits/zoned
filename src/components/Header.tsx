@@ -5,7 +5,7 @@ import Link from "@/components/SiteLink";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronRight } from "lucide-react";
-import { SPRING_SOFT, EASE } from "@/lib/motion";
+import { EASE, SPRING_ICON, SPRING_SOFT, useReducedMotion } from "@/lib/motion";
 import { ICONS } from "@/components/icons";
 import LinkedInIcon from "./LinkedInIcon";
 import Logo from "./Logo";
@@ -35,15 +35,30 @@ const SECTION_PREFIX: Record<NavName, string> = {
 
 function MenuLink({ item }: { item: NavItem }) {
   const Icon = item.icon ? ICONS[item.icon] : undefined;
+  const reduced = useReducedMotion();
   return (
+    <motion.div initial="rest" animate="rest" whileHover={reduced ? undefined : "hover"}>
     <Link
       href={item.href}
       className="group flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-white/[0.05]"
     >
       {Icon && (
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[var(--v-border)] bg-white/[0.04] text-[var(--v-muted)] transition-colors group-hover:border-[var(--v-primary)]/50 group-hover:text-[var(--v-primary)]">
-          <Icon size={18} strokeWidth={1.75} />
-        </span>
+        /* Tile and glyph on separate springs, the glyph stiffer, so the small
+           thing moves faster than the big one. A colour change alone reads as
+           the same object recoloured rather than as the object responding. */
+        <motion.span
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[var(--v-border)] bg-white/[0.04] text-[var(--v-muted)] transition-colors duration-300 group-hover:border-[var(--v-primary)]/50 group-hover:bg-[var(--v-primary)]/10 group-hover:text-[var(--v-primary)]"
+          variants={{ rest: { scale: 1, rotate: 0 }, hover: { scale: 1.08, rotate: -5 } }}
+          transition={SPRING_ICON}
+        >
+          <motion.span
+            className="grid place-items-center"
+            variants={{ rest: { y: 0, rotate: 0 }, hover: { y: -2, rotate: 5 } }}
+            transition={{ ...SPRING_ICON, stiffness: 420 }}
+          >
+            <Icon size={18} strokeWidth={1.75} />
+          </motion.span>
+        </motion.span>
       )}
       <span className="flex min-w-0 flex-col">
         <span className="flex items-center gap-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)]">
@@ -59,6 +74,7 @@ function MenuLink({ item }: { item: NavItem }) {
         )}
       </span>
     </Link>
+    </motion.div>
   );
 }
 

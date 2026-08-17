@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "@/components/SiteLink";
 import {
+  AnimatePresence,
   cubicBezier,
   motion,
   useMotionTemplate,
@@ -71,8 +72,15 @@ import { SERVICES } from "@/lib/site";
  * `will-change` declared, which is where that cost is affordable.
  */
 
-/** Drop a real photograph here and the section is finished. */
-const HERO_IMAGE = "/hero.jpg";
+/* The footage that lives inside the card. Third-party CDN for now; self-host it
+   at /hero.mp4 before launch so the hero's largest asset is not on a host
+   nobody here controls. */
+const VIDEO_SRC =
+  "https://cdn.sceneai.art/Hero%20Section%20Video/973fa3f6-7715-4e73-9cfd-100ee86285b5.mp4";
+
+const HEADLINE = "Our talent is finding";
+/* Longest first: the slot is sized by measuring this one. */
+const ROTATING = ["Professionals.", "Executives.", "Operators.", "Yours."];
 
 /* easeInOutCubic. Used for every interpolation in the section so the whole
    transformation reads as one move rather than several.
@@ -150,7 +158,7 @@ function Echo({
   return (
     <motion.div
       aria-hidden="true"
-      className="pointer-events-none absolute left-1/2 border border-[rgba(18,21,31,0.10)] bg-[#e9e5da]"
+      className="pointer-events-none absolute left-1/2 border border-white/[0.07] bg-white/[0.035]"
       style={{
         top: `${rest.top}vh`,
         width: `${rest.w}vw`,
@@ -200,17 +208,15 @@ export default function CinematicHero() {
   const imageY = useTransform(scrollYProgress, [0, 1], ["3%", "-3%"], opts);
 
   /* ---- Typography ------------------------------------------------------ */
-  /* The headline starts above the card in ink on the light ground, travels down
-     into the image, and turns white. One element rather than two cross-fading:
-     a cross-fade double-strikes the letterforms through the middle of the
-     handover, and at this size that is glaring. The colour is interpolated so
-     it flips exactly where the image edge passes under the text. */
+  /* The headline is white for the whole scrub, and the ground is dark rather
+     than paper, which is the first hero's palette carried over. An ink headline
+     travelling onto a dark image needs its colour interpolated mid-scroll; a
+     white one on a dark ground never has that problem, and the section keeps
+     one palette from top to bottom instead of two.
+     
+     It still travels down into the image as the card opens. Only the colour
+     handover is gone. */
   const titleY = useTransform(scrollYProgress, [0, 0.74], ["0vh", "52vh"], opts);
-  const titleColor = useTransform(
-    scrollYProgress,
-    [0, 0.3, 0.46],
-    ["#12151f", "#12151f", "#ffffff"],
-  );
   const titleScale = useTransform(scrollYProgress, [0, 0.74], [0.96, 1], opts);
   const eyebrowOpacity = useTransform(scrollYProgress, [0, 0.16], [1, 0], opts);
 
@@ -225,8 +231,8 @@ export default function CinematicHero() {
      correct here. Animating the same thing faster is not. */
   if (reduced) {
     return (
-      <section className="relative h-screen overflow-hidden bg-[#f2efe7]">
-        <Photo />
+      <section className="relative h-screen overflow-hidden bg-[var(--v-bg)]">
+        <Media />
         <div className="absolute inset-x-0 bottom-0 mx-auto max-w-[1280px] px-6 pb-14">
           <h1
             className="v-display mb-10 max-w-[18ch] text-balance text-white"
@@ -250,7 +256,7 @@ export default function CinematicHero() {
        short enough that nobody is scrolling through a section that has already
        finished. */
     <div ref={wrap} className="relative h-[360vh]">
-      <div className="sticky top-0 h-screen overflow-hidden bg-[#f2efe7]">
+      <div className="sticky top-0 h-screen overflow-hidden bg-[var(--v-bg)]">
         {/* Echoes first, so they sit behind the card. Furthest back drawn first. */}
         <Echo progress={scrollYProgress} depth={2} rest={rest} />
         <Echo progress={scrollYProgress} depth={1} rest={rest} />
@@ -267,25 +273,24 @@ export default function CinematicHero() {
             willChange: "width, height, top, border-radius",
           }}
         >
-          <Photo y={imageY} scale={imageScale} />
+          <Media y={imageY} scale={imageScale} />
         </motion.div>
 
         {/* Type sits above the card and is not clipped by it. */}
         <div className="pointer-events-none absolute inset-0">
           <div className="mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[11vh]">
             <motion.p
-              className="v-eyebrow text-[var(--v-primary-deep)]"
+              className="v-eyebrow text-[var(--v-primary)]"
               style={{ opacity: eyebrowOpacity }}
             >
               Talent Infrastructure
             </motion.p>
 
             <motion.h1
-              className="v-display mt-7 max-w-[18ch] text-balance"
+              className="v-display mt-7 max-w-[18ch] text-balance text-white"
               style={{
                 y: titleY,
                 scale: titleScale,
-                color: titleColor,
                 transformOrigin: "0% 50%",
                 fontSize: "var(--t-hero)",
                 lineHeight: "var(--lh-hero)",
@@ -293,7 +298,24 @@ export default function CinematicHero() {
                 willChange: "transform",
               }}
             >
-              Our talent is finding yours.
+              {HEADLINE.split(" ").map((word, i) => (
+                <React.Fragment key={`${word}-${i}`}>
+                  <span
+                    className={reduced ? undefined : "dp-word"}
+                    style={
+                      reduced ? undefined : { animationDelay: `${(0.35 + i * 0.055).toFixed(3)}s` }
+                    }
+                  >
+                    {word}
+                  </span>{" "}
+                </React.Fragment>
+              ))}
+              <span
+                className={reduced ? undefined : "dp-word"}
+                style={reduced ? undefined : { animationDelay: "0.57s" }}
+              >
+                <FlipWord words={ROTATING} reduced={reduced} />
+              </span>
             </motion.h1>
           </div>
 
@@ -310,14 +332,19 @@ export default function CinematicHero() {
 }
 
 /**
- * The photograph, treated.
+ * The footage, treated, sitting inside the card.
  *
- * Desaturated and tinted to the brand hue, so a raw file dropped in still lands
- * on-palette. With no file present the tinted ground shows through instead,
- * which is a finished surface rather than a broken image, and the whole
- * choreography still reads while the real photograph is being sourced.
+ * This is the whole point of merging the two heroes: the video is not a
+ * background behind the section, it is the CONTENT OF THE CARD, so scrolling
+ * expands the frame the video already lives in. Two separate heroes, one with
+ * a video ground and one with an expanding card, was a misreading of the brief
+ * and gave the page two openings.
+ *
+ * Desaturated and tinted to the brand hue so the footage lands on-palette
+ * whatever it happens to be, with a foot of shade so white type at the bottom
+ * always has something to sit on.
  */
-function Photo({
+function Media({
   y,
   scale,
 }: {
@@ -326,29 +353,81 @@ function Photo({
 }) {
   return (
     <motion.div
-      className="absolute inset-0"
+      className="absolute inset-0 bg-[linear-gradient(155deg,#1b2438_0%,#101728_52%,#0a0e1b_100%)]"
       style={{ y, scale, willChange: "transform" }}
     >
-      <div
-        className="absolute inset-0 bg-[linear-gradient(155deg,#1b2438_0%,#101728_52%,#0a0e1b_100%)]"
-        style={{
-          backgroundImage: `url(${HERO_IMAGE})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center 28%",
-        }}
+      <video
+        className="absolute inset-0 h-full w-full object-cover"
+        src={VIDEO_SRC}
+        autoPlay
+        muted
+        loop
+        playsInline
+        aria-hidden="true"
+        tabIndex={-1}
       />
       <div
         aria-hidden="true"
         className="absolute inset-0 mix-blend-color"
         style={{ background: "var(--v-primary)", opacity: 0.24 }}
       />
-      {/* A foot of shade, so white type at the bottom always has something to
-          sit on whatever the photograph is doing there. */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-[linear-gradient(180deg,transparent_36%,rgba(6,8,20,0.74)_100%)]"
+        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,8,20,0.28)_0%,transparent_34%,rgba(6,8,20,0.74)_100%)]"
       />
     </motion.div>
+  );
+}
+
+/**
+ * A word that turns over on a real axis, rather than cross-fading.
+ *
+ * Both faces stay mounted through the change: AnimatePresence is deliberately
+ * not in `mode="wait"`, because waiting leaves the slot empty for a frame and at
+ * this size that is a visible stutter. Opacity moves faster than the rotation,
+ * so a face is gone before it would be seen edge-on as a flat line. The slot is
+ * held open by a hidden copy of the longest word, so the line never reflows.
+ */
+function FlipWord({ words, reduced }: { words: string[]; reduced: boolean }) {
+  const [i, setI] = React.useState(0);
+
+  React.useEffect(() => {
+    if (reduced) return;
+    const id = setInterval(() => setI((n) => (n + 1) % words.length), 2600);
+    return () => clearInterval(id);
+  }, [words.length, reduced]);
+
+  if (reduced) {
+    return <span className="text-[var(--v-ring)]">{words[words.length - 1]}</span>;
+  }
+
+  return (
+    <span
+      className="relative inline-block align-bottom text-[var(--v-ring)]"
+      style={{ perspective: "700px" }}
+    >
+      <span aria-hidden="true" className="invisible block">
+        {words[0]}
+      </span>
+      <span className="sr-only">{words[i]}</span>
+      <AnimatePresence initial={false}>
+        <motion.span
+          key={words[i]}
+          aria-hidden="true"
+          className="absolute left-0 top-0 whitespace-nowrap"
+          style={{ transformOrigin: "50% 50% -0.55em", backfaceVisibility: "hidden" }}
+          initial={{ rotateX: -92, opacity: 0 }}
+          animate={{ rotateX: 0, opacity: 1 }}
+          exit={{ rotateX: 92, opacity: 0 }}
+          transition={{
+            rotateX: { duration: 0.72, ease: [0.16, 1, 0.3, 1] },
+            opacity: { duration: 0.34, ease: [0.4, 0, 0.2, 1] },
+          }}
+        >
+          {words[i]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
   );
 }
 
