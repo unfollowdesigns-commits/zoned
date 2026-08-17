@@ -26,6 +26,25 @@ import { SERVICES } from "@/lib/site";
  * the whole difference between a section that feels expensive and one that
  * feels heavy.
  *
+ * THE GROUND IS SET IN HEX, NOT FROM A TOKEN, AND THE CONTAINER MUST NOT CARRY
+ * `.v-light`. Two bugs in a row here, both worth keeping written down.
+ *
+ * First, `--v-cream` is declared inside the `.v-light` rule, so it does not
+ * exist outside that scope. Reading it here resolved to nothing, the dark page
+ * showed through, and the headline, correctly ink-coloured for a light ground,
+ * became a black smear on black.
+ *
+ * The obvious fix, adding `.v-light` to this container, broke the pin instead:
+ * that rule declares `position: relative`, and the kit stylesheet is imported
+ * after Tailwind, so it beats `sticky` at equal specificity and the section
+ * simply scrolled away. Measured, the card was 2275px above the viewport at the
+ * end of the scrub. This is the third time in the project that a kit class
+ * carrying `position` has silently overridden a Tailwind positioning utility;
+ * the rule is that they never go on the same element.
+ *
+ * So: no `.v-light` here, and every colour this section needs is stated
+ * literally. It depends on no token being in scope.
+ *
  * Depends on `overflow-x: clip` rather than `hidden` on html and body. `hidden`
  * on any ancestor silently demotes every descendant sticky to relative, with no
  * error at all. The tokens file sets `clip` for exactly this reason.
@@ -81,8 +100,15 @@ const SCRUB = cubicBezier(0.65, 0, 0.35, 1);
  * card that size is a pill.
  */
 const REST = {
-  mobile: { w: 88, h: 52, radius: 22 },
-  desktop: { w: 72, h: 64, radius: 34 },
+  /* `top` is the card's distance from the top of the viewport at rest, and it
+     exists because centring the card was the bug. A 64vh card centred spans
+     18vh to 82vh, and the headline above it lands between 13vh and 32vh, so the
+     two occupied the same band and the type sat across the card's corner. The
+     card is anchored from the top instead and starts below the headline. It is
+     also shorter at rest, because a card that starts nearly full height has
+     very little expanding left to do. */
+  mobile: { w: 88, h: 44, top: 42, radius: 22 },
+  desktop: { w: 72, h: 52, top: 36, radius: 34 },
 };
 
 function useRest() {
@@ -112,7 +138,7 @@ function Echo({
   progress: MotionValue<number>;
   /** 1 is the layer immediately behind the card, 2 the one behind that. */
   depth: number;
-  rest: { w: number; h: number; radius: number };
+  rest: { w: number; h: number; top: number; radius: number };
 }) {
   const end = 0.32;
   const opts = { ease: SCRUB } as const;
@@ -124,14 +150,14 @@ function Echo({
   return (
     <motion.div
       aria-hidden="true"
-      className="pointer-events-none absolute left-1/2 top-1/2 border border-[rgba(18,21,31,0.12)] bg-[var(--v-cream-2)]"
+      className="pointer-events-none absolute left-1/2 border border-[rgba(18,21,31,0.10)] bg-[#e9e5da]"
       style={{
+        top: `${rest.top}vh`,
         width: `${rest.w}vw`,
         height: `${rest.h}vh`,
         borderRadius: rest.radius,
         x: "-50%",
         y,
-        translateY: "-50%",
         scale,
         opacity,
         willChange: "transform, opacity",
@@ -158,9 +184,13 @@ export default function CinematicHero() {
   /* ---- Geometry: the card growing to the edges ------------------------- */
   const w = useTransform(scrollYProgress, [0, 0.86], [rest.w, 100], opts);
   const h = useTransform(scrollYProgress, [0, 0.86], [rest.h, 100], opts);
+  /* The card rises to the top of the viewport as it grows, so it opens upward
+     and outward from where it sat rather than inflating around a fixed centre. */
+  const t = useTransform(scrollYProgress, [0, 0.86], [rest.top, 0], opts);
   const radius = useTransform(scrollYProgress, [0, 0.8], [rest.radius, 0], opts);
   const width = useMotionTemplate`${w}vw`;
   const height = useMotionTemplate`${h}vh`;
+  const top = useMotionTemplate`${t}vh`;
 
   /* ---- The image inside it -------------------------------------------- */
   /* Over-scaled at rest and settling to 1, so the photograph is always being
@@ -175,7 +205,7 @@ export default function CinematicHero() {
      a cross-fade double-strikes the letterforms through the middle of the
      handover, and at this size that is glaring. The colour is interpolated so
      it flips exactly where the image edge passes under the text. */
-  const titleY = useTransform(scrollYProgress, [0, 0.74], ["0vh", "27vh"], opts);
+  const titleY = useTransform(scrollYProgress, [0, 0.74], ["0vh", "52vh"], opts);
   const titleColor = useTransform(
     scrollYProgress,
     [0, 0.3, 0.46],
@@ -195,7 +225,7 @@ export default function CinematicHero() {
      correct here. Animating the same thing faster is not. */
   if (reduced) {
     return (
-      <section className="relative h-screen overflow-hidden bg-[var(--v-cream)]">
+      <section className="relative h-screen overflow-hidden bg-[#f2efe7]">
         <Photo />
         <div className="absolute inset-x-0 bottom-0 mx-auto max-w-[1280px] px-6 pb-14">
           <h1
@@ -220,21 +250,21 @@ export default function CinematicHero() {
        short enough that nobody is scrolling through a section that has already
        finished. */
     <div ref={wrap} className="relative h-[360vh]">
-      <div className="sticky top-0 h-screen overflow-hidden bg-[var(--v-cream)]">
+      <div className="sticky top-0 h-screen overflow-hidden bg-[#f2efe7]">
         {/* Echoes first, so they sit behind the card. Furthest back drawn first. */}
         <Echo progress={scrollYProgress} depth={2} rest={rest} />
         <Echo progress={scrollYProgress} depth={1} rest={rest} />
 
         {/* The card. Centred, growing to the viewport on both axes. */}
         <motion.div
-          className="absolute left-1/2 top-1/2 overflow-hidden"
+          className="absolute left-1/2 overflow-hidden"
           style={{
+            top,
             width,
             height,
             borderRadius: radius,
             x: "-50%",
-            y: "-50%",
-            willChange: "width, height, border-radius",
+            willChange: "width, height, top, border-radius",
           }}
         >
           <Photo y={imageY} scale={imageScale} />
@@ -242,7 +272,7 @@ export default function CinematicHero() {
 
         {/* Type sits above the card and is not clipped by it. */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[8vh]">
+          <div className="mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[11vh]">
             <motion.p
               className="v-eyebrow text-[var(--v-primary-deep)]"
               style={{ opacity: eyebrowOpacity }}
