@@ -24,6 +24,12 @@ import GlowButton from "@/components/ui/GlowButton";
  * than sitting as a large paragraph, and tracking tightened to -0.035em,
  * because tracking has to decrease as size increases.
  *
+ * THE ROTATING WORD IS GONE. A headline that cycles through four nouns is one
+ * of the most recognisable signatures of a generated landing page, and it costs
+ * the sentence its meaning: a claim that swaps its own object every 2.6 seconds
+ * is not a claim, it is a demo of a text effect. The line now says one thing and
+ * commits to it.
+ *
  * The headline arrives as a mask reveal, word by word, which is the section's
  * actual animation. See the comment on the h1: the distinction between that and
  * a fade is the whole difference between a hero that looks composed and one
@@ -38,13 +44,9 @@ import GlowButton from "@/components/ui/GlowButton";
  * it costs nothing on the main thread.
  */
 
-const WORDS = ["Professionals.", "Leaders.", "Solutions.", "Yours."] as const;
-
 export default function Hero() {
   const reduced = useReducedMotion();
   const sectionRef = React.useRef<HTMLElement>(null);
-  const [tick, setTick] = React.useState(0);
-
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
@@ -59,14 +61,6 @@ export default function Hero() {
   const copyBlur = useTransform(scrollYProgress, [0, 1], ["blur(0px)", "blur(6px)"]);
   /* The field behind travels the other way and slower. Two planes, two rates. */
   const fieldY = useTransform(scrollYProgress, [0, 1], [0, 70]);
-
-  React.useEffect(() => {
-    if (reduced) return;
-    const id = setInterval(() => setTick((t) => t + 1), 2600);
-    return () => clearInterval(id);
-  }, [reduced]);
-
-  const index = reduced ? WORDS.length - 1 : tick % WORDS.length;
 
   const rise = (i: number) => ({
     initial: { opacity: 0, y: 18, filter: "blur(8px)" },
@@ -116,6 +110,13 @@ export default function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.01, delay: 0.12 }}
+          /* The word gaps are padding on the mask boxes, not space characters,
+             because a space inside a mask gets clipped along with everything
+             else. The cost is that the accessible name concatenates to
+             "OurTalentisFindingYours." unless it is stated explicitly, so it
+             is: the visible spans are hidden from assistive technology and the
+             heading carries the real sentence. This also fixes copy and paste. */
+          aria-label="Our Talent is Finding Yours."
           className="v-display mt-8 max-w-[15ch] text-balance"
           style={{
             fontSize: "var(--t-hero)",
@@ -126,9 +127,8 @@ export default function Hero() {
           {["Our", "Talent", "is", "Finding"].map((word, i) => (
             <span
               key={word}
+              aria-hidden="true"
               className="inline-block overflow-hidden align-bottom pr-[0.26em]"
-              /* The mask has to be taller than the glyphs or descenders and the
-                 tracking's overhang get shaved off at rest. */
               style={{ paddingBottom: "0.12em", marginBottom: "-0.12em" }}
             >
               <motion.span
@@ -141,35 +141,18 @@ export default function Hero() {
               </motion.span>
             </span>
           ))}
-
-          {/* The rotating word gets the same treatment on entry, then switches
-              to a cross-fade in place. Never AnimatePresence with mode="wait":
-              that leaves a frame with nothing on screen between exit and enter,
-              which is a visible dead beat every cycle. Every word shares one
-              grid cell, so the box is sized by the longest. */}
           <span
+            aria-hidden="true"
             className="inline-block overflow-hidden align-bottom"
             style={{ paddingBottom: "0.12em", marginBottom: "-0.12em" }}
           >
             <motion.span
-              className="inline-grid max-w-full"
+              className="v-accent-text inline-block"
               initial={reduced ? false : { y: "115%" }}
               animate={{ y: "0%" }}
               transition={{ duration: 0.9, ease: EASE, delay: 0.18 + 4 * 0.075 }}
             >
-              {WORDS.map((word, i) => (
-                <motion.span
-                  key={word}
-                  aria-hidden={i !== index}
-                  className="v-accent-text"
-                  style={{ gridArea: "1 / 1" }}
-                  initial={false}
-                  animate={{ opacity: i === index ? 1 : 0 }}
-                  transition={{ duration: 0.55, ease: EASE }}
-                >
-                  {word}
-                </motion.span>
-              ))}
+              Yours.
             </motion.span>
           </span>
         </motion.h1>

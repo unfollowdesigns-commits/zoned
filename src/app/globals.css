@@ -20,16 +20,22 @@
 
    It is commercial type: it cannot be fetched from a CDN or a free mirror, and
    a "free download" is a pirated copy that would put the client in breach on
-   their own live site. So it is declared here against files that do not exist
-   yet, and the whole site upgrades the moment they do.
+   their own live site.
 
-   TO INSTALL: buy the web licence from grillitype.com, then drop the woff2
-   files into public/fonts/ with exactly these names. Nothing else changes.
+   THE @font-face RULES BELOW ARE COMMENTED OUT ON PURPOSE. A declared family
+   whose file does not exist is not inert: the browser requests it on every page
+   that uses the family, gets a 404, and logs an error. That was happening on
+   all 37 routes, three times each, which is exactly the kind of noise that
+   hides a real error later.
 
-   `font-display: swap` means text paints immediately in the fallback and
-   re-renders when the real face arrives, rather than sitting invisible. Archivo
-   is the fallback and is chosen so that swap is barely visible: same neo-
-   grotesque lineage, comparable x-height and width, so the layout holds. */
+   TO INSTALL: buy the web licence at grillitype.com, drop the three woff2 files
+   into public/fonts/ under the names below, and uncomment this block. Nothing
+   else changes; every heading switches over on the next load.
+
+   Until then the site renders in Archivo, chosen so the swap is barely visible:
+   same neo-grotesque American gothic lineage, comparable x-height and width, so
+   the layout does not reflow when the real face lands.
+
 @font-face {
   font-family: "GT America";
   src: url("/fonts/GT-America-Standard-Regular.woff2") format("woff2");
@@ -51,6 +57,7 @@
   font-style: normal;
   font-display: swap;
 }
+*/
 
 :root {
   /* MD2 names two fluid display steps, a lede and an action label as the four
