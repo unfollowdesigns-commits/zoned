@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ageless AI &mdash; CyberSenior 95</title>
+<meta name="description" content="Ageless AI: plain-language AI literacy, safety and productivity training for adults 55+, delivered inside a familiar 1995 desktop.">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="assets/css/system95.css">
+<link rel="stylesheet" href="assets/css/desktop.css">
+<link rel="stylesheet" href="assets/css/apps.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23008080'/%3E%3Crect x='2' y='3' width='12' height='9' fill='%23c0c0c0' stroke='%23000'/%3E%3Crect x='3' y='4' width='10' height='2' fill='%23000080'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<noscript>
+  <div class="noscript-notice">
+    <h1>JavaScript is switched off</h1>
+    <p>Ageless AI needs JavaScript to open its windows. Please switch JavaScript on in your
+    browser settings, then reload this page. If you would like a person to help you with this,
+    call the Ageless AI help line at <strong>1-800-555-0142</strong>.</p>
+  </div>
+</noscript>
+
+<!-- ============================================================
+     STARTUP SPLASH  (shown once per visit, always skippable)
+     ============================================================ -->
+<div id="boot-screen" class="boot-screen" role="status" aria-live="polite" hidden>
+  <div class="boot-panel">
+    <div class="boot-logo" aria-hidden="true">
+      <svg viewBox="0 0 64 64" width="64" height="64" shape-rendering="crispEdges" focusable="false">
+        <rect x="2" y="8"  width="60" height="42" fill="#c0c0c0" stroke="#000" stroke-width="2"/>
+        <rect x="7" y="13" width="50" height="30" fill="#000080"/>
+        <rect x="11" y="18" width="30" height="4" fill="#00ff00"/>
+        <rect x="11" y="26" width="38" height="4" fill="#00ff00"/>
+        <rect x="11" y="34" width="22" height="4" fill="#00ff00"/>
+        <rect x="22" y="50" width="20" height="6" fill="#c0c0c0" stroke="#000" stroke-width="2"/>
+      </svg>
+    </div>
+    <p class="boot-title">Ageless AI<span class="boot-title-sub">CyberSenior&nbsp;95</span></p>
+    <p class="boot-status" id="boot-status">Starting your desktop&hellip;</p>
+    <div class="boot-progress" role="presentation">
+      <div class="boot-progress-fill" id="boot-progress-fill"></div>
+    </div>
+    <button type="button" class="btn" id="boot-skip">Skip &amp; Go To Desktop</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     THE OPERATING SYSTEM SHELL
+     ============================================================ -->
+<div id="os" class="os" hidden>
+
+  <a class="skip-link" href="#desktop">Skip to the desktop</a>
+
+  <!-- ---------- TOP MENU BAR ---------- -->
+  <header id="menubar" class="menubar">
+    <nav class="menubar-menus" aria-label="Main menu">
+      <ul class="menubar-list" id="menubar-list" role="menubar" aria-label="Main menu">
+        <li role="none">
+          <button type="button" class="menubar-item menubar-item--brand" role="menuitem"
+                  aria-haspopup="true" aria-expanded="false" data-menu="system">
+            <span class="menubar-brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 16 16" width="18" height="18" shape-rendering="crispEdges" focusable="false">
+                <rect x="1" y="2" width="14" height="10" fill="#000080" stroke="#000"/>
+                <rect x="3" y="4" width="6" height="2" fill="#00ff00"/>
+                <rect x="3" y="8" width="10" height="2" fill="#00ff00"/>
+                <rect x="5" y="13" width="6" height="2" fill="#000"/>
+              </svg>
+            </span>
+            Ageless&nbsp;AI
+          </button>
+        </li>
+        <li role="none">
+          <button type="button" class="menubar-item" role="menuitem"
+                  aria-haspopup="true" aria-expanded="false" data-menu="file">File</button>
+        </li>
+        <li role="none">
+          <button type="button" class="menubar-item" role="menuitem"
+                  aria-haspopup="true" aria-expanded="false" data-menu="windows">Windows</button>
+        </li>
+        <li role="none">
+          <button type="button" class="menubar-item" role="menuitem"
+                  aria-haspopup="true" aria-expanded="false" data-menu="accessibility">Accessibility</button>
+        </li>
+        <li role="none">
+          <button type="button" class="menubar-item" role="menuitem"
+                  aria-haspopup="true" aria-expanded="false" data-menu="help">Help</button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Always-visible controls. Nothing here is hidden behind a hover. -->
+    <div class="menubar-tools" role="group" aria-label="Text size and contrast controls">
+      <span class="menubar-tools-label" aria-hidden="true">Text&nbsp;Size:</span>
+      <button type="button" class="btn btn--tool" id="tool-text-smaller"
+              aria-label="Make all text smaller">A&minus;</button>
+      <button type="button" class="btn btn--tool" id="tool-text-bigger"
+              aria-label="Make all text bigger">A&plus;</button>
+      <button type="button" class="btn btn--tool btn--wide" id="tool-contrast"
+              aria-pressed="false">High Contrast</button>
+    </div>
+  </header>
+
+  <!-- ---------- DROP-DOWN MENU PANELS (click to open, never hover) ---------- -->
+  <div id="menu-layer" class="menu-layer" hidden></div>
+
+  <!-- ---------- DESKTOP ---------- -->
+  <main id="desktop" class="desktop" data-pattern="teal">
+    <h1 class="visually-hidden">Ageless AI desktop</h1>
+
+    <ul id="desktop-icons" class="desktop-icons" aria-label="Programs on the desktop"></ul>
+
+    <div id="window-layer" class="window-layer"></div>
+  </main>
+
+  <!-- ---------- TASKBAR ---------- -->
+  <footer id="taskbar" class="taskbar">
+    <button type="button" class="btn btn--start" id="start-button"
+            aria-haspopup="true" aria-expanded="false">
+      <span class="start-icon" aria-hidden="true">
+        <svg viewBox="0 0 16 16" width="20" height="20" shape-rendering="crispEdges" focusable="false">
+          <rect x="1" y="2" width="6" height="6" fill="#ff0000"/>
+          <rect x="9" y="2" width="6" height="6" fill="#00a000"/>
+          <rect x="1" y="9" width="6" height="6" fill="#0000c0"/>
+          <rect x="9" y="9" width="6" height="6" fill="#ffc000"/>
+        </svg>
+      </span>
+      Start
+    </button>
+
+    <div class="taskbar-divider" aria-hidden="true"></div>
+
+    <ul id="tasklist" class="tasklist" aria-label="Open windows"></ul>
+
+    <div class="tray">
+      <span class="tray-slot" id="tray-contrast" hidden>High Contrast On</span>
+      <time class="tray-clock" id="tray-clock" aria-label="Current time"></time>
+    </div>
+  </footer>
+
+</div><!-- /#os -->
+
+<!-- Live region used by the whole system to announce what just happened. -->
+<p id="sr-announcer" class="visually-hidden" role="status" aria-live="polite"></p>
+
+<script src="assets/js/prefs.js"></script>
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/wm.js"></script>
+<script src="assets/js/dialogs.js"></script>
+<script src="assets/js/data/courses.js"></script>
+<script src="assets/js/apps/welcome.js"></script>
+<script src="assets/js/apps/catalog.js"></script>
+<script src="assets/js/apps/help.js"></script>
+<script src="assets/js/menubar.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

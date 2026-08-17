@@ -1,0 +1,578 @@
+/* ============================================================================
+   AGELESS AI  ·  CyberSenior 95
+   desktop.css — the OS shell: boot screen, menu bar, desktop, windows, taskbar
+   ========================================================================= */
+
+/* ------------------------------------------------------- startup splash -- */
+.boot-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  place-items: center;
+  background: #000000;
+  padding: 1rem;
+}
+/* An author `display` beats the user-agent [hidden] rule, so restore it. */
+.boot-screen[hidden] { display: none; }
+.boot-panel {
+  width: min(34rem, 100%);
+  padding: 2rem 1.6rem;
+  background: var(--face);
+  text-align: center;
+  box-shadow:
+    inset -1px -1px 0 0 var(--dark),
+    inset  1px  1px 0 0 var(--white),
+    inset -2px -2px 0 0 var(--shadow),
+    inset  2px  2px 0 0 var(--face-light);
+}
+.boot-logo { display: flex; justify-content: center; margin-bottom: 1rem; }
+.boot-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0 auto;
+}
+.boot-title-sub {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-top: 0.3em;
+}
+.boot-status { margin: 1rem auto 0.8rem; font-size: 1rem; }
+.boot-progress {
+  height: 30px;
+  margin: 0 auto 1.4rem;
+  padding: 3px;
+  background: var(--well);
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white),
+    inset  2px  2px 0 0 var(--dark),
+    inset -2px -2px 0 0 var(--face-light);
+}
+.boot-progress-fill {
+  width: 0%;
+  height: 100%;
+  background-color: var(--title-active-a);
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--title-active-a) 0, var(--title-active-a) 14px,
+    transparent 14px, transparent 18px
+  );
+  transition: width 180ms linear;
+}
+
+/* --------------------------------------------------------- shell layout -- */
+.os {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100dvh;
+}
+.os[hidden] { display: none; }
+
+/* ------------------------------------------------------------ menu bar --- */
+.menubar {
+  position: relative;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: var(--menubar-h);
+  padding: 3px 6px;
+  background: var(--face);
+  box-shadow:
+    inset  0  1px 0 0 var(--white),
+    inset  0 -1px 0 0 var(--shadow),
+    0 2px 0 0 var(--dark);
+}
+
+.menubar-list { display: flex; align-items: center; gap: 2px; }
+
+.menubar-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: 38px;
+  padding: 0.2em 0.8em;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 0;
+  cursor: var(--cursor-hand), pointer;
+}
+.menubar-item:hover { background: var(--face-light); }
+.menubar-item[aria-expanded="true"] {
+  background: var(--select-bg);
+  color: var(--select-ink);
+}
+.menubar-item--brand { padding-left: 0.5em; }
+.menubar-brand-mark { display: inline-flex; }
+
+.menubar-tools {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 4px;
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white);
+}
+.menubar-tools-label { font-weight: 700; font-size: 0.92rem; padding-left: 0.3em; }
+
+@media (max-width: 860px) {
+  .menubar { flex-wrap: wrap; }
+  .menubar-tools-label { display: none; }
+}
+
+/* --------------------------------------------------- drop-down menus ----- */
+/* Menus open on CLICK and stay open. They never open on hover. */
+.menu-layer { position: fixed; inset: 0; z-index: 600; }
+.menu-layer[hidden] { display: none; }
+
+.menu-popup {
+  position: absolute;
+  min-width: 17rem;
+  padding: 4px;
+  background: var(--face);
+  box-shadow:
+    inset -1px -1px 0 0 var(--dark),
+    inset  1px  1px 0 0 var(--white),
+    inset -2px -2px 0 0 var(--shadow),
+    inset  2px  2px 0 0 var(--face-light),
+    4px 4px 0 0 rgba(0, 0, 0, 0.45);
+}
+html[data-contrast="high"] .menu-popup { box-shadow: 0 0 0 2px #fff, 4px 4px 0 0 #fff; }
+
+.menu-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.35em 0.9em;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1rem;
+  text-align: left;
+  border: 0;
+  cursor: var(--cursor-hand), pointer;
+}
+.menu-entry:hover,
+.menu-entry:focus-visible {
+  background: var(--select-bg);
+  color: var(--select-ink);
+  outline: none;
+}
+.menu-entry[aria-disabled="true"] {
+  color: var(--shadow);
+  text-shadow: 1px 1px 0 var(--white);
+  cursor: var(--cursor-arrow), default;
+}
+.menu-entry[aria-disabled="true"]:hover { background: transparent; color: var(--shadow); }
+.menu-entry-mark { width: 1.3em; flex: 0 0 auto; font-weight: 700; }
+.menu-entry-key { font-size: 0.88rem; opacity: 1; }
+.menu-separator {
+  height: 2px;
+  margin: 4px 6px;
+  box-shadow: inset 0 1px 0 0 var(--shadow), inset 0 -1px 0 0 var(--white);
+}
+
+/* ------------------------------------------------------------- desktop --- */
+.desktop {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--desktop-bg);
+}
+
+/* Classic Macintosh 50% dither pattern. */
+.desktop[data-pattern="macgray"] {
+  background-color: #888888;
+  background-image:
+    linear-gradient(45deg, #ffffff 25%, transparent 25%, transparent 75%, #ffffff 75%),
+    linear-gradient(45deg, #ffffff 25%, transparent 25%, transparent 75%, #ffffff 75%);
+  background-size: 4px 4px;
+  background-position: 0 0, 2px 2px;
+}
+.desktop[data-pattern="navy"] { background-color: #000060; }
+html[data-contrast="high"] .desktop { background-image: none; background-color: #000; }
+
+/* ------------------------------------------------------- desktop icons -- */
+.desktop-icons {
+  position: absolute;
+  inset: 0;
+  padding: 14px 10px;
+  /* Icons fill top-to-bottom, then start a new column — exactly as they did.
+     Cell sizes are in em so the whole grid grows with the text-size controls
+     instead of letting labels spill over their neighbours. */
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+  overflow: auto;
+}
+.desktop-icons > li {
+  flex: 0 0 auto;
+  width: 8.6em;
+  height: 9.6em;
+}
+@media (max-width: 700px) {
+  .desktop-icons { flex-direction: row; align-content: flex-start; }
+}
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  height: 100%;
+  padding: 6px 2px;
+  background: transparent;
+  border: 0;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  cursor: var(--cursor-hand), pointer;
+}
+.desktop-icon-art {
+  display: block;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.55));
+}
+/* The art grows with the labels, so the icon never becomes a big word with a
+   tiny picture beside it at the larger text sizes. */
+.desktop-icon-art svg { width: 2.6em; height: 2.6em; }
+.desktop-icon-label {
+  display: inline-block;
+  padding: 3px 6px;
+  /* A solid plate behind the label so the text never fights the wallpaper.
+     White on this navy = 15.3:1. */
+  background: var(--title-active-a);
+  color: #ffffff;
+  text-shadow: none;
+}
+.desktop-icon[aria-pressed="true"] .desktop-icon-label,
+.desktop-icon:hover .desktop-icon-label {
+  background: #ffffff;
+  color: #000080;
+}
+.desktop-icon[aria-pressed="true"] .desktop-icon-art { filter: none; opacity: 0.85; }
+html[data-contrast="high"] .desktop-icon-label { background: #000; color: #fff; box-shadow: 0 0 0 2px #fff; }
+html[data-contrast="high"] .desktop-icon:hover .desktop-icon-label { background: #ffff00; color: #000; }
+
+.desktop-icon-hint {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.68);
+  padding: 1px 5px;
+}
+html[data-contrast="high"] .desktop-icon-hint { background: #000; }
+
+/* --------------------------------------------------------- window layer -- */
+.window-layer { position: absolute; inset: 0; pointer-events: none; }
+.window-layer > * { pointer-events: auto; }
+
+/* ------------------------------------------------------------- windows --- */
+.window {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  min-width: 300px;
+  min-height: 200px;
+  padding: 4px;
+  background: var(--face);
+  color: var(--ink);
+  box-shadow:
+    inset -1px -1px 0 0 var(--dark),
+    inset  1px  1px 0 0 var(--white),
+    inset -2px -2px 0 0 var(--shadow),
+    inset  2px  2px 0 0 var(--face-light),
+    5px 5px 0 0 rgba(0, 0, 0, 0.42);
+}
+html[data-contrast="high"] .window {
+  box-shadow: 0 0 0 2px #ffffff, 6px 6px 0 0 #ffffff;
+  border: 2px solid #ffffff;
+}
+.window[data-minimized="true"] { display: none; }
+.window[data-maximized="true"] { box-shadow:
+    inset -1px -1px 0 0 var(--dark),
+    inset  1px  1px 0 0 var(--white),
+    inset -2px -2px 0 0 var(--shadow),
+    inset  2px  2px 0 0 var(--face-light); }
+
+/* --- title bar --- */
+.title-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 4px 4px 4px 8px;
+  background: linear-gradient(90deg, var(--title-active-a) 0%, var(--title-active-b) 100%);
+  color: var(--title-ink);
+  cursor: var(--cursor-move), move;
+  touch-action: none;
+  user-select: none;
+}
+.title-bar--inactive {
+  background: linear-gradient(90deg, var(--title-inactive-a) 0%, var(--title-inactive-b) 100%);
+}
+.title-bar-icon { flex: 0 0 auto; display: flex; }
+.title-bar-text {
+  flex: 1 1 auto;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--title-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.title-bar-controls { display: flex; gap: 3px; cursor: var(--cursor-arrow), default; }
+
+.title-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 32px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  background: var(--face);
+  color: var(--ink);
+  border: 0;
+  cursor: var(--cursor-hand), pointer;
+  box-shadow:
+    inset -1px -1px 0 0 var(--dark),
+    inset  1px  1px 0 0 var(--white),
+    inset -2px -2px 0 0 var(--shadow),
+    inset  2px  2px 0 0 var(--face-light);
+}
+.title-btn:active {
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white),
+    inset  2px  2px 0 0 var(--dark),
+    inset -2px -2px 0 0 var(--face-light);
+}
+.title-btn:focus-visible { outline: 3px solid #ffffff; outline-offset: 1px; }
+.title-btn svg { pointer-events: none; }
+
+/* --- menu strip inside a window (File / Edit / …) --- */
+.window-menu {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  margin-top: 3px;
+  box-shadow: inset 0 -1px 0 0 var(--shadow);
+}
+.window-menu-item {
+  min-height: 36px;
+  padding: 0.2em 0.75em;
+  background: transparent;
+  border: 0;
+  font-weight: 700;
+  cursor: var(--cursor-hand), pointer;
+  color: var(--ink);
+}
+.window-menu-item:hover { background: var(--select-bg); color: var(--select-ink); }
+
+/* --- body --- */
+.window-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 1.1rem 1.2rem;
+  margin-top: 3px;
+  background: var(--face);
+}
+.window-body--well {
+  background: var(--well);
+  color: var(--well-ink);
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white),
+    inset  2px  2px 0 0 var(--dark),
+    inset -2px -2px 0 0 var(--face-light);
+}
+.window-body--flush { padding: 0; }
+
+/* --- footer action bar: always shows the plain-language exits --- */
+.window-footer {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem;
+  margin-top: 3px;
+  box-shadow: inset 0 1px 0 0 var(--white), inset 0 2px 0 0 var(--shadow);
+}
+.window-footer .spacer { flex: 1 1 auto; }
+
+/* --- status bar --- */
+.status-bar {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 3px;
+  margin-top: 3px;
+}
+.status-field {
+  padding: 0.35em 0.7em;
+  font-size: 0.9rem;
+  color: var(--ink);
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white);
+}
+.status-field:first-child { flex: 1 1 auto; }
+
+/* --- resize grip --- */
+.resize-grip {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  border: 0;
+  cursor: nwse-resize;
+  touch-action: none;
+  background-image:
+    linear-gradient(135deg, transparent 45%, var(--white) 45%, var(--white) 58%, var(--shadow) 58%, var(--shadow) 70%, transparent 70%);
+}
+.resize-grip:focus-visible { outline: 3px solid var(--focus-ring); }
+.window[data-maximized="true"] .resize-grip { display: none; }
+
+/* ------------------------------------------------------------- dialogs --- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.35);
+}
+html[data-contrast="high"] .modal-backdrop { background: rgba(0, 0, 0, 0.85); }
+
+.dialog {
+  width: min(38rem, 100%);
+  max-height: 86dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  background: var(--face);
+  box-shadow:
+    inset -1px -1px 0 0 var(--dark),
+    inset  1px  1px 0 0 var(--white),
+    inset -2px -2px 0 0 var(--shadow),
+    inset  2px  2px 0 0 var(--face-light),
+    5px 5px 0 0 rgba(0, 0, 0, 0.5);
+}
+html[data-contrast="high"] .dialog { box-shadow: 0 0 0 2px #fff, 6px 6px 0 0 #fff; }
+
+.dialog-body {
+  display: flex;
+  gap: 1.1rem;
+  padding: 1.4rem 1.2rem;
+  overflow: auto;
+}
+.dialog-glyph { flex: 0 0 auto; }
+.dialog-text h2 { margin-bottom: 0.5em; font-size: 1.25rem; }
+.dialog-text p  { max-width: 46ch; }
+
+/* ------------------------------------------------------------ taskbar ---- */
+.taskbar {
+  position: relative;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--taskbar-h);
+  padding: 4px 6px;
+  background: var(--face);
+  box-shadow: inset 0 1px 0 0 var(--white), inset 0 2px 0 0 var(--face-light), 0 -2px 0 0 var(--dark);
+}
+
+.btn--start { min-height: 44px; padding-inline: 0.9em; gap: 0.45em; }
+.start-icon { display: inline-flex; }
+
+.taskbar-divider {
+  width: 2px;
+  align-self: stretch;
+  margin: 2px 2px;
+  box-shadow: inset 1px 0 0 0 var(--shadow), inset -1px 0 0 0 var(--white);
+}
+
+.tasklist {
+  flex: 1 1 auto;
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+}
+.task-btn {
+  flex: 0 1 15rem;
+  min-width: 8rem;
+  min-height: 44px;
+  justify-content: flex-start;
+  gap: 0.5em;
+  padding: 0.25em 0.7em;
+  font-size: 0.95rem;
+  font-weight: 700;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.task-btn > span { overflow: hidden; text-overflow: ellipsis; }
+
+.tray {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.3em 0.7em;
+  box-shadow: inset 1px 1px 0 0 var(--shadow), inset -1px -1px 0 0 var(--white);
+}
+.tray-slot { font-size: 0.85rem; font-weight: 700; }
+.tray-clock { font-size: 0.95rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 640px) {
+  .tray-slot { display: none; }
+  .task-btn { flex-basis: 9rem; }
+}
+
+/* ----------------------------------------------------- shut-down screen -- */
+.shutdown-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: #000000;
+  text-align: center;
+}
+.shutdown-screen p {
+  max-width: 30ch;
+  margin: 0 auto 1.6rem;
+  color: #ffb400;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.5;
+  font-family: "Courier New", Courier, monospace;
+}

@@ -1,0 +1,341 @@
+/* ============================================================================
+   AGELESS AI  ·  CyberSenior 95
+   apps.css — styles for the individual application windows
+   ========================================================================= */
+
+/* ==========================================================================
+   THE WELCOME DISK  (installation-wizard styling)
+   ========================================================================== */
+.wizard {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  min-height: 100%;
+}
+@media (max-width: 720px) {
+  .wizard { grid-template-columns: 1fr; }
+  .wizard-sidebar { display: none; }
+}
+
+.wizard-sidebar {
+  padding: 1.2rem 1rem;
+  background: var(--title-active-a);
+  color: #ffffff;
+}
+html[data-contrast="high"] .wizard-sidebar { background: #000; box-shadow: inset -2px 0 0 0 #fff; }
+
+.wizard-sidebar-art {
+  margin: 0 auto 1.1rem;
+  display: flex;
+  justify-content: center;
+}
+.wizard-sidebar h2 {
+  color: #ffffff;
+  font-size: 1.15rem;
+  margin-bottom: 0.9rem;
+}
+.wizard-steps { display: flex; flex-direction: column; gap: 0.55rem; }
+.wizard-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55em;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  color: #ffffff;
+}
+.wizard-step-mark {
+  flex: 0 0 auto;
+  width: 1.4em;
+  font-weight: 700;
+}
+.wizard-step[data-state="current"] { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.wizard-step[data-state="done"] .wizard-step-mark { color: #7dff9e; }
+html[data-contrast="high"] .wizard-step[data-state="done"] .wizard-step-mark { color: #ffff00; }
+
+.wizard-main { padding: 1.4rem 1.5rem; }
+.wizard-eyebrow {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  padding: 0.2em 0.7em;
+  background: var(--face);
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: inset 1px 1px 0 0 var(--white), inset -1px -1px 0 0 var(--shadow);
+}
+.wizard-main h2 { font-size: 1.5rem; margin-bottom: 0.6rem; }
+.wizard-lede { font-size: 1.08rem; }
+
+.wizard-figure {
+  margin: 1.2rem 0;
+  padding: 1rem;
+  background: var(--well);
+  color: var(--well-ink);
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white),
+    inset  2px  2px 0 0 var(--dark),
+    inset -2px -2px 0 0 var(--face-light);
+}
+
+/* Plain checklists with real, visible marks. */
+.tick-list { display: grid; gap: 0.75rem; margin-top: 1rem; }
+.tick-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7em;
+  font-size: 1rem;
+}
+.tick-list .tick {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 1.7em;
+  height: 1.7em;
+  background: var(--face);
+  font-weight: 700;
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white),
+    inset  2px  2px 0 0 var(--dark),
+    inset -2px -2px 0 0 var(--face-light);
+}
+
+/* Caution / reassurance panels */
+.notice {
+  display: flex;
+  gap: 0.9rem;
+  margin: 1.2rem 0;
+  padding: 1rem;
+  background: var(--accent-yellow);
+  color: #000000;
+  box-shadow:
+    inset -1px -1px 0 0 var(--dark),
+    inset  1px  1px 0 0 var(--white),
+    inset -2px -2px 0 0 var(--shadow),
+    inset -2px -2px 0 0 var(--shadow);
+}
+.notice h3 { margin-bottom: 0.35em; font-size: 1.05rem; }
+.notice p { max-width: 58ch; }
+html[data-contrast="high"] .notice { background: #000; color: #fff; box-shadow: 0 0 0 2px #fff; }
+html[data-contrast="high"] .notice h3 { color: #fff; }
+
+.notice--calm { background: #d6e4ff; }
+html[data-contrast="high"] .notice--calm { background: #000; }
+
+/* The wizard's progress read-out — always spelled out in words. */
+.wizard-progress {
+  flex: 1 1 16rem;
+  min-width: 11rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-weight: 700;
+}
+#wizard-progress-text { white-space: nowrap; }
+.wizard-progress-track {
+  flex: 1 1 8rem;
+  height: 26px;
+  padding: 3px;
+  background: var(--well);
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white),
+    inset  2px  2px 0 0 var(--dark),
+    inset -2px -2px 0 0 var(--face-light);
+}
+.wizard-progress-fill {
+  height: 100%;
+  background-color: var(--title-active-a);
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--title-active-a) 0, var(--title-active-a) 12px,
+    transparent 12px, transparent 16px
+  );
+  transition: width 200ms linear;
+}
+html[data-contrast="high"] .wizard-progress-fill { background-color: #fff; background-image: none; }
+
+/* ==========================================================================
+   COURSE CATALOG FILE FINDER
+   ========================================================================== */
+.finder { display: flex; flex-direction: column; height: 100%; }
+
+.finder-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  box-shadow: inset 0 -1px 0 0 var(--shadow), inset 0 -2px 0 0 var(--white);
+}
+.finder-path {
+  flex: 1 1 14rem;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0.25em 0.7em;
+  background: var(--well);
+  color: var(--well-ink);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.95rem;
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white),
+    inset  2px  2px 0 0 var(--dark),
+    inset -2px -2px 0 0 var(--face-light);
+}
+
+.folder-grid {
+  flex: 1 1 auto;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10em, 1fr));
+  gap: 10px;
+  padding: 1rem;
+  background: var(--well);
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white),
+    inset  2px  2px 0 0 var(--dark),
+    inset -2px -2px 0 0 var(--face-light);
+}
+
+.folder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 0.6rem;
+  min-height: 9.9em;
+  background: var(--face);
+  color: var(--ink);
+  border: 0;
+  text-align: center;
+  cursor: var(--cursor-hand), pointer;
+  box-shadow:
+    inset -1px -1px 0 0 var(--dark),
+    inset  1px  1px 0 0 var(--white),
+    inset -2px -2px 0 0 var(--shadow),
+    inset  2px  2px 0 0 var(--face-light);
+}
+.folder:hover { background: var(--face-light); }
+.folder:active {
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white),
+    inset  2px  2px 0 0 var(--dark),
+    inset -2px -2px 0 0 var(--face-light);
+}
+.folder > .icon-holder svg { width: 2.8em; height: 2.8em; }
+.folder-name { font-weight: 700; font-size: 0.98rem; line-height: 1.25; }
+.folder-meta { font-size: 0.85rem; }
+.folder-open-hint {
+  margin-top: auto;
+  padding: 0.15em 0.5em;
+  font-size: 0.8rem;
+  box-shadow: inset 1px 1px 0 0 var(--shadow), inset -1px -1px 0 0 var(--white);
+}
+
+/* Course detail sheet */
+.course-detail { display: grid; gap: 1rem; }
+.course-detail-head { display: flex; align-items: flex-start; gap: 1rem; }
+.course-detail h2 { font-size: 1.4rem; }
+
+.badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+.badge {
+  padding: 0.2em 0.6em;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: var(--face);
+  color: var(--ink);
+  box-shadow: inset 1px 1px 0 0 var(--white), inset -1px -1px 0 0 var(--shadow);
+}
+.badge--priority { background: var(--accent-yellow); }
+html[data-contrast="high"] .badge--priority { background: #000; color: #ffff00; box-shadow: 0 0 0 2px #ffff00; }
+
+.lesson-list { display: grid; gap: 4px; }
+.lesson-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 52px;
+  padding: 0.5em 0.8em;
+  background: var(--well);
+  color: var(--well-ink);
+  box-shadow: inset 1px 1px 0 0 var(--shadow), inset -1px -1px 0 0 var(--white);
+}
+.lesson-num {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 2.1em;
+  height: 2.1em;
+  background: var(--title-active-a);
+  color: #ffffff;
+  font-weight: 700;
+}
+html[data-contrast="high"] .lesson-num { background: #fff; color: #000; }
+.lesson-title { flex: 1 1 auto; }
+.lesson-time { flex: 0 0 auto; font-size: 0.88rem; font-weight: 700; }
+
+/* ==========================================================================
+   HELP BOOK
+   ========================================================================== */
+.helpbook { display: grid; gap: 1.2rem; }
+.help-entry {
+  padding: 1rem 1.1rem;
+  background: var(--well);
+  color: var(--well-ink);
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white),
+    inset  2px  2px 0 0 var(--dark),
+    inset -2px -2px 0 0 var(--face-light);
+}
+.help-entry h3 { margin-bottom: 0.4em; }
+.help-entry p { max-width: 62ch; }
+
+.keytable { width: 100%; margin-top: 0.6rem; }
+.keytable th, .keytable td {
+  padding: 0.55em 0.7em;
+  text-align: left;
+  vertical-align: top;
+  font-size: 0.98rem;
+}
+.keytable th { font-weight: 700; }
+.keytable tbody tr { box-shadow: inset 0 -1px 0 0 var(--shadow); }
+.keytable thead tr { box-shadow: inset 0 -2px 0 0 var(--dark); }
+.keytable td:first-child { white-space: nowrap; }
+
+/* ==========================================================================
+   ABOUT BOX
+   ========================================================================== */
+.about { display: grid; gap: 1rem; text-align: center; justify-items: center; }
+.about-rule { width: 100%; }
+.about dl { display: grid; grid-template-columns: auto 1fr; gap: 0.4em 1.2em; text-align: left; }
+.about dt { font-weight: 700; }
+
+/* ==========================================================================
+   COMING-SOON / MODULE-NOT-INSTALLED SHEET
+   ========================================================================== */
+.install-sheet { display: grid; gap: 1rem; }
+.install-sheet .meter {
+  height: 26px;
+  padding: 3px;
+  background: var(--well);
+  box-shadow:
+    inset  1px  1px 0 0 var(--shadow),
+    inset -1px -1px 0 0 var(--white),
+    inset  2px  2px 0 0 var(--dark),
+    inset -2px -2px 0 0 var(--face-light);
+}
+.install-sheet .meter > i {
+  display: block;
+  height: 100%;
+  background-color: var(--title-active-a);
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--title-active-a) 0, var(--title-active-a) 12px,
+    transparent 12px, transparent 16px
+  );
+}
+html[data-contrast="high"] .install-sheet .meter > i { background-color: #fff; background-image: none; }
