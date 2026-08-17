@@ -1,4 +1,5 @@
 import VideoHero from "@/components/VideoHero";
+import CinematicHero from "@/components/CinematicHero";
 import Stats from "@/components/Stats";
 import StickyServices from "@/components/StickyServices";
 import Specializations from "@/components/Specializations";
@@ -32,6 +33,14 @@ export default function Home() {
   return (
     <>
       <VideoHero />
+
+      {/* The scroll-scrubbed card. It was the hero until the video brief
+          replaced it; it works better here anyway. As the opening frame it had
+          to earn attention from a standing start, which is a lot to ask of a
+          card that has not moved yet. Arriving second, after the entrance has
+          already landed, it is the page's first reward for scrolling, which is
+          what a scrubbed section is for. */}
+      <CinematicHero />
 
       <LightBand>
         <div className="mx-auto max-w-[1280px] px-6 py-24 sm:py-32">

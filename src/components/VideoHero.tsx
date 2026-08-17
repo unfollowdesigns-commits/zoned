@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "@/components/SiteLink";
+import { AnimatePresence, motion } from "framer-motion";
 import { useReducedMotion } from "@/lib/motion";
 
 /**
@@ -41,7 +42,10 @@ import { useReducedMotion } from "@/lib/motion";
 const VIDEO_SRC =
   "https://cdn.sceneai.art/Hero%20Section%20Video/973fa3f6-7715-4e73-9cfd-100ee86285b5.mp4";
 
-const HEADLINE = "Our talent is finding yours.";
+const HEADLINE = "Our talent is finding";
+/* Longest first: the slot is sized by measuring this one, so it must genuinely
+   be the widest or the headline reflows mid-flip. */
+const ROTATING = ["Professionals.", "Executives.", "Operators.", "Yours."];
 const LEDE =
   "When the talent decisions are as consequential as the capital decisions, you need more than a search firm. We design talent strategy from the boardroom down.";
 
@@ -100,6 +104,80 @@ function AnimatedText({
   );
 }
 
+/**
+ * A word that turns over, on a real axis.
+ *
+ * NOT A CROSS-FADE. The version this replaces faded one word into another in
+ * place, which is the carousel every generated landing page ships and reads as
+ * a text effect rather than as a thing happening. This rotates about the
+ * horizontal axis with perspective and a deep transform origin, so the outgoing
+ * word turns away and the incoming one turns up behind it: two faces of the
+ * same solid, not two images blended.
+ *
+ * Both words are mounted through the change. AnimatePresence is deliberately
+ * NOT in `mode="wait"` here, because waiting leaves a frame with the slot empty
+ * between exit and enter, and at this size an empty frame every few seconds is
+ * a visible stutter in the headline.
+ *
+ * The slot is sized by a hidden copy of the longest word rather than by
+ * whichever word is showing, so the line never reflows as it turns. Getting
+ * this wrong is what makes rotating headlines jitter the text beside them.
+ */
+function FlipWord({ words, reduced }: { words: string[]; reduced: boolean }) {
+  const [i, setI] = React.useState(0);
+
+  React.useEffect(() => {
+    if (reduced) return;
+    /* Starts after the entrance has finished. A word turning over while the
+       sentence around it is still arriving reads as two animations colliding. */
+    const kick = setTimeout(() => {
+      const id = setInterval(() => setI((n) => (n + 1) % words.length), 2600);
+      timer.current = id;
+    }, 2600);
+    return () => {
+      clearTimeout(kick);
+      if (timer.current) clearInterval(timer.current);
+    };
+  }, [words.length, reduced]);
+  const timer = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
+  if (reduced) {
+    return <span className="text-[var(--v-ring)]">{words[words.length - 1]}</span>;
+  }
+
+  return (
+    <span
+      className="relative inline-block align-bottom text-[var(--v-ring)]"
+      style={{ perspective: "700px" }}
+    >
+      {/* Invisible sizer: holds the slot open at the widest word. */}
+      <span aria-hidden="true" className="invisible block">
+        {words[0]}
+      </span>
+      <span className="sr-only">{words[i]}</span>
+      <AnimatePresence initial={false}>
+        <motion.span
+          key={words[i]}
+          aria-hidden="true"
+          className="absolute left-0 top-0 whitespace-nowrap"
+          style={{ transformOrigin: "50% 50% -0.55em", backfaceVisibility: "hidden" }}
+          initial={{ rotateX: -92, opacity: 0 }}
+          animate={{ rotateX: 0, opacity: 1 }}
+          exit={{ rotateX: 92, opacity: 0 }}
+          transition={{
+            rotateX: { duration: 0.72, ease: [0.16, 1, 0.3, 1] },
+            /* Opacity moves faster than the rotation, so the face is gone
+               before it would otherwise be seen edge-on as a flat line. */
+            opacity: { duration: 0.34, ease: [0.4, 0, 0.2, 1] },
+          }}
+        >
+          {words[i]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
 export default function VideoHero() {
   const reduced = useReducedMotion();
 
@@ -126,18 +204,32 @@ export default function VideoHero() {
       />
 
       <div className="relative mx-auto max-w-[1400px] px-6 pb-[clamp(7rem,16vh,12rem)] pt-[clamp(7rem,14vh,11rem)]">
-        <AnimatedText
-          as="h1"
-          reduced={reduced}
-          text={HEADLINE}
-          start={0.35}
+        <h1
           className="v-display max-w-[16ch] text-balance"
           style={{
             fontSize: "var(--t-hero)",
             lineHeight: "var(--lh-hero)",
             letterSpacing: "var(--tr-hero)",
           }}
-        />
+        >
+          {HEADLINE.split(" ").map((word, i) => (
+            <React.Fragment key={`${word}-${i}`}>
+              <span
+                className={reduced ? undefined : "dp-word"}
+                style={reduced ? undefined : { animationDelay: `${(0.35 + i * 0.055).toFixed(3)}s` }}
+              >
+                {word}
+              </span>{" "}
+            </React.Fragment>
+          ))}
+          {/* The turning word arrives with the rest, then starts rotating. */}
+          <span
+            className={reduced ? undefined : "dp-word"}
+            style={reduced ? undefined : { animationDelay: "0.57s" }}
+          >
+            <FlipWord words={ROTATING} reduced={reduced} />
+          </span>
+        </h1>
 
         <AnimatedText
           reduced={reduced}
