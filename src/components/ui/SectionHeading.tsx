@@ -60,7 +60,7 @@ export default function SectionHeading({
       {lede && (
         <Reveal delay={0.14}>
           <p
-            className={`mt-7 text-[length:var(--t-lede)] leading-[1.6] text-[var(--v-muted)] ${
+            className={`mt-8 text-[length:var(--t-lede)] leading-[1.65] text-[var(--v-muted)] ${
               centred ? "mx-auto max-w-[58ch]" : "max-w-[52ch]"
             }`}
           >

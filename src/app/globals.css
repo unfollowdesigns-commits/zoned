@@ -387,6 +387,7 @@
   overflow: hidden;
   line-height: 0.78;
   user-select: none;
+  text-align: center;
 }
 
 .v-footer-wordmark span {
@@ -400,13 +401,49 @@
   letter-spacing: -0.03em;
   white-space: nowrap;
   color: transparent;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.085),
-    rgba(255, 255, 255, 0.012) 78%
-  );
+
+  /* Two layers, both clipped to the letterforms.
+
+     The first is a narrow bright band that travels across the word, which is
+     the reflection: it reads as light moving over a surface rather than the
+     surface itself lighting up, and that is the difference between a sheen and
+     a pulse. It is deliberately slow and deliberately faint. At the size this
+     type is set, anything faster reads as a loading skeleton, and anything
+     brighter turns a colophon into a banner.
+
+     The second is the base fade, brighter at the cap line than at the baseline,
+     so the word sits into the ground instead of on it. */
+  background-image:
+    linear-gradient(
+      100deg,
+      transparent 38%,
+      rgba(255, 255, 255, 0.13) 50%,
+      transparent 62%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.085),
+      rgba(255, 255, 255, 0.012) 78%
+    );
+  background-size: 260% 100%, 100% 100%;
+  background-position: 150% 0, 0 0;
+  background-repeat: no-repeat;
   -webkit-background-clip: text;
   background-clip: text;
+  animation: v-wordmark-sheen 9s var(--ease-in-out) infinite;
+}
+
+@keyframes v-wordmark-sheen {
+  /* Holds off-stage for most of the cycle, so the sweep is an event rather
+     than a loop you notice running. */
+  0%, 22% { background-position: 150% 0, 0 0; }
+  78%, 100% { background-position: -60% 0, 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v-footer-wordmark span {
+    animation: none;
+  }
 }
 
 /* ---- Glass card ---------------------------------------------------------

@@ -38,7 +38,12 @@ export default function Home() {
             lede="When your business evolves, your talent strategy should too."
           />
 
-          <div className="mt-12 grid max-w-[92ch] gap-8 md:grid-cols-2">
+          {/* Wide gutter, narrow columns. Two paragraphs 2rem apart read as one
+              block of text that happens to be broken in half; the reference
+              runs a gutter wide enough that each column is its own object. The
+              measure per column stays around 48 characters, which is what makes
+              the wide gutter possible without the lines getting long. */}
+          <div className="mt-16 grid max-w-[100ch] gap-x-24 gap-y-12 md:grid-cols-2">
             <Reveal delay={0.2}>
               <p className="text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
                 District Partners is an independent, partner-led firm built to serve clients
