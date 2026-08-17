@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "@/components/SiteLink";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
-import { EASE, useReducedMotion } from "@/lib/motion";
+import { EASE, EXIT, SPRING, useReducedMotion } from "@/lib/motion";
 
 /**
  * The guided assistant.
@@ -210,10 +210,24 @@ export default function Assistant() {
             role="dialog"
             aria-label="Find the right engagement"
             className="v-glass v-glass-panel w-[min(24rem,calc(100vw-3rem))] overflow-hidden outline-none"
-            initial={reduced ? { opacity: 0 } : { opacity: 0, y: 14, scale: 0.97 }}
+            /* ORIGIN-AWARE. The panel is anchored to a launcher in the
+               bottom-left corner, so it has to grow OUT of that corner. Scaling
+               from the centre, which is the default and what this did first,
+               makes the panel appear to arrive from somewhere the visitor was
+               not looking, and no amount of tuning the curve fixes a wrong
+               origin. This is the single highest-leverage detail on any popover
+               and the one most often skipped. */
+            style={{ transformOrigin: "0% 100%" }}
+            initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduced ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.98 }}
-            transition={{ duration: 0.32, ease: EASE }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.97 }}
+            /* A spring on the way in, a short ease on the way out. Springs read
+               as physical, which is right for something the visitor summoned;
+               but a spring on exit means the panel is still settling while it
+               disappears, so dismissal feels sluggish. Exit is also FASTER than
+               enter, always: waiting to leave is the most annoying thing an
+               interface can do. */
+            transition={reduced ? { duration: 0 } : { ...SPRING, opacity: { duration: 0.16 } }}
           >
             <div className="relative z-[2] flex items-start justify-between gap-4 border-b border-[var(--v-border)] p-5">
               <div>
@@ -239,10 +253,15 @@ export default function Assistant() {
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={here}
-                  initial={reduced ? false : { opacity: 0, x: 12 }}
+                  /* Steps slide in the direction of travel, so going forward
+                     and going Back are visibly different moves rather than the
+                     same fade twice. Kept short: this fires on every tap, and
+                     motion the visitor triggers repeatedly has to get out of
+                     the way faster than motion they see once. */
+                  initial={reduced ? false : { opacity: 0, x: 14 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={reduced ? { opacity: 0 } : { opacity: 0, x: -12 }}
-                  transition={{ duration: 0.24, ease: EASE }}
+                  exit={reduced ? { opacity: 0 } : { opacity: 0, x: -14 }}
+                  transition={reduced ? { duration: 0 } : { ...SPRING, opacity: { duration: 0.14 } }}
                 >
                   {step ? (
                     <>

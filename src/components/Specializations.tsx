@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "@/components/SiteLink";
 import { motion, AnimatePresence } from "framer-motion";
-import { EASE, useReducedMotion } from "@/lib/motion";
+import { EASE, SPRING_ICON, useReducedMotion } from "@/lib/motion";
 import { FUNCTIONS, INDUSTRIES } from "@/lib/site";
 import SectionHeading from "@/components/ui/SectionHeading";
 
@@ -47,7 +47,11 @@ function Chevron({ open }: { open: boolean }) {
           : "border-[var(--v-border-strong)] text-[var(--v-muted)]"
       }`}
       animate={{ rotate: open ? 180 : 0 }}
-      transition={{ duration: 0.42, ease: EASE }}
+      /* A spring here and an ease on the panel height below, deliberately.
+         The chevron is a small object the visitor just acted on, so overshoot
+         reads as responsiveness. Height is not: a spring on height overshoots
+         the page's own layout and every section underneath bounces with it. */
+      transition={SPRING_ICON}
     >
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none" aria-hidden="true">
         <path
