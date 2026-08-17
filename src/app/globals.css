@@ -556,6 +556,23 @@
   }
 }
 
+/* A floating panel needs a heavier fill than a panel sitting in a section.
+   A section panel has one known thing behind it and can afford to be thin. A
+   panel that floats over the whole page passes across headlines, images and
+   both grounds, and at the section alpha the page reads straight through it:
+   the assistant's copy was competing with an 88px hero headline showing through
+   from underneath. The blur and the lit rim stay; only the fill thickens. */
+.v-glass-panel {
+  background:
+    linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.07),
+      rgba(255, 255, 255, 0.03) 46%,
+      rgba(255, 255, 255, 0.015)
+    ),
+    linear-gradient(180deg, rgba(10, 13, 28, 0.94), rgba(6, 8, 20, 0.97));
+}
+
 /* ---- Eyebrow: the brand's label face ------------------------------------
    Overrides the kit's .v-eyebrow, which inherits the UI face. Declared after
    the kit imports so it wins without !important. */

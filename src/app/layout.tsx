@@ -3,6 +3,7 @@ import { DM_Sans, Familjen_Grotesk, Space_Grotesk } from "next/font/google";
 import { Shell, Atmosphere } from "@/kit/components/Atmosphere";
 import { prePaintScript } from "@/lib/preload";
 import Preloader from "@/components/Preloader";
+import Assistant from "@/components/Assistant";
 import MotionProvider from "@/components/MotionProvider";
 import { ScrollProgress } from "@/kit/components/Scroll";
 import Header from "@/components/Header";
@@ -64,6 +65,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Footer />
           </MotionProvider>
         </Shell>
+        {/* Outside <Shell>, and that is load bearing. Shell and the motion
+            provider put transforms on the tree, and a transformed ancestor
+            makes `position: fixed` resolve against THAT element instead of the
+            viewport. Mounted inside, the launcher drifted up the page and
+            collided with its own panel. */}
+        <Assistant />
       </body>
     </html>
   );
