@@ -28,14 +28,19 @@ import { useReducedMotion } from "@/lib/motion";
  * animation, which is a flash of the entire finished headline before it plays.
  */
 
-/* Replace both with District Partners assets before launch. They are third
-   party URLs from the brief, and the mockup in particular is a productivity
-   dashboard, which is the wrong subject for a search firm: it should be the
-   client's own work, a placement, or a team. */
-const VIDEO_SRC =
-  "https://cdn.sceneai.art/Hero%20Section%20Video/973fa3f6-7715-4e73-9cfd-100ee86285b5.mp4";
-const MOCKUP_SRC =
-  "https://cdn.sceneai.art/Hero%20section%20image/f818ffa9-3074-43cc-8ca5-953c97da9edd.png";
+/* Local paths, deliberately, and neither file exists yet.
+   
+   The brief supplied two third-party CDN URLs and they were shipped once, which
+   was a mistake: the "dashboard mockup" is a screenshot of somebody else's task
+   management product, complete with their logo, their Kanban board and their
+   invented users. On a search firm's homepage that is not a placeholder, it is
+   a different company's product being passed off as this one's. Flagging it in
+   a commit message was not good enough; it should never have rendered.
+   
+   Drop real assets at these paths and both slots fill. Until then the video
+   element renders nothing and the section is type on the brand ground, which is
+   honest and still reads. */
+const VIDEO_SRC = "/hero.mp4";
 
 const HEADLINE = "Our talent is finding yours.";
 const LEDE =
@@ -121,7 +126,7 @@ export default function VideoHero() {
         className="absolute inset-0 -z-10 bg-[linear-gradient(100deg,var(--v-bg)_0%,rgba(6,8,20,0.82)_38%,rgba(6,8,20,0.35)_68%,transparent_100%)]"
       />
 
-      <div className="relative mx-auto max-w-[1400px] px-6 pb-0 pt-[clamp(7rem,14vh,11rem)]">
+      <div className="relative mx-auto max-w-[1400px] px-6 pb-[clamp(7rem,16vh,12rem)] pt-[clamp(7rem,14vh,11rem)]">
         <AnimatedText
           as="h1"
           reduced={reduced}
@@ -145,7 +150,8 @@ export default function VideoHero() {
 
         {/* Buttons arrive as one block once the words have finished, not word by
             word: a control that assembles itself reads as broken rather than as
-            choreographed. */}
+            choreographed. They also close the section now that the borrowed
+            mockup is gone, so the sequence ends on the thing worth clicking. */}
         <div
           className={reduced ? "mt-10 flex flex-wrap gap-4" : "dp-rise mt-10 flex flex-wrap gap-4"}
           style={reduced ? undefined : { animationDelay: "2.2s" }}
@@ -164,26 +170,6 @@ export default function VideoHero() {
           </Link>
         </div>
 
-        {/* The mockup, rounded on its top corners only so it reads as rising out
-            of the fold rather than as a floating card. overflow-hidden is what
-            makes the image respect those corners. */}
-        <div
-          className={
-            reduced
-              ? "mx-auto mt-[clamp(4rem,9vh,6.5rem)] w-full max-w-[1180px] overflow-hidden rounded-t-[24px] border border-white/10 bg-[var(--v-bg-2)] v-e3"
-              : "dp-scale-in mx-auto mt-[clamp(4rem,9vh,6.5rem)] w-full max-w-[1180px] overflow-hidden rounded-t-[24px] border border-white/10 bg-[var(--v-bg-2)] v-e3"
-          }
-          style={reduced ? undefined : { animationDelay: "2.8s" }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={MOCKUP_SRC}
-            alt=""
-            aria-hidden="true"
-            className="block h-auto w-full"
-            loading="eager"
-          />
-        </div>
       </div>
     </section>
   );
