@@ -5,7 +5,6 @@ import Link from "@/components/SiteLink";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
 import { EASE, useReducedMotion } from "@/lib/motion";
-import { LogoMark } from "@/components/Logo";
 
 /**
  * The guided assistant.
@@ -189,8 +188,11 @@ export default function Assistant() {
             <i key={i} />
           ))}
         </span>
-        <span className="relative grid h-8 w-8 place-items-center rounded-full bg-[var(--v-primary)]/15">
-          <LogoMark className="h-4 w-4 text-[var(--v-ink)]" />
+        <span
+          aria-hidden="true"
+          className="relative grid h-8 w-8 place-items-center rounded-full bg-[var(--v-primary)]/15 text-[length:var(--t-small)] font-bold text-[var(--v-ring)]"
+        >
+          ?
         </span>
         <span className="relative">{open ? "Close" : "Where do I start?"}</span>
       </motion.button>

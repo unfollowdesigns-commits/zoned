@@ -28,47 +28,57 @@ import { PRELOAD_KEY } from "@/lib/preload";
  * animates what the logo is.
  */
 
-const BLUE = "#3e85de";
-
-const RING_W = 184;
-const STROKE = 33;
-
-function ring(x: number, y: number) {
-  const i = STROKE;
+/**
+ * The word arrives letter by letter, out of a mask.
+ *
+ * This used to assemble the monogram from its own pieces, which was the better
+ * idea and will come back the moment the real mark exists. Until then it
+ * animates what is actually correct: the wordmark. Each letter rises out of a
+ * clipped box, so the name is wiped into being rather than faded in, and the
+ * accent rule draws underneath once the letters have landed.
+ */
+function Letters({ word, size, tracking, delay }: {
+  word: string;
+  size: string;
+  tracking: string;
+  delay: number;
+}) {
   return (
-    `M${x} ${y}h${RING_W}v${RING_W}h-${RING_W}Z` +
-    `M${x + i} ${y + i}h${RING_W - i * 2}v${RING_W - i * 2}h-${RING_W - i * 2}Z`
+    <span className="flex" aria-hidden="true">
+      {word.split("").map((ch, i) => (
+        <span
+          key={i}
+          className="dp-pre-letter inline-block overflow-hidden"
+          style={{
+            // Each letter carries its own delay as a custom property, so the
+            // whole run is one CSS animation rather than N staggered ones.
+            ["--d" as string]: `${delay + i * 0.045}s`,
+            paddingBottom: "0.14em",
+            marginBottom: "-0.14em",
+          }}
+        >
+          <span
+            className="v-display inline-block"
+            style={{ fontSize: size, letterSpacing: tracking }}
+          >
+            {ch}
+          </span>
+        </span>
+      ))}
+    </span>
   );
 }
 
 function Mark() {
   return (
-    <div className="flex flex-col items-center gap-7">
-      <svg viewBox="0 0 260 260" width="128" height="128" aria-hidden="true">
-        <path className="dp-pre-bracket" d="M0 0h48v33H33v118h15v33H0Z" fill={BLUE} />
-        <path className="dp-pre-blue" d={ring(76, 0)} fillRule="evenodd" fill={BLUE} />
-        <path
-          className="dp-pre-ink"
-          d={ring(76, 76)}
-          fillRule="evenodd"
-          fill="var(--v-ink)"
-        />
-      </svg>
-
-      <div className="dp-pre-word flex items-baseline gap-[0.55em] text-[var(--v-ink)]">
-        <span
-          className="v-display"
-          style={{ fontSize: "var(--t-secondary)", letterSpacing: "0.2em" }}
-        >
-          DISTRICT
-        </span>
-        <span
-          className="v-display"
-          style={{ fontSize: "var(--t-small)", letterSpacing: "0.28em" }}
-        >
-          PARTNERS
-        </span>
-      </div>
+    <div className="flex flex-col items-center gap-4 text-[var(--v-ink)]">
+      <Letters word="DISTRICT" size="var(--t-display)" tracking="0.06em" delay={0.1} />
+      <Letters word="PARTNERS" size="var(--t-title)" tracking="0.28em" delay={0.42} />
+      <span
+        aria-hidden="true"
+        className="dp-pre-rule mt-3 block h-px w-40 origin-left bg-[linear-gradient(90deg,transparent,var(--v-primary),transparent)]"
+      />
+      <span className="sr-only">District Partners</span>
     </div>
   );
 }

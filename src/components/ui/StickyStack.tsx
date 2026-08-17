@@ -57,7 +57,19 @@ function Card({
   // something visibly smaller than everything before it.
   const isLast = index === count - 1;
 
-  const scale = useTransform(progress, [start, end], [1, isLast ? 1 : 0.94]);
+  /* The travel is deliberately large. Earlier passes shrank a parked card by
+     6 percent, which is below the threshold at which a person registers that
+     anything happened at all: the pin was real, the maths was right, and it
+     read as a static two-column layout. An effect nobody notices is the same
+     as no effect. 14 percent, plus a lift and a backward tilt, is unmistakable
+     without tipping into novelty. */
+  const scale = useTransform(progress, [start, end], [1, isLast ? 1 : 0.86]);
+  /* Parked cards lift as they recede, so the stack fans upward and each card
+     underneath keeps a visible edge instead of hiding behind the one above. */
+  const y = useTransform(progress, [start, end], [0, isLast ? 0 : -34]);
+  /* A few degrees of backward tilt. This is what makes the stack read as
+     receding in space rather than merely getting smaller. */
+  const rotateX = useTransform(progress, [start, end], [0, isLast ? 0 : 7]);
 
   /**
    * A parked card recedes behind a near-opaque scrim, and it has to be near
@@ -76,7 +88,7 @@ function Card({
    * the front card convincing, because glass needs something solid behind it
    * to refract, and a stack of glass on glass has nothing.
    */
-  const scrim = useTransform(progress, [start, end], [0, isLast ? 0 : 0.86]);
+  const scrim = useTransform(progress, [start, end], [0, isLast ? 0 : 0.88]);
 
   return (
     <motion.div
@@ -84,9 +96,11 @@ function Card({
       style={{
         // Each card rests low enough below the one before to leave a visible
         // sliver of it. Too small a step and the stack looks like one card.
-        top: `calc(7rem + ${index * 26}px)`,
+        top: `calc(7rem + ${index * 18}px)`,
         zIndex: index + 1,
-        ...(reduced ? {} : { scale }),
+        ...(reduced ? {} : { scale, y, rotateX }),
+        // The tilt needs a perspective to be a tilt rather than a squash.
+        transformPerspective: 1400,
         // The card must own a paint layer or the scale re-rasterises its text
         // on every frame, which is the usual cause of a stack like this looking
         // soft while it moves.
@@ -111,7 +125,7 @@ function Card({
 export default function StickyStack({
   children,
   className = "",
-  gap = "3.5rem",
+  gap = "5rem",
 }: {
   children: React.ReactNode;
   className?: string;
@@ -123,7 +137,7 @@ export default function StickyStack({
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start 25%", "end 85%"],
+    offset: ["start 40%", "end 90%"],
   });
 
   const items = React.Children.toArray(children);

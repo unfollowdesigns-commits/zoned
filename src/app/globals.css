@@ -319,57 +319,32 @@
 .v-dark-band::before { top: 0; }
 .v-dark-band::after { bottom: 0; }
 
-/* ---- Preloader mark assembly --------------------------------------------
+/* ---- Preloader assembly -------------------------------------------------
    CSS rather than Framer, because the curtain ships in the server HTML and a
    Framer element renders at its `initial` values there. An `initial` of
    opacity 0 means an invisible mark from first paint until hydration, which is
-   most of the curtain's life on a cold load. See components/Preloader.tsx.
-
-   Translations are in SVG user units, since CSS transforms on SVG children
-   operate in the element's local coordinate system, not in screen pixels.
-
-   `both` fill is correct here in a way it is not for a scroll-driven reveal:
-   the backwards fill is what holds each piece off-stage through its delay. */
-@keyframes dp-pre-bracket {
-  from { transform: translateX(-64px); opacity: 0; }
-  to   { transform: translateX(0);     opacity: 1; }
+   most of the curtain's life on a cold load. See components/Preloader.tsx. */
+@keyframes dp-pre-letter {
+  from { transform: translateY(115%); }
+  to   { transform: translateY(0); }
 }
-@keyframes dp-pre-drop {
-  from { transform: translateY(-58px); opacity: 0; }
-  to   { transform: translateY(0);     opacity: 1; }
-}
-@keyframes dp-pre-rise {
-  from { transform: translateY(58px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-}
-@keyframes dp-pre-word {
-  from { transform: translateY(8px); opacity: 0; }
-  to   { transform: translateY(0);   opacity: 1; }
+@keyframes dp-pre-rule {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
 }
 
-/* Slow out, hard settle: the pieces arrive quickly and stop dead, which is what
-   makes an interlock read as locking rather than as floating into place. */
-.dp-pre-bracket,
-.dp-pre-blue,
-.dp-pre-ink,
-.dp-pre-word {
-  animation-duration: 0.66s;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  animation-fill-mode: both;
+.dp-pre-letter > span {
+  display: inline-block;
+  animation: dp-pre-letter 0.85s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s) both;
 }
 
-.dp-pre-bracket { animation-name: dp-pre-bracket; animation-delay: 0.06s; }
-.dp-pre-blue    { animation-name: dp-pre-drop;    animation-delay: 0.2s; }
-.dp-pre-ink     { animation-name: dp-pre-rise;    animation-delay: 0.34s; }
-.dp-pre-word    { animation-name: dp-pre-word;    animation-delay: 0.78s; animation-duration: 0.5s; }
+.dp-pre-rule {
+  animation: dp-pre-rule 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.95s both;
+}
 
-/* The curtain is skipped entirely under reduced motion, but if it is ever
-   shown, nothing here should move. */
 @media (prefers-reduced-motion: reduce) {
-  .dp-pre-bracket,
-  .dp-pre-blue,
-  .dp-pre-ink,
-  .dp-pre-word {
+  .dp-pre-letter > span,
+  .dp-pre-rule {
     animation: none;
   }
 }
