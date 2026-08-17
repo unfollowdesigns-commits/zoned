@@ -139,7 +139,7 @@ export default function Specializations() {
                           >
                             <Link
                               href={item.href}
-                              className="inline-flex rounded-full border border-[var(--v-border-strong)] bg-white/[0.04] px-5 py-2.5 text-[length:var(--t-small)] text-[var(--v-ink)]/85 transition-colors duration-200 hover:border-[var(--v-primary)] hover:bg-[var(--v-primary)]/12 hover:text-[var(--v-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+                              className="v-lift inline-flex rounded-full border border-[var(--v-border-strong)] bg-white/[0.04] px-5 py-2.5 text-[length:var(--t-small)] text-[var(--v-ink)]/85 hover:border-[var(--v-primary)] hover:bg-[var(--v-primary)]/12 hover:text-[var(--v-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
                             >
                               {item.label}
                             </Link>

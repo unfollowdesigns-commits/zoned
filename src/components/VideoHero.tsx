@@ -152,13 +152,13 @@ export default function VideoHero() {
         >
           <Link
             href="/contact"
-            className="rounded-xl bg-[var(--v-primary)] px-8 py-3.5 text-[length:var(--t-action)] font-medium text-white transition-colors duration-200 hover:bg-[var(--v-primary-deep)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+            className="v-lift v-e2 rounded-xl bg-[var(--v-primary)] px-8 py-3.5 text-[length:var(--t-action)] font-medium text-white hover:bg-[var(--v-primary-deep)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
           >
             Get started
           </Link>
           <Link
             href="/what-we-do"
-            className="rounded-xl border border-white/10 bg-[var(--v-surface)] px-8 py-3.5 text-[length:var(--t-action)] font-medium text-white transition-colors duration-200 hover:border-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+            className="v-lift v-e1 rounded-xl border border-white/10 bg-[var(--v-surface)] px-8 py-3.5 text-[length:var(--t-action)] font-medium text-white hover:border-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
           >
             How it works
           </Link>
@@ -170,8 +170,8 @@ export default function VideoHero() {
         <div
           className={
             reduced
-              ? "mx-auto mt-[clamp(4rem,9vh,6.5rem)] w-full max-w-[1180px] overflow-hidden rounded-t-[24px] border border-white/10 bg-[var(--v-bg-2)]"
-              : "dp-scale-in mx-auto mt-[clamp(4rem,9vh,6.5rem)] w-full max-w-[1180px] overflow-hidden rounded-t-[24px] border border-white/10 bg-[var(--v-bg-2)]"
+              ? "mx-auto mt-[clamp(4rem,9vh,6.5rem)] w-full max-w-[1180px] overflow-hidden rounded-t-[24px] border border-white/10 bg-[var(--v-bg-2)] v-e3"
+              : "dp-scale-in mx-auto mt-[clamp(4rem,9vh,6.5rem)] w-full max-w-[1180px] overflow-hidden rounded-t-[24px] border border-white/10 bg-[var(--v-bg-2)] v-e3"
           }
           style={reduced ? undefined : { animationDelay: "2.8s" }}
         >

@@ -386,6 +386,99 @@
 .v-dark-band::before { top: 0; }
 .v-dark-band::after { bottom: 0; }
 
+/* ---- Elevation ----------------------------------------------------------
+   Layered shadows, and a hover model that changes HEIGHT rather than colour.
+
+   Two things make a page read flat, and both are here.
+
+   THE FIRST IS SINGLE SHADOWS. `box-shadow: 0 4px 12px rgba(0,0,0,.1)` is the
+   web default and it is why so many sites look like paper cutouts: real light
+   produces a tight dark contact shadow directly beneath an object AND a wide
+   soft ambient one spreading past it, and the ratio between them is what the
+   eye reads as height. One shadow can only ever be a compromise between the
+   two, so it reads as neither. Every step below stacks a contact shadow, a
+   mid shadow and an ambient one, with alpha falling as blur grows.
+
+   THE SECOND IS COLOUR-ONLY HOVER. A surface whose only response to the pointer
+   is a slightly lighter background has not moved, and the eye reads "recoloured"
+   rather than "responded". Lifting the element and deepening its shadow together
+   is what reads as physical, because those two always happen together in the
+   world. `.v-lift` does both from one class so no two surfaces on the site can
+   disagree about how far things rise.
+
+   Shadows are tuned for the dark ground, where they have to be considerably
+   deeper than the light-ground values most scales ship with, or they vanish. */
+:root {
+  --e-1:
+    0 1px 2px -1px rgba(0, 0, 0, 0.45),
+    0 3px 8px -3px rgba(0, 0, 0, 0.4);
+  --e-2:
+    0 1px 2px -1px rgba(0, 0, 0, 0.5),
+    0 6px 14px -6px rgba(0, 0, 0, 0.5),
+    0 18px 34px -18px rgba(0, 0, 0, 0.55);
+  --e-3:
+    0 2px 4px -2px rgba(0, 0, 0, 0.55),
+    0 12px 26px -10px rgba(0, 0, 0, 0.55),
+    0 34px 62px -28px rgba(0, 0, 0, 0.7);
+  /* The accent bleeds into the shadow on hover, which is the detail that stops
+     a deepened shadow reading as merely "darker". */
+  --e-hover:
+    0 2px 6px -2px rgba(0, 0, 0, 0.55),
+    0 16px 32px -12px rgba(0, 0, 0, 0.6),
+    0 40px 72px -30px color-mix(in srgb, var(--v-primary) 30%, rgba(0, 0, 0, 0.7));
+}
+
+.v-e1 { box-shadow: var(--e-1); }
+.v-e2 {
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.2) inset,
+    var(--e-2);
+}
+.v-e3 { box-shadow: var(--e-3); }
+
+/* One hover for the whole site.
+   
+   Transform and box-shadow only, both composited, both on the same curve and
+   duration so the lift and the shadow are one gesture rather than two. The
+   press is faster than the lift: a control has to feel like it answers
+   instantly downward and settles gently upward, and equal timings in both
+   directions read as mushy. */
+.v-lift {
+  transition:
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.v-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--e-hover);
+}
+
+.v-lift:active {
+  transform: translateY(-1px) scale(0.995);
+  transition-duration: 110ms;
+}
+
+/* Same gesture from the keyboard. A hover that focus cannot reach is a hover
+   half the people using the site never get. */
+.v-lift:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: var(--e-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v-lift,
+  .v-lift:hover,
+  .v-lift:active,
+  .v-lift:focus-visible {
+    transform: none;
+    transition-duration: 1ms;
+  }
+}
+
 /* ---- iOS-style glass ----------------------------------------------------
    What separates Apple's material from the usual web "glassmorphism" is not the
    blur. It is four things, and leaving any of them out is what makes a panel
@@ -677,8 +770,7 @@ html[data-loaded] .dp-scale-in {
   box-shadow:
     0 1px 0 0 rgba(255, 255, 255, 0.14) inset,
     0 -1px 0 0 rgba(0, 0, 0, 0.22) inset,
-    0 2px 6px -2px rgba(0, 0, 0, 0.45),
-    0 30px 60px -30px rgba(0, 0, 0, 0.75);
+    var(--e-2);
 }
 
 /* The lit rim. A masked one-pixel band rather than a border property, because

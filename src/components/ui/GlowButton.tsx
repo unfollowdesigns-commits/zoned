@@ -67,12 +67,12 @@ export default function GlowButton({
       ? // A contained inner highlight and a tight shadow, not a bloom. The pill
         // is already the brightest object in its section; it does not need to
         // light the paint around it as well.
-        "bg-[linear-gradient(180deg,var(--v-primary),var(--v-primary-deep))] text-white " +
-        "shadow-[0_1px_0_0_rgba(255,255,255,0.22)_inset,0_8px_20px_-10px_rgba(47,95,214,0.7)] " +
-        "transition-[transform,box-shadow] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] " +
-        "hover:-translate-y-0.5 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.28)_inset,0_12px_26px_-10px_rgba(47,95,214,0.85)] " +
-        "active:translate-y-0"
-      : "v-edge text-[var(--v-ink)]/85 transition-colors duration-200 hover:text-[var(--v-ink)]";
+        // No Tailwind shadow utility alongside `.v-e2`: both set box-shadow,
+        // the kit-adjacent class is declared later, and the utility would be
+        // silently dropped. Elevation comes from the token, and the inset
+        // highlight rides along inside it.
+        "bg-[linear-gradient(180deg,var(--v-primary),var(--v-primary-deep))] text-white v-lift v-e2"
+      : "v-edge v-lift text-[var(--v-ink)]/85 hover:text-[var(--v-ink)]";
 
   const inner = (
     <>

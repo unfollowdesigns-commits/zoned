@@ -107,7 +107,7 @@ export default function StickyServices() {
                   animate="rest"
                   whileHover={reduced ? undefined : "hover"}
                   whileFocus={reduced ? undefined : "hover"}
-                  className="v-glass v-spotlight group relative overflow-hidden p-8 transition-colors duration-300 sm:p-10"
+                  className="v-glass v-lift v-spotlight group relative overflow-hidden p-8 sm:p-10"
                   onPointerMove={(e) => {
                     const el = e.currentTarget;
                     const r = el.getBoundingClientRect();
