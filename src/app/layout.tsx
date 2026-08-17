@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Familjen_Grotesk, Space_Grotesk, Syne } from "next/font/google";
+import { DM_Sans, Familjen_Grotesk, Space_Grotesk, Archivo } from "next/font/google";
 import { Shell, Atmosphere } from "@/kit/components/Atmosphere";
 import { prePaintScript } from "@/lib/preload";
 import Preloader from "@/components/Preloader";
@@ -23,11 +23,20 @@ const label = Space_Grotesk({
   weight: ["500", "600", "700"],
 });
 
-/* Display: everything above 20px. Syne is a variable face across 400 to 800,
-   so one request covers the whole display range and there is no second file to
-   pay for when a heading wants more weight. */
-const display = Syne({
-  variable: "--font-display-face",
+/* Display: everything above 20px.
+ *
+ * The brand face is GT America, which is licensed commercial type from Grilli
+ * Type. It cannot be fetched, bundled from a CDN, or served from a free mirror,
+ * and a "free download" of it is a pirated copy that would put the client in
+ * breach on their own site. So it is declared in globals.css against files in
+ * public/fonts/ and simply takes over the moment those files exist.
+ *
+ * Archivo loads as the fallback and is chosen to fail well: it is a neo-
+ * grotesque of the same American gothic lineage, with a comparable x-height and
+ * width, so the layout does not reflow when the real face lands. See the
+ * @font-face block in globals.css for the exact filenames. */
+const display = Archivo({
+  variable: "--font-display-fallback",
   subsets: ["latin"],
 });
 

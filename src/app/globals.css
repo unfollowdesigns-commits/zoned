@@ -15,6 +15,43 @@
    assembly, the footer wordmark, the glow control and the sticky rail.
    ========================================================================= */
 
+/* ---- GT America ---------------------------------------------------------
+   The brand display face, licensed from Grilli Type.
+
+   It is commercial type: it cannot be fetched from a CDN or a free mirror, and
+   a "free download" is a pirated copy that would put the client in breach on
+   their own live site. So it is declared here against files that do not exist
+   yet, and the whole site upgrades the moment they do.
+
+   TO INSTALL: buy the web licence from grillitype.com, then drop the woff2
+   files into public/fonts/ with exactly these names. Nothing else changes.
+
+   `font-display: swap` means text paints immediately in the fallback and
+   re-renders when the real face arrives, rather than sitting invisible. Archivo
+   is the fallback and is chosen so that swap is barely visible: same neo-
+   grotesque lineage, comparable x-height and width, so the layout holds. */
+@font-face {
+  font-family: "GT America";
+  src: url("/fonts/GT-America-Standard-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "GT America";
+  src: url("/fonts/GT-America-Standard-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "GT America";
+  src: url("/fonts/GT-America-Standard-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* MD2 names two fluid display steps, a lede and an action label as the four
      additions over part one's seven, without restating their values. These are
@@ -31,7 +68,7 @@
      lock into one shape. */
   --t-display-fluid: clamp(34px, 5vw, 76px);
   --lh-display-fluid: 0.98;
-  --tr-display-fluid: -0.035em;
+  --tr-display-fluid: -0.032em;
 
   --t-lede: 1.1875rem;   /* 19px */
   --t-action: 0.9375rem; /* 15px */
@@ -44,7 +81,7 @@
      only in body and UI, the display face only above 20px. */
   --font-body: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
   --font-ui: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display-face), var(--font-body-face), sans-serif;
+  --font-display: "GT America", var(--font-display-fallback), var(--font-body-face), sans-serif;
   --font-label: var(--font-label-face), var(--font-body-face), sans-serif;
   /* The logo's own face, pinned so the lockup never follows a type change. */
   --font-wordmark: var(--font-wordmark-face), var(--font-body-face), sans-serif;
