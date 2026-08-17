@@ -417,7 +417,7 @@
     linear-gradient(
       100deg,
       transparent 38%,
-      rgba(255, 255, 255, 0.13) 50%,
+      rgba(255, 255, 255, 0.075) 50%,
       transparent 62%
     ),
     linear-gradient(
@@ -425,19 +425,27 @@
       rgba(255, 255, 255, 0.085),
       rgba(255, 255, 255, 0.012) 78%
     );
-  background-size: 260% 100%, 100% 100%;
-  background-position: 150% 0, 0 0;
+  background-size: 420% 100%, 100% 100%;
+  background-position: 170% 0, 0 0;
   background-repeat: no-repeat;
   -webkit-background-clip: text;
   background-clip: text;
-  animation: v-wordmark-sheen 9s var(--ease-in-out) infinite;
+  /* 26 seconds, and the sweep itself only occupies the middle third of that.
+     The first attempt ran a 9s cycle with a narrow band and it read as a
+     loading skeleton: at this size the eye tracks the band rather than the
+     word, and anything that draws attention on a repeat is worse than no
+     animation at all. A colophon should look like it is breathing, not
+     working. The band is also much wider now (420% of the box rather than
+     260%), which makes the light arrive as a broad wash instead of a stripe
+     crossing the letters. */
+  animation: v-wordmark-sheen 26s ease-in-out infinite;
 }
 
 @keyframes v-wordmark-sheen {
-  /* Holds off-stage for most of the cycle, so the sweep is an event rather
-     than a loop you notice running. */
-  0%, 22% { background-position: 150% 0, 0 0; }
-  78%, 100% { background-position: -60% 0, 0 0; }
+  /* Off-stage for two thirds of the cycle. The sweep is an event you catch
+     once, not a loop you notice running. */
+  0%, 34% { background-position: 170% 0, 0 0; }
+  66%, 100% { background-position: -70% 0, 0 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,7 +1,7 @@
 import Hero from "@/components/Hero";
 import Stats from "@/components/Stats";
 import StickyServices from "@/components/StickyServices";
-import Industries from "@/components/Industries";
+import Specializations from "@/components/Specializations";
 import PlacedPositions from "@/components/PlacedPositions";
 import AskAI from "@/components/AskAI";
 import Reveal from "@/components/Reveal";
@@ -70,7 +70,7 @@ export default function Home() {
         </div>
       </LightBand>
 
-      <Industries />
+      <Specializations />
 
       <Stats />
 

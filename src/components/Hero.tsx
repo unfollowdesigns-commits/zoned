@@ -24,9 +24,10 @@ import GlowButton from "@/components/ui/GlowButton";
  * than sitting as a large paragraph, and tracking tightened to -0.035em,
  * because tracking has to decrease as size increases.
  *
- * The rotating word is a cross-fade in place, never AnimatePresence with
- * mode="wait": that leaves a frame with nothing on screen between exit and
- * enter, which is a visible dead beat every cycle.
+ * The headline arrives as a mask reveal, word by word, which is the section's
+ * actual animation. See the comment on the h1: the distinction between that and
+ * a fade is the whole difference between a hero that looks composed and one
+ * that looks like it finished loading.
  *
  * Scrolling out of the hero is its own move. The statement drifts up faster
  * than the page, shrinks slightly and blurs, so the next section reads as
@@ -98,8 +99,23 @@ export default function Hero() {
           Talent Infrastructure
         </motion.p>
 
+        {/* The headline is the hero's animation, and it is a mask reveal
+            rather than a fade. Each word sits inside its own overflow-hidden
+            box and rises from fully below it, so the letters are wiped into
+            existence by the edge of the mask instead of appearing at reduced
+            opacity. That difference is the whole effect: a fade says "this
+            content loaded", a mask reveal says "this was composed". It is also
+            why the words must not be spaced with a plain space character. A
+            space inside the mask gets clipped with everything else, so the
+            gap is padding on the mask box itself.
+
+            Slow, and slower than it feels it should be: 0.9s per word with a
+            small stagger. Display type at this size needs the extra time or
+            the reveal reads as a flicker. */}
         <motion.h1
-          {...rise(1)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.01, delay: 0.12 }}
           className="v-display mt-8 max-w-[15ch] text-balance"
           style={{
             fontSize: "var(--t-hero)",
@@ -107,23 +123,54 @@ export default function Hero() {
             letterSpacing: "var(--tr-hero)",
           }}
         >
-          Our Talent is Finding{" "}
-          {/* Every word shares one grid cell, so the box is sized by the
-              longest and the cross-fade never leaves an empty frame. */}
-          <span className="inline-grid max-w-full align-baseline">
-            {WORDS.map((word, i) => (
+          {["Our", "Talent", "is", "Finding"].map((word, i) => (
+            <span
+              key={word}
+              className="inline-block overflow-hidden align-bottom pr-[0.26em]"
+              /* The mask has to be taller than the glyphs or descenders and the
+                 tracking's overhang get shaved off at rest. */
+              style={{ paddingBottom: "0.12em", marginBottom: "-0.12em" }}
+            >
               <motion.span
-                key={word}
-                aria-hidden={i !== index}
-                className="v-accent-text"
-                style={{ gridArea: "1 / 1" }}
-                initial={false}
-                animate={{ opacity: i === index ? 1 : 0 }}
-                transition={{ duration: 0.55, ease: EASE }}
+                className="inline-block"
+                initial={reduced ? false : { y: "115%" }}
+                animate={{ y: "0%" }}
+                transition={{ duration: 0.9, ease: EASE, delay: 0.18 + i * 0.075 }}
               >
                 {word}
               </motion.span>
-            ))}
+            </span>
+          ))}
+
+          {/* The rotating word gets the same treatment on entry, then switches
+              to a cross-fade in place. Never AnimatePresence with mode="wait":
+              that leaves a frame with nothing on screen between exit and enter,
+              which is a visible dead beat every cycle. Every word shares one
+              grid cell, so the box is sized by the longest. */}
+          <span
+            className="inline-block overflow-hidden align-bottom"
+            style={{ paddingBottom: "0.12em", marginBottom: "-0.12em" }}
+          >
+            <motion.span
+              className="inline-grid max-w-full"
+              initial={reduced ? false : { y: "115%" }}
+              animate={{ y: "0%" }}
+              transition={{ duration: 0.9, ease: EASE, delay: 0.18 + 4 * 0.075 }}
+            >
+              {WORDS.map((word, i) => (
+                <motion.span
+                  key={word}
+                  aria-hidden={i !== index}
+                  className="v-accent-text"
+                  style={{ gridArea: "1 / 1" }}
+                  initial={false}
+                  animate={{ opacity: i === index ? 1 : 0 }}
+                  transition={{ duration: 0.55, ease: EASE }}
+                >
+                  {word}
+                </motion.span>
+              ))}
+            </motion.span>
           </span>
         </motion.h1>
 
