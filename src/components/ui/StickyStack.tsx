@@ -57,20 +57,26 @@ function Card({
   // something visibly smaller than everything before it.
   const isLast = index === count - 1;
 
-  const scale = useTransform(progress, [start, end], [1, isLast ? 1 : 0.93]);
+  const scale = useTransform(progress, [start, end], [1, isLast ? 1 : 0.94]);
 
   /**
-   * A parked card recedes by getting darker, NOT by getting transparent.
+   * A parked card recedes behind a near-opaque scrim, and it has to be near
+   * opaque rather than a light tint. Two versions of this were wrong for the
+   * same underlying reason.
    *
-   * The first version faded parked cards to 45% opacity, and it was unreadable:
-   * the cards are the same size and pin within a few pixels of each other, so a
-   * translucent one lets the card beneath show straight through it and three
-   * headings render on top of each other as grey soup. The stack has to be a
-   * stack of solid objects. A scrim laid over the card keeps it opaque and
-   * still pushes it back in space, which is what the eye actually reads as
-   * depth.
+   * First the parked cards were faded to 45% opacity. The cards pin within a
+   * few pixels of each other, so a translucent one lets the card beneath show
+   * straight through and three headings render on top of each other as grey
+   * soup. Then the cards became glass, which is translucent BY CONSTRUCTION,
+   * and a light scrim brought the same soup straight back: card 2 was showing
+   * card 1's heading through its own backdrop.
+   *
+   * So the scrim goes almost solid. Only the front card reads as lit glass;
+   * everything parked behind it becomes a dark plate. That is also what makes
+   * the front card convincing, because glass needs something solid behind it
+   * to refract, and a stack of glass on glass has nothing.
    */
-  const scrim = useTransform(progress, [start, end], [0, isLast ? 0 : 0.34]);
+  const scrim = useTransform(progress, [start, end], [0, isLast ? 0 : 0.86]);
 
   return (
     <motion.div

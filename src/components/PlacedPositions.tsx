@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { EASE, useReducedMotion } from "@/lib/motion";
 import { PLACED_POSITIONS } from "@/lib/site";
 import Reveal from "@/components/Reveal";
+import LightBand from "@/components/ui/LightBand";
 
 /**
  * Frequently placed positions.
@@ -18,7 +19,8 @@ export default function PlacedPositions() {
   const reduced = useReducedMotion();
 
   return (
-    <section className="mx-auto max-w-[1280px] px-6 pb-24">
+    <LightBand>
+      <div className="mx-auto max-w-[1280px] px-6 py-24 sm:py-28">
       <p className="v-eyebrow mb-7">Frequently Placed Positions</p>
 
       <Reveal>
@@ -33,7 +35,7 @@ export default function PlacedPositions() {
           >
             <motion.span
               tabIndex={0}
-              className="relative inline-flex cursor-default items-center rounded-full border border-[var(--v-border)] bg-white/[0.03] px-5 py-2.5 text-[length:var(--t-secondary)] text-[var(--v-muted)] outline-none transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+              className="relative inline-flex cursor-default items-center rounded-full border border-[var(--v-border)] bg-white/60 px-5 py-2.5 text-[length:var(--t-secondary)] text-[var(--v-muted)] outline-none transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
               variants={{
                 rest: { y: 0, color: "var(--v-muted)" },
                 hover: { y: -3, color: "var(--v-ink)" },
@@ -52,6 +54,7 @@ export default function PlacedPositions() {
         ))}
       </ul>
       </Reveal>
-    </section>
+      </div>
+    </LightBand>
   );
 }

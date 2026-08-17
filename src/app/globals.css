@@ -277,7 +277,13 @@
 .v-dark-band {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  /* `clip`, never `hidden`, for the third time in this file. `overflow: hidden`
+     makes an element a scroll container, and every `position: sticky`
+     descendant then sticks relative to a box that does not scroll, which means
+     it does not stick at all. It took the services rail out the moment that
+     section moved onto this band. `clip` contains the gradient without
+     creating a scrollport. */
+  overflow: clip;
   background:
     radial-gradient(
       120% 90% at 12% 0%,
@@ -403,43 +409,104 @@
   background-clip: text;
 }
 
-/* ---- Glow control -------------------------------------------------------
-   A pill that carries its own light. The glow is a blurred copy of the shape
-   behind it rather than a box-shadow, because a shadow cannot bloom past its
-   own spread and the result reads as a border. On hover the copy widens and
-   brightens, so the control looks like it is powering up rather than changing
-   colour.
+/* ---- Glass card ---------------------------------------------------------
+   Real glass, which needs four layers and not one.
 
-   The blurred layer is a separate composited element with no paint of its own
-   on the main thread, so this stays free at 60fps. */
-.v-glow {
+   What this replaces was a halo: a blurred copy of the element sitting behind
+   it. On a dark ground three haloed pills in one row is a wall of bloom that is
+   genuinely painful to look at, and it gets worse the more controls a section
+   has, which is exactly backwards. Buttons use the travelling edge light in
+   kit/styles/03-effects.css instead, and panels use this.
+
+   Glass is not a colour, it is a set of relationships: something has to show
+   THROUGH it, the edge has to catch light differently from the face, and the
+   top has to be brighter than the bottom because light comes from above. Put a
+   pale panel on a pale ground and none of those relationships can exist, no
+   matter how the fill is tuned, which is why the services band moved to the
+   dark ground. The blur needs something to blur.
+
+     1. A backdrop blur WITH saturation, so what passes behind is enriched
+        rather than smeared grey.
+     2. A translucent fill, lighter at the top than at the bottom.
+     3. A gradient hairline drawn as a masked band, brightest at the top-left.
+        This is the single detail that separates convincing glass from a div
+        with a white border, and it is the one most often left out.
+     4. A tight contact shadow plus a wide ambient one, so the card sits ON the
+        surface rather than hovering vaguely in front of it. */
+.v-glass {
   position: relative;
   isolation: isolate;
+  border-radius: var(--radius);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.09),
+    rgba(255, 255, 255, 0.045) 46%,
+    rgba(255, 255, 255, 0.022)
+  );
+  backdrop-filter: blur(22px) saturate(1.5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.14) inset,
+    0 -1px 0 0 rgba(0, 0, 0, 0.22) inset,
+    0 2px 6px -2px rgba(0, 0, 0, 0.45),
+    0 30px 60px -30px rgba(0, 0, 0, 0.75);
 }
 
-.v-glow::before {
+/* The lit rim. A masked one-pixel band rather than a border property, because
+   a border cannot carry a gradient along its own length. */
+.v-glass::before {
   content: "";
   position: absolute;
-  inset: -2px;
-  z-index: -1;
+  inset: 0;
+  z-index: 1;
   border-radius: inherit;
-  background: linear-gradient(120deg, var(--v-primary), var(--v-ring), var(--v-primary-deep));
-  filter: blur(14px);
-  opacity: 0.5;
-  transform: scale(0.94);
-  transition:
-    opacity 0.35s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)),
-    transform 0.35s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    150deg,
+    rgba(255, 255, 255, 0.42),
+    rgba(255, 255, 255, 0.1) 34%,
+    rgba(255, 255, 255, 0.03) 62%,
+    color-mix(in srgb, var(--v-primary) 26%, transparent)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
 }
 
-.v-glow:hover::before,
-.v-glow:focus-visible::before {
-  opacity: 0.92;
-  transform: scale(1.04);
+/* A specular sweep across the top face, the way light lies on real glass. It
+   brightens on hover, so pointing at a card feels like tilting it. */
+.v-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.55;
+  transition: opacity 0.4s var(--ease-out);
+  background: radial-gradient(
+    120% 70% at 12% -10%,
+    rgba(255, 255, 255, 0.16),
+    transparent 60%
+  );
+}
+
+.v-glass:hover::after {
+  opacity: 0.9;
+}
+
+/* Unsupported in a few embedded browsers, where the card would otherwise
+   render nearly transparent. The fill thickens so it is always readable. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .v-glass {
+    background: linear-gradient(160deg, rgba(24, 30, 52, 0.94), rgba(13, 17, 34, 0.96));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .v-glow::before {
+  .v-glass::after {
     transition: none;
   }
 }

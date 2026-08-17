@@ -18,10 +18,11 @@ import LightBand from "@/components/ui/LightBand";
  * section followed by a separate call to action gives the page two endings,
  * and the second one always reads as the page not knowing when to stop.
  *
- * The grounds alternate, and the rule is that no two adjacent sections share
- * one. Paper for the two sections that are mostly reading, the lit dark band
- * for the two that are mostly looking. Three paper sections in a row would stop
- * being a joint in the page and start being a second website.
+ * The grounds alternate, and the rule is that no two adjacent sections may
+ * share one: dark, paper, dark, paper, dark, paper, dark. That constraint is
+ * what decides the order as much as the argument does. The services section
+ * moving to the dark ground for its glass cards is why the placed positions
+ * moved to paper and swapped places with it.
  */
 export default function Home() {
   return (
@@ -68,9 +69,9 @@ export default function Home() {
 
       <Stats />
 
-      <PlacedPositions />
-
       <StickyServices />
+
+      <PlacedPositions />
 
       <AskAI />
     </>

@@ -34,7 +34,9 @@ import GlowButton from "@/components/ui/GlowButton";
  *      watched being built rather than a hidden payload behind a button.
  *
  * The destinations take the prompt as a query parameter, which is a documented
- * entry point for all three. `noopener` on every outbound link.
+ * entry point for all three. `noopener` on every outbound link. They carry the
+ * house travelling edge light rather than a halo: three haloed pills in one row
+ * is a wall of bloom, and the point of light costs no brightness at all.
  */
 
 type Question = { chip: string; prompt: string };
@@ -135,7 +137,7 @@ export default function AskAI() {
 
   return (
     <section className="v-dark-band">
-      <div className="relative z-[1] mx-auto grid max-w-[1280px] gap-14 px-6 py-24 sm:py-32 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
+      <div className="relative z-[1] mx-auto grid max-w-[1280px] gap-14 px-6 py-24 sm:py-32 lg:grid-cols-[0.88fr_1.12fr] lg:gap-28 xl:gap-32">
         <div>
           <SectionHeading
             eyebrow="Due Diligence"
@@ -154,10 +156,10 @@ export default function AskAI() {
 
         {/* The composer. Glass, so it reads as a surface laid on the band
             rather than a box cut out of it. */}
-        <div className="g-glass g-ring-accent relative overflow-hidden rounded-[var(--radius)] p-7 sm:p-9">
-          <p className="v-eyebrow mb-5">Your question</p>
+        <div className="v-glass relative overflow-hidden p-7 sm:p-9">
+          <p className="v-eyebrow relative z-[2] mb-5">Your question</p>
 
-          <ul className="mb-7 flex flex-wrap gap-2">
+          <ul className="relative z-[2] mb-7 flex flex-wrap gap-2">
             {QUESTIONS.map((q, i) => (
               <li key={q.chip}>
                 <button
@@ -184,18 +186,18 @@ export default function AskAI() {
             ))}
           </ul>
 
-          <div className="v-well rounded-[calc(var(--radius)-0.35rem)] p-5">
+          <div className="relative z-[2] rounded-[calc(var(--radius)-0.35rem)] border border-[var(--v-border)] bg-black/25 p-5">
             <TypedPrompt text={prompt} reduced={reduced} />
           </div>
 
-          <div className="mt-7 flex flex-wrap items-center gap-2.5">
+          <div className="relative z-[2] mt-7 flex flex-wrap items-center gap-2.5">
             {DESTINATIONS.map((d) => (
               <a
                 key={d.label}
                 href={d.href(prompt)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="v-glow rounded-full border border-[var(--v-border-strong)] bg-white/[0.05] px-5 py-2.5 text-[length:var(--t-small)] font-semibold text-[var(--v-ink)] transition-colors duration-200 hover:border-[var(--v-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+                className="v-edge rounded-full px-5 py-2.5 text-[length:var(--t-small)] font-semibold text-[var(--v-ink)]/85 outline-none transition-colors duration-200 hover:text-[var(--v-ink)] focus-visible:ring-2 focus-visible:ring-[var(--v-ring)]"
               >
                 Ask {d.label}
                 <span className="sr-only"> (opens in a new tab)</span>

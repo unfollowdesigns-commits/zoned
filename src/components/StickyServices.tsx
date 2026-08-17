@@ -6,7 +6,6 @@ import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { SPRING_SOFT, useReducedMotion } from "@/lib/motion";
 import { SERVICES } from "@/lib/site";
-import LightBand from "@/components/ui/LightBand";
 import SectionHeading from "@/components/ui/SectionHeading";
 import StickyStack from "@/components/ui/StickyStack";
 import {
@@ -26,7 +25,14 @@ const GLYPHS = [
 ];
 
 /**
- * The services, as a stack that deals itself.
+ * The services, as a stack of glass that deals itself.
+ *
+ * The band is dark, and that is a requirement rather than a preference. These
+ * cards are glass, and glass needs something to refract: a translucent panel on
+ * a cream ground has nothing behind it to blur, no contrast for its lit rim to
+ * register against, and no way for its shadow to read. The paper version of
+ * this section looked flat because a pale card on a pale ground IS flat, and no
+ * amount of tuning the fill fixes it.
  *
  * The previous version pinned only the heading and let five cards scroll past
  * it, which is the weakest form of a sticky section: the pin is real but
@@ -53,8 +59,8 @@ export default function StickyServices() {
   const scaleY = useTransform(progress, (v) => (reduced ? 1 : v));
 
   return (
-    <LightBand>
-      <div className="mx-auto grid max-w-[1280px] gap-12 px-6 py-24 sm:py-32 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+    <section className="v-dark-band">
+      <div className="relative z-[1] mx-auto grid max-w-[1280px] gap-14 px-6 py-24 sm:py-32 lg:grid-cols-[0.78fr_1.22fr] lg:gap-28 xl:gap-32">
         {/* pinned rail */}
         <div className="v-sticky-rail">
           <SectionHeading
@@ -101,7 +107,7 @@ export default function StickyServices() {
                   animate="rest"
                   whileHover={reduced ? undefined : "hover"}
                   whileFocus={reduced ? undefined : "hover"}
-                  className="v-spotlight group relative overflow-hidden rounded-[var(--radius)] border border-[var(--v-border)] p-8 shadow-[0_2px_4px_-2px_rgba(18,21,31,0.08),0_24px_48px_-28px_rgba(18,21,31,0.28)] transition-colors duration-300 hover:border-[var(--v-primary)]/45 sm:p-10 bg-[linear-gradient(150deg,#ffffff_0%,#ffffff_52%,color-mix(in_srgb,var(--v-primary)_9%,#ffffff)_100%)]"
+                  className="v-glass v-spotlight group relative overflow-hidden p-8 transition-colors duration-300 sm:p-10"
                   onPointerMove={(e) => {
                     const el = e.currentTarget;
                     const r = el.getBoundingClientRect();
@@ -109,25 +115,25 @@ export default function StickyServices() {
                     el.style.setProperty("--my", `${e.clientY - r.top}px`);
                   }}
                 >
-                  <div className="flex items-start justify-between gap-6">
-                    <p className="text-[length:var(--t-small)] font-semibold tabular-nums text-[var(--v-primary-deep)]">
+                  <div className="relative z-[2] flex items-start justify-between gap-6">
+                    <p className="text-[length:var(--t-small)] font-semibold tabular-nums text-[var(--v-ring)]">
                       {String(i + 1).padStart(2, "0")}
                     </p>
                     <div
                       aria-hidden="true"
-                      className="pointer-events-none h-14 w-28 shrink-0 [color:var(--v-ink)]"
+                      className="pointer-events-none h-14 w-28 shrink-0 [color:var(--v-ring)]"
                     >
                       <Glyph />
                     </div>
                   </div>
 
-                  <h3 className="v-display mt-8 max-w-[14ch] text-[length:var(--t-title)] leading-[1.1]">
+                  <h3 className="v-display relative z-[2] mt-8 max-w-[14ch] text-[length:var(--t-title)] leading-[1.1]">
                     {service.label}
                   </h3>
 
                   <Link
                     href={service.href}
-                    className="mt-8 inline-flex items-center gap-2 rounded-full border border-[var(--v-border)] py-2.5 pl-5 pr-4 text-[length:var(--t-small)] font-medium transition-colors duration-200 hover:border-[var(--v-primary)] hover:text-[var(--v-primary-deep)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+                    className="relative z-[2] mt-8 inline-flex items-center gap-2 rounded-full border border-[var(--v-border-strong)] py-2.5 pl-5 pr-4 text-[length:var(--t-small)] font-medium text-[var(--v-ink)] transition-colors duration-200 hover:border-[var(--v-primary)] hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
                   >
                     <span className="sr-only">{service.label}: </span>
                     Explore
@@ -143,6 +149,6 @@ export default function StickyServices() {
           </StickyStack>
         </div>
       </div>
-    </LightBand>
+    </section>
   );
 }
