@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Familjen_Grotesk, Space_Grotesk } from "next/font/google";
+import { DM_Sans, Familjen_Grotesk, Space_Grotesk, Syne } from "next/font/google";
 import { Shell, Atmosphere } from "@/kit/components/Atmosphere";
 import { prePaintScript } from "@/lib/preload";
 import Preloader from "@/components/Preloader";
@@ -23,8 +23,21 @@ const label = Space_Grotesk({
   weight: ["500", "600", "700"],
 });
 
-const display = Familjen_Grotesk({
+/* Display: everything above 20px. Syne is a variable face across 400 to 800,
+   so one request covers the whole display range and there is no second file to
+   pay for when a heading wants more weight. */
+const display = Syne({
   variable: "--font-display-face",
+  subsets: ["latin"],
+});
+
+/* The wordmark keeps the face it was drawn against, and does not follow the
+   display face. The logo is a fixed asset: if it inherited --font-display then
+   every future type decision would silently redraw the brand mark, which is
+   exactly the kind of drift a lockup exists to prevent. Used only in
+   components/Logo.tsx. */
+const wordmark = Familjen_Grotesk({
+  variable: "--font-wordmark-face",
   subsets: ["latin"],
 });
 
@@ -38,7 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${body.variable} ${display.variable} ${label.variable} h-full antialiased`}
+      className={`${body.variable} ${display.variable} ${label.variable} ${wordmark.variable} h-full antialiased`}
     >
       <head>
         {/* Must be inline and synchronous. Anything deferred runs after the

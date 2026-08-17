@@ -106,7 +106,7 @@ export default function Logo({
       {/* The rule runs past the monogram top and bottom, as in the original. */}
       <rect x="330" y="0" width="15" height="293" fill="currentColor" />
 
-      <g fill="currentColor" fontFamily="var(--font-display)" fontWeight={500}>
+      <g fill="currentColor" fontFamily="var(--font-wordmark)" fontWeight={500}>
         <text x="415" y="150" fontSize="140" textLength={715} lengthAdjust="spacing">
           DISTRICT
         </text>

@@ -31,7 +31,7 @@
      lock into one shape. */
   --t-display-fluid: clamp(34px, 5vw, 76px);
   --lh-display-fluid: 0.98;
-  --tr-display-fluid: -0.032em;
+  --tr-display-fluid: -0.035em;
 
   --t-lede: 1.1875rem;   /* 19px */
   --t-action: 0.9375rem; /* 15px */
@@ -46,6 +46,8 @@
   --font-ui: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-display-face), var(--font-body-face), sans-serif;
   --font-label: var(--font-label-face), var(--font-body-face), sans-serif;
+  /* The logo's own face, pinned so the lockup never follows a type change. */
+  --font-wordmark: var(--font-wordmark-face), var(--font-body-face), sans-serif;
 
   /* The brand system specifies 8 to 10 percent on labels. That overrides the
      kit's 0.16em, which was tuned for a different face: Space Grotesk is wider
