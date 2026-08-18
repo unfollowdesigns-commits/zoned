@@ -101,6 +101,20 @@ const LEDE =
    the end. Shaped, but still spread. */
 const SCRUB = cubicBezier(0.65, 0, 0.35, 1);
 
+/* EVERY EASED RANGE BELOW ENDS WITH A HOLD POINT AT 1, and that is a
+   correctness fix rather than a style.
+
+   `useTransform` with a custom `ease` does not clamp the normalized input
+   before running the easing function. Given a range of [0, 0.16] and a scroll
+   progress of 1, the bezier is solved at t = 6.25, where it returns close to
+   zero again, so the mix comes back to its STARTING value. Measured: the
+   eyebrow and the lede faded correctly to 0.31 and 0.17 halfway through the
+   scrub and were both back at full opacity by the end, sitting on top of the
+   fullscreen video.
+
+   Writing each range as [0, x, 1] with the final output repeated keeps the
+   mapping monotonic past x, so a value that has finished stays finished. */
+
 /**
  * The card's resting size, in viewport units, per breakpoint.
  *
@@ -111,15 +125,21 @@ const SCRUB = cubicBezier(0.65, 0, 0.35, 1);
  * card that size is a pill.
  */
 const REST = {
-  /* `top` is the card's distance from the top of the viewport at rest, and it
-     exists because centring the card was the bug. A 64vh card centred spans
-     18vh to 82vh, and the headline above it lands between 13vh and 32vh, so the
-     two occupied the same band and the type sat across the card's corner. The
-     card is anchored from the top instead and starts below the headline. It is
-     also shorter at rest, because a card that starts nearly full height has
-     very little expanding left to do. */
-  mobile: { w: 88, h: 44, top: 42, radius: 22 },
-  desktop: { w: 72, h: 52, top: 36, radius: 34 },
+  /* `top` is the card's distance from the top of the viewport at rest.
+  
+     MEASURED, TWICE, BECAUSE GUESSING AT IT WAS WRONG BOTH TIMES. Centring the
+     card put it across the headline. Anchoring it at 36vh then put its top edge
+     at 389px while the lede still ran to 488px, so the paragraph lay over the
+     card's top-left corner from the very first frame, which is what "the text
+     placement is wrong" was.
+  
+     The type block ends around 49vh on a 900px viewport, so the card starts at
+     56vh with real air between them and nothing can overlap at rest. It is also
+     deliberately small: a card that begins at half the screen has very little
+     expanding left to do, and the transformation is the entire point of the
+     section. 40vh to 100vh is a change worth scrolling for. */
+  mobile: { w: 90, h: 30, top: 60, radius: 20 },
+  desktop: { w: 66, h: 40, top: 56, radius: 28 },
 };
 
 function useRest() {
@@ -154,9 +174,9 @@ function Echo({
   const end = 0.32;
   const opts = { ease: SCRUB } as const;
 
-  const scale = useTransform(progress, [0, end], [1 - depth * 0.05, 1], opts);
-  const y = useTransform(progress, [0, end], [depth * 26, 0], opts);
-  const opacity = useTransform(progress, [0, end * 0.85], [0.55 - depth * 0.2, 0], opts);
+  const scale = useTransform(progress, [0, end, 1], [1 - depth * 0.05, 1, 1], opts);
+  const y = useTransform(progress, [0, end, 1], [depth * 26, 0, 0], opts);
+  const opacity = useTransform(progress, [0, end * 0.85, 1], [0.55 - depth * 0.2, 0, 0], opts);
 
   return (
     <motion.div
@@ -192,13 +212,27 @@ export default function CinematicHero() {
 
   const opts = { ease: SCRUB } as const;
 
-  /* ---- Geometry: the card growing to the edges ------------------------- */
-  const w = useTransform(scrollYProgress, [0, 0.86], [rest.w, 100], opts);
-  const h = useTransform(scrollYProgress, [0, 0.86], [rest.h, 100], opts);
+  /* ---- Geometry: the card growing to the edges -------------------------
+  
+     The expansion runs to 0.94, not 0.86. Measured against the wrapper's real
+     bounds, the earlier end put the card at 1438 of 1440px by four fifths of
+     the way through, so the last fifth of a 360vh section had nothing left to
+     do and the visitor was scrolling a section that had already finished. The
+     rim and the shadow follow it out on the same schedule, and only the
+     supporting row is left to arrive after that. */
+  const w = useTransform(scrollYProgress, [0, 0.94, 1], [rest.w, 100, 100], opts);
+  const h = useTransform(scrollYProgress, [0, 0.94, 1], [rest.h, 100, 100], opts);
   /* The card rises to the top of the viewport as it grows, so it opens upward
      and outward from where it sat rather than inflating around a fixed centre. */
-  const t = useTransform(scrollYProgress, [0, 0.86], [rest.top, 0], opts);
-  const radius = useTransform(scrollYProgress, [0, 0.8], [rest.radius, 0], opts);
+  const t = useTransform(scrollYProgress, [0, 0.94, 1], [rest.top, 0, 0], opts);
+  const radius = useTransform(scrollYProgress, [0, 0.9, 1], [rest.radius, 0, 0], opts);
+  /* Elevation while it is an object, none once it is the screen. Interpolated
+     through a template so the shadow softens out rather than switching off. */
+  const shadowAlpha = useTransform(scrollYProgress, [0, 0.86, 1], [0.55, 0, 0], opts);
+  const shadowBlur = useTransform(scrollYProgress, [0, 0.86, 1], [90, 0, 0], opts);
+  const cardShadow = useMotionTemplate`0 40px ${shadowBlur}px -30px rgba(0,0,0,${shadowAlpha})`;
+  const rimOpacity = useTransform(scrollYProgress, [0, 0.88, 1], [1, 0, 0], opts);
+
   const width = useMotionTemplate`${w}vw`;
   const height = useMotionTemplate`${h}vh`;
   const top = useMotionTemplate`${t}vh`;
@@ -219,9 +253,9 @@ export default function CinematicHero() {
      
      It still travels down into the image as the card opens. Only the colour
      handover is gone. */
-  const titleY = useTransform(scrollYProgress, [0, 0.74], ["0vh", "52vh"], opts);
-  const titleScale = useTransform(scrollYProgress, [0, 0.74], [0.96, 1], opts);
-  const eyebrowOpacity = useTransform(scrollYProgress, [0, 0.16], [1, 0], opts);
+  const titleY = useTransform(scrollYProgress, [0, 0.74, 1], ["0vh", "52vh", "52vh"], opts);
+  const titleScale = useTransform(scrollYProgress, [0, 0.74, 1], [0.96, 1, 1], opts);
+  const eyebrowOpacity = useTransform(scrollYProgress, [0, 0.16, 1], [1, 0, 0], opts);
   /* The lede reads at rest and leaves as the card opens.
   
      It belongs at the top, not at the end: it is the sentence that explains why
@@ -238,7 +272,7 @@ export default function CinematicHero() {
      move as one. It fades a little later than the headline's own handover so
      the paragraph is gone before the image edge reaches it, which is the only
      part that needs to differ. */
-  const ledeOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0], opts);
+  const ledeOpacity = useTransform(scrollYProgress, [0, 0.2, 1], [1, 0, 0], opts);
 
   /* ---- Supporting content --------------------------------------------- */
   /* Arrives only in the last quarter, once the image is effectively full bleed.
@@ -295,7 +329,7 @@ export default function CinematicHero() {
         <Echo progress={scrollYProgress} depth={2} rest={rest} />
         <Echo progress={scrollYProgress} depth={1} rest={rest} />
 
-        {/* The card. Centred, growing to the viewport on both axes. */}
+        {/* The card, growing to the viewport on both axes. */}
         <motion.div
           className="absolute left-1/2 overflow-hidden"
           style={{
@@ -304,10 +338,27 @@ export default function CinematicHero() {
             height,
             borderRadius: radius,
             x: "-50%",
+            boxShadow: cardShadow,
             willChange: "width, height, top, border-radius",
           }}
         >
           <Media y={imageY} scale={imageScale} />
+          {/* A lit rim while it is a card, gone by the time it is the screen.
+              Without it the card is a dark rectangle on a dark ground with no
+              visible edge, so there is no object for the expansion to be an
+              expansion OF: the section reads as a video fading up rather than
+              as a frame opening. It has to leave, though. A border around a
+              full-bleed hero is a mistake, so it fades with the radius. */}
+          <motion.span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              borderRadius: radius,
+              opacity: rimOpacity,
+              boxShadow:
+                "inset 0 0 0 1px rgba(255,255,255,0.16), inset 0 1px 0 0 rgba(255,255,255,0.22)",
+            }}
+          />
         </motion.div>
 
         {/* Type sits above the card and is not clipped by it. */}
