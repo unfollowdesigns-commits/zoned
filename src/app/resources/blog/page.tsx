@@ -2,21 +2,42 @@ import type { Metadata } from "next";
 import Link from "@/components/SiteLink";
 import PageHero from "@/components/ui/PageHero";
 import Reveal from "@/components/Reveal";
-import { BLOG_POSTS } from "@/lib/site";
+import PostArt from "@/components/ui/PostArt";
+import BlogArchive from "@/components/BlogArchive";
+import LightBand from "@/components/ui/LightBand";
+import { BLOG_POSTS_BY_DATE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Blog | District Partners",
   description: "Articles and announcements from District Partners.",
 };
 
+/**
+ * The blog index: a promoted stack, then a filterable archive.
+ *
+ * THE SHAPE IS TWO REGISTERS, NOT ONE LONG LIST. An archive presented as a
+ * uniform grid asks the reader to evaluate twelve equally-weighted things,
+ * which is work, and most leave rather than do it. Promoting a few pieces to
+ * full width and letting the rest sit in a grid does the first cut for them:
+ * here is what we would put in front of you, and here is everything else if
+ * you would rather choose yourself.
+ *
+ * The promoted cards carry their headline ON the art at display size, so the
+ * top of the page reads as three statements rather than as three thumbnails
+ * with captions. That is the single thing that separates a publication's index
+ * from a list of links.
+ */
 export default function BlogPage() {
-  const [lead, ...rest] = BLOG_POSTS;
+  const featured = BLOG_POSTS_BY_DATE.filter((p) => p.featured);
+  /* Everything not promoted, so no post appears twice on the page. */
+  const rest = BLOG_POSTS_BY_DATE.filter((p) => !p.featured);
 
   return (
     <>
       <PageHero
         eyebrow="Resources"
         title="Blog"
+        standfirst="What we are seeing across senior search, interim leadership and the market for talent."
         crumbs={[
           { label: "Home", href: "/" },
           { label: "Resources", href: "/resources" },
@@ -24,46 +45,103 @@ export default function BlogPage() {
         ]}
       />
 
-      <section className="mx-auto max-w-[1280px] px-6 py-16 sm:py-20">
-        {/* promoted lead */}
-        <Reveal>
-          <Link
-            href={`/resources/blog/${lead.slug}`}
-            className="g-glass g-ring-accent group block overflow-hidden p-8 sm:p-10"
-          >
-            <p className="v-eyebrow mb-4">Latest</p>
-            <h2 className="v-display max-w-[24ch] text-[length:var(--t-display-fluid)] leading-[1.15] transition-colors duration-200 group-hover:text-[var(--v-primary)]">
-              {lead.title}
-            </h2>
-            <p className="mt-5 text-[length:var(--t-small)] text-[var(--v-muted)]">
-              <time dateTime={lead.iso}>{lead.date}</time>
-            </p>
-          </Link>
-        </Reveal>
-
-        {/* ledger rows with the date in a left rail */}
-        <ul className="mt-14 border-t border-[var(--v-border)]">
-          {rest.map((post, i) => (
-            <li key={post.slug} className="border-b border-[var(--v-border)]">
-              <Reveal delay={Math.min(i * 0.07, 0.3)}>
-                <Link
-                  href={`/resources/blog/${post.slug}`}
-                  className="group flex flex-col gap-2 py-7 transition-colors duration-200 hover:bg-white/[0.03] sm:flex-row sm:items-baseline sm:gap-10 sm:px-4"
-                >
-                  <time
-                    dateTime={post.iso}
-                    className="shrink-0 text-[length:var(--t-small)] tabular-nums text-[var(--v-muted)] sm:w-28"
+      <LightBand>
+        <div className="mx-auto max-w-[1280px] px-6 py-16 sm:py-20">
+          {/* ---- Promoted stack ------------------------------------------- */}
+          <ul className="flex flex-col gap-8">
+            {featured.map((post, i) => (
+              <li key={post.slug}>
+                <Reveal delay={Math.min(i * 0.08, 0.24)}>
+                  <Link
+                    href={`/resources/blog/${post.slug}`}
+                    className="v-lift group block overflow-hidden rounded-[var(--radius)]"
                   >
-                    {post.date}
-                  </time>
-                  <span className="v-display max-w-[52ch] text-[length:var(--t-heading)] leading-[1.35] transition-colors duration-200 group-hover:text-[var(--v-primary)] sm:text-[length:var(--t-heading)]">
-                    {post.title}
-                  </span>
-                </Link>
-              </Reveal>
-            </li>
-          ))}
-        </ul>
+                    <div className="relative aspect-[16/9] sm:aspect-[21/8]">
+                      <PostArt slug={post.slug} />
+
+                      <span className="absolute left-6 top-6 rounded-full bg-black/35 px-3 py-1 text-[length:var(--t-label)] font-medium uppercase tracking-[0.1em] text-white/80 backdrop-blur-sm">
+                        {post.category}
+                      </span>
+
+                      {/* The headline sits on the art, bottom-left, inside a max
+                          measure so it never runs the full width of a 21:8 card
+                          and becomes a single unreadable line. */}
+                      <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
+                        <h2
+                          className="v-display max-w-[20ch] text-balance text-white transition-colors duration-200 group-hover:text-[var(--v-primary-soft,#a9c4ff)]"
+                          style={{
+                            fontSize: "clamp(22px, 2.6vw, 40px)",
+                            lineHeight: 1.15,
+                            letterSpacing: "-0.02em",
+                          }}
+                        >
+                          {post.title}
+                        </h2>
+                        <p className="mt-4 flex items-center gap-2 text-[length:var(--t-small)] text-white/60">
+                          <time dateTime={post.iso}>{post.date}</time>
+                          <span aria-hidden="true">·</span>
+                          <span>{post.readMinutes} min read</span>
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                </Reveal>
+              </li>
+            ))}
+          </ul>
+
+          {/* ---- Archive --------------------------------------------------- */}
+          {rest.length > 0 && (
+            <div className="mt-20 border-t border-[var(--v-border)] pt-12">
+              <BlogArchive posts={rest} />
+            </div>
+          )}
+        </div>
+      </LightBand>
+
+      {/* ---- Newsletter ------------------------------------------------- */}
+      <section className="mx-auto max-w-[1280px] px-6 py-20 sm:py-24">
+        <Reveal>
+          <div className="mx-auto max-w-[46ch] text-center">
+            <p className="v-eyebrow">Subscribe</p>
+            <h2
+              className="v-display mt-4 text-balance"
+              style={{
+                fontSize: "var(--t-display-fluid)",
+                lineHeight: "var(--lh-display-fluid)",
+                letterSpacing: "var(--tr-display-fluid)",
+              }}
+            >
+              Get the latest in your inbox.
+            </h2>
+            <form
+              /* No handler yet: this posts nowhere until there is a list to post
+                 to. Left as a real form rather than a decorative one so wiring
+                 it up is a single action attribute, and so it is keyboard and
+                 screen-reader complete in the meantime. */
+              className="mt-8 flex flex-col gap-3 sm:flex-row"
+            >
+              <label htmlFor="newsletter-email" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="newsletter-email"
+                type="email"
+                name="email"
+                required
+                autoComplete="email"
+                placeholder="Email address"
+                className="min-w-0 flex-1 rounded-full border border-[var(--v-border)] bg-transparent px-5 py-3 text-[length:var(--t-small)] outline-none transition-colors duration-200 placeholder:text-[var(--v-muted)]/70 focus-visible:border-[var(--v-primary)]"
+              />
+              <button
+                type="submit"
+                className="rounded-full bg-[var(--v-primary)] px-6 py-3 text-[length:var(--t-small)] font-medium text-white transition-transform duration-200 hover:scale-[1.02] active:scale-[0.99]"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        </Reveal>
       </section>
     </>
   );

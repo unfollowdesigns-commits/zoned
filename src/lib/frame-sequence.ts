@@ -6,8 +6,8 @@
  * Firing 120 requests at once does not make them arrive sooner. The browser
  * caps parallel connections per origin, and over HTTP/2 you get one connection
  * whose flow-control window is then shared 120 ways, so every frame arrives
- * slowly and in an order nobody chose. Frame 1 — the only one needed to render
- * anything at all — finishes alongside frame 120. A small concurrency window
+ * slowly and in an order nobody chose. Frame 1, the only one needed to render
+ * anything at all, finishes alongside frame 120. A small concurrency window
  * means early frames land first and the sequence becomes drawable early.
  *
  * AND WHY `decode()` RATHER THAN `onload`.

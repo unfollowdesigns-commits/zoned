@@ -25,7 +25,7 @@ import { useReducedMotion } from "@/lib/motion";
  *
  *   2. SEEKING IS ASYNCHRONOUS AND COALESCED. `currentTime = x` is a request,
  *      not a draw. The browser services it whenever the demuxer is ready and
- *      is free to drop requests that arrive while one is in flight — which,
+ *      is free to drop requests that arrive while one is in flight, which,
  *      during a scroll, is all of them. The picture therefore trails the
  *      scroll and then snaps, and no amount of smoothing on your side fixes it
  *      because the lag is downstream of your code.
@@ -54,8 +54,9 @@ import { useReducedMotion } from "@/lib/motion";
  * NO LAYOUT READS IN THE LOOP. Geometry is measured in a ResizeObserver and
  * cached. The loop reads `scrollY` and writes to a canvas, and a canvas draw
  * does not invalidate layout, so nothing in the frame can force a synchronous
- * reflow. Measuring the wrapper inside the loop — `getBoundingClientRect()` on
- * every tick — is what makes most implementations of this stutter under load.
+ * reflow. Measuring the wrapper inside the loop, calling
+ * `getBoundingClientRect()` on every tick, is what makes most implementations
+ * of this stutter under load.
  */
 
 export type SequenceOverlay = {
@@ -253,7 +254,7 @@ export default function ScrollSequence({
         el.style.opacity = String(next);
         /* A short rise as it arrives. Transform and opacity only: both are
            composited, so an overlay costs no layout and no paint. */
-        el.style.transform = `translate3d(0, ${((1 - next) * 16).toFixed(2)}px, 0)`;
+        el.style.transform = `translate3d(0, ${(1 - next) * 16}px, 0)`;
         /* Not just tidiness. A transparent element is still composited and
            still hit-tested; `hidden` takes it out of both. */
         el.style.visibility = next < 0.01 ? "hidden" : "visible";
@@ -277,7 +278,7 @@ export default function ScrollSequence({
          whose real frame time exceeds it has its easing slowed by exactly the
          ratio between the two: at 0.05 a phone struggling along at 10fps
          (dt = 0.1) advances at half rate, so the scrub falls further behind the
-         longer you scroll — the failure mode lands hardest on the devices least
+         longer you scroll. The failure mode lands hardest on the devices least
          able to absorb it. 0.1 covers everything down to 10fps honestly and
          still catches the multi-second delta a backgrounded tab produces. */
       const dt = lastTime ? Math.min((time - lastTime) / 1000, 0.1) : 1 / 60;
@@ -336,7 +337,7 @@ export default function ScrollSequence({
        mis-registration rather than a crash.
 
        `m.top` is this section's offset from the top of the document, so it
-       depends on the height of everything ABOVE it — none of which changes this
+       depends on the height of everything ABOVE it, none of which changes this
        section's own box. A web font swapping in and reflowing the lead-in, an
        image arriving without a reserved aspect ratio, an accordion opening: any
        of those move the section without resizing it, the wrapper's observer
@@ -349,8 +350,8 @@ export default function ScrollSequence({
     window.addEventListener("resize", kick, { passive: true });
     window.addEventListener("scroll", kick, { passive: true });
     /* Named, not an inline arrow, so it can actually be removed again. An
-       anonymous handler here leaks the whole effect closure — frames, canvas
-       context and all — for the life of the document on every remount. */
+       anonymous handler here leaks the whole effect closure, frames and canvas
+       context and all, for the life of the document on every remount. */
     const onOrientation = () => {
       measure();
       kick();
@@ -419,7 +420,7 @@ export default function ScrollSequence({
         />
 
         {/* Overlays. Positioned once, animated only via opacity and transform
-            written directly from the loop — never through React state, which at
+            written directly from the loop, never through React state, which at
             60fps would re-render the tree sixty times a second to change one
             number. */}
         {overlays.map((o, i) => (
@@ -468,7 +469,7 @@ export default function ScrollSequence({
                   {failed ? "Unavailable" : "Loading"}
                 </span>
                 {!failed && (
-                  <span className="text-[13px] tabular-nums text-white/40">
+                  <span className="text-[length:var(--t-small)] tabular-nums text-white/40">
                     {Math.round(progress * 100)}%
                   </span>
                 )}
