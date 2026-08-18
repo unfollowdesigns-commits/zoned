@@ -6,7 +6,10 @@ import NavLedger from "@/components/ui/NavLedger";
 import AwaitingCopy from "@/components/ui/AwaitingCopy";
 import { COMPANY } from "@/lib/site";
 
-const CHILDREN = COMPANY.filter((c) => c.href !== "/about");
+/* Filtered on the prefix, not on "not the index". COMPANY now carries an entry
+   that lives at the top level and has its own route, and the old test would have
+   generated a second, empty /about/the-dp-difference page for it. */
+const CHILDREN = COMPANY.filter((c) => c.href.startsWith("/about/"));
 
 function find(slug: string) {
   return CHILDREN.find((c) => c.href === `/about/${slug}`);

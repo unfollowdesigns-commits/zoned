@@ -93,6 +93,11 @@ export const NEW_TOOLS: NavItem[] = [
 
 export const COMPANY: NavItem[] = [
   { label: "About Us", href: "/about" },
+  /* Lives at the top level rather than under /about because it is a positioning
+     page rather than a fact about the company, and because it has its own hand
+     built route. Anything consuming this list to generate /about/[slug] pages
+     must therefore filter on the /about/ prefix rather than assume it. */
+  { label: "The DP Difference", href: "/the-dp-difference", icon: "brackets" },
   { label: "Meet Our Team", href: "/about/team" },
   { label: "Accolades", href: "/about/accolades" },
   { label: "Careers at DP", href: "/about/careers" },

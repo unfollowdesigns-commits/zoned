@@ -22,6 +22,7 @@ export default function SectionHeading({
   turn,
   lede,
   align = "left",
+  size = "full",
   className = "",
   as: Tag = "h2",
 }: {
@@ -31,10 +32,25 @@ export default function SectionHeading({
   turn?: React.ReactNode;
   lede?: React.ReactNode;
   align?: "left" | "center";
+  /**
+   * "full" is the section title sized for a heading that owns the page's whole
+   * measure. "column" steps it down for a heading that shares a row with
+   * something else.
+   *
+   * THIS IS NOT A STYLE KNOB, IT IS THE MISSING HALF OF THE TOKEN. A display
+   * size is only correct relative to the width it is given: `--t-display-fluid`
+   * scales with the viewport, not with the container, so the same 64px that
+   * reads as confident across a 1280px measure wraps to four lines and swamps
+   * everything beside it in a half width column. Two sections hit this before
+   * it was worth naming, and both had been patched with a hand-written clamp,
+   * which is exactly the per-page drift this component exists to prevent.
+   */
+  size?: "full" | "column";
   className?: string;
   as?: "h1" | "h2" | "h3";
 }) {
   const centred = align === "center";
+  const columnar = size === "column";
 
   return (
     <div className={`${centred ? "mx-auto text-center" : ""} ${className}`}>
@@ -45,7 +61,20 @@ export default function SectionHeading({
       )}
 
       <Reveal delay={eyebrow ? 0.07 : 0}>
-        <Tag className={`v-section-title ${centred ? "mx-auto max-w-[20ch]" : "max-w-[18ch]"}`}>
+        <Tag
+          /* The measure widens as the size steps down. 18ch is tuned to the
+             full display step; holding it at a smaller size just forces the
+             same number of wraps out of shorter lines, which was the actual
+             cause of the four line heading, not the font size. */
+          className={`v-section-title ${
+            centred ? "mx-auto max-w-[20ch]" : columnar ? "max-w-[23ch]" : "max-w-[18ch]"
+          }`}
+          style={
+            columnar
+              ? { fontSize: "clamp(28px, 3.2vw, 46px)", lineHeight: 1.08, letterSpacing: "-0.028em" }
+              : undefined
+          }
+        >
           {title}
           {turn && (
             <>
@@ -60,9 +89,9 @@ export default function SectionHeading({
       {lede && (
         <Reveal delay={0.14}>
           <p
-            className={`mt-8 text-[length:var(--t-lede)] leading-[1.65] text-[var(--v-muted)] ${
-              centred ? "mx-auto max-w-[58ch]" : "max-w-[52ch]"
-            }`}
+            className={`text-[length:var(--t-lede)] leading-[1.65] text-[var(--v-muted)] ${
+              columnar ? "mt-6" : "mt-8"
+            } ${centred ? "mx-auto max-w-[58ch]" : "max-w-[52ch]"}`}
           >
             {lede}
           </p>
