@@ -8,21 +8,25 @@ import { SPRING_SOFT, useReducedMotion } from "@/lib/motion";
 import { SERVICES } from "@/lib/site";
 import SectionHeading from "@/components/ui/SectionHeading";
 import StickyStack from "@/components/ui/StickyStack";
-import {
-  ExecutiveSearchGlyph,
-  ProfessionalSearchGlyph,
-  InterimGlyph,
-  FractionalGlyph,
-  ProjectSupportGlyph,
-} from "./ServiceGlyphs";
+import { ICONS } from "@/components/icons";
 
-const GLYPHS = [
-  ExecutiveSearchGlyph,
-  ProfessionalSearchGlyph,
-  InterimGlyph,
-  FractionalGlyph,
-  ProjectSupportGlyph,
-];
+/* THE FIVE BESPOKE GLYPHS ARE GONE, and what replaced them is the icon the
+   service already carries in lib/site.ts.
+
+   They were drawn as little scenes: a reticle closing on a candidate, a
+   skeleton of rows, a segmented bar. Each mixed the accent blue with
+   `currentColor` at 12 to 28 percent alpha, and on a dark card that alpha
+   renders as pale grey. The result was not a diagram, it was a row of white
+   blobs in the corner: card one read as a loading spinner and card two as a
+   skeleton screen that had failed to load. A mark nobody can identify is worse
+   than no mark, because the reader spends attention deciding it means nothing.
+
+   They also carried real rot: a hardcoded `rgba(6,8,20,0.9)` that only worked
+   on one ground, and a `<text>` element at `fontSize={0}`.
+
+   One icon, one colour, in the same tinted well used by the specializations
+   tiles, is quieter and says more. It is also the same drawing the visitor has
+   already seen against this service in the navigation. */
 
 /**
  * The services, as a stack of glass that deals itself.
@@ -99,7 +103,7 @@ export default function StickyServices() {
         <div ref={trackRef}>
           <StickyStack>
             {SERVICES.map((service, i) => {
-              const Glyph = GLYPHS[i];
+              const Icon = service.icon ? ICONS[service.icon] : undefined;
               return (
                 <motion.article
                   key={service.href}
@@ -119,12 +123,18 @@ export default function StickyServices() {
                     <p className="text-[length:var(--t-small)] font-semibold tabular-nums text-[var(--v-ring)]">
                       {String(i + 1).padStart(2, "0")}
                     </p>
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none h-14 w-28 shrink-0 [color:var(--v-ring)]"
-                    >
-                      <Glyph />
-                    </div>
+                    {Icon && (
+                      /* Fills solid on hover, driven by the card's own `group`,
+                         so a pointer and a keyboard focus produce the same
+                         thing. Colour only: no transform, so the mark cannot
+                         jitter against the card's own lift. */
+                      <span
+                        aria-hidden="true"
+                        className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--v-primary)]/14 text-[var(--v-primary)] transition-colors duration-300 group-hover:bg-[var(--v-primary)] group-hover:text-white"
+                      >
+                        <Icon size={19} strokeWidth={1.75} />
+                      </span>
+                    )}
                   </div>
 
                   <h3 className="v-display relative z-[2] mt-8 max-w-[14ch] text-[length:var(--t-title)] leading-[1.1]">
