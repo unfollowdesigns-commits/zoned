@@ -220,22 +220,52 @@ export default function CinematicHero() {
      do and the visitor was scrolling a section that had already finished. The
      rim and the shadow follow it out on the same schedule, and only the
      supporting row is left to arrive after that. */
-  const w = useTransform(scrollYProgress, [0, 0.94, 1], [rest.w, 100, 100], opts);
-  const h = useTransform(scrollYProgress, [0, 0.94, 1], [rest.h, 100, 100], opts);
-  /* The card rises to the top of the viewport as it grows, so it opens upward
-     and outward from where it sat rather than inflating around a fixed centre. */
-  const t = useTransform(scrollYProgress, [0, 0.94, 1], [rest.top, 0, 0], opts);
-  const radius = useTransform(scrollYProgress, [0, 0.9, 1], [rest.radius, 0, 0], opts);
-  /* Elevation while it is an object, none once it is the screen. Interpolated
-     through a template so the shadow softens out rather than switching off. */
-  const shadowAlpha = useTransform(scrollYProgress, [0, 0.86, 1], [0.55, 0, 0], opts);
-  const shadowBlur = useTransform(scrollYProgress, [0, 0.86, 1], [90, 0, 0], opts);
-  const cardShadow = useMotionTemplate`0 40px ${shadowBlur}px -30px rgba(0,0,0,${shadowAlpha})`;
-  const rimOpacity = useTransform(scrollYProgress, [0, 0.88, 1], [1, 0, 0], opts);
+  /* THE CARD IS CLIPPED OPEN, NOT RESIZED, AND THAT IS A CORRECTNESS FIX.
 
-  const width = useMotionTemplate`${w}vw`;
-  const height = useMotionTemplate`${h}vh`;
-  const top = useMotionTemplate`${t}vh`;
+     This used to animate `width`, `height` and `top`. Those are layout
+     properties: every scroll frame re-ran layout for the card and everything
+     inside it, which is the video, the tint, the shade gradient and the rim.
+     Measured, the homepage scored 0.39 cumulative layout shift and every event
+     came from this element, while /the-dp-difference and /resources/blog, which
+     have the same reveals, glow and gradients but no hero, both scored exactly
+     zero. It was this, on its own.
+
+     A clip does the same picture without the cost. The element is always the
+     full viewport and always laid out once; only the visible rectangle changes,
+     which touches paint and compositing but never layout. `inset()` also takes
+     a `round`, so the corner radius comes along for free instead of needing its
+     own animated property.
+
+     The rest state maps onto insets directly: the card sits `rest.top` from the
+     top, so the bottom inset is whatever is left under it, and the side insets
+     are half the width it is not using. */
+  const clipTop = useTransform(scrollYProgress, [0, 0.94, 1], [rest.top, 0, 0], opts);
+  const clipBottom = useTransform(
+    scrollYProgress,
+    [0, 0.94, 1],
+    [100 - rest.top - rest.h, 0, 0],
+    opts,
+  );
+  const clipSide = useTransform(
+    scrollYProgress,
+    [0, 0.94, 1],
+    [(100 - rest.w) / 2, 0, 0],
+    opts,
+  );
+  const radius = useTransform(scrollYProgress, [0, 0.9, 1], [rest.radius, 0, 0], opts);
+
+  const cardClip = useMotionTemplate`inset(${clipTop}vh ${clipSide}vw ${clipBottom}vh ${clipSide}vw round ${radius}px)`;
+
+  /* The rim is a second clip one pixel larger on every side, sitting behind the
+     media, so a hairline of it shows around the opening.
+
+     It has to be done this way. An inset box-shadow or a border is painted on
+     the element's own border box, which here is the whole viewport, and the
+     clip then throws that ring away. Two clips one pixel apart is the only way
+     to draw an edge that follows a clipped shape without going back to
+     animating the box itself. */
+  const rimClip = useMotionTemplate`inset(calc(${clipTop}vh - 1px) calc(${clipSide}vw - 1px) calc(${clipBottom}vh - 1px) calc(${clipSide}vw - 1px) round ${radius}px)`;
+  const rimOpacity = useTransform(scrollYProgress, [0, 0.88, 1], [1, 0, 0], opts);
 
   /* ---- The image inside it -------------------------------------------- */
   /* Over-scaled at rest and settling to 1, so the photograph is always being
@@ -329,36 +359,35 @@ export default function CinematicHero() {
         <Echo progress={scrollYProgress} depth={2} rest={rest} />
         <Echo progress={scrollYProgress} depth={1} rest={rest} />
 
-        {/* The card, growing to the viewport on both axes. */}
+        {/* The rim, one pixel proud of the card on every side and behind it, so
+            only a hairline shows.
+
+            Without an edge the card is a dark rectangle on a dark ground and
+            there is no object for the expansion to be an expansion OF: the
+            section reads as a video fading up rather than as a frame opening.
+            It has to leave, though. A border around a full-bleed hero is a
+            mistake, so it fades out with the radius. */}
+        <motion.span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-white/20"
+          style={{ clipPath: rimClip, WebkitClipPath: rimClip, opacity: rimOpacity }}
+        />
+
+        {/* The card. Always the full viewport, opened by its clip. */}
         <motion.div
-          className="absolute left-1/2 overflow-hidden"
+          className="absolute inset-0"
           style={{
-            top,
-            width,
-            height,
-            borderRadius: radius,
-            x: "-50%",
-            boxShadow: cardShadow,
-            willChange: "width, height, top, border-radius",
+            clipPath: cardClip,
+            WebkitClipPath: cardClip,
+            /* `clip-path` only. Naming the old layout properties here would
+               promote the layer for changes that no longer happen, and
+               `will-change` on a property that is not animating is worse than
+               omitting it: it costs the memory of a promoted layer and buys
+               nothing. */
+            willChange: "clip-path",
           }}
         >
           <Media y={imageY} scale={imageScale} />
-          {/* A lit rim while it is a card, gone by the time it is the screen.
-              Without it the card is a dark rectangle on a dark ground with no
-              visible edge, so there is no object for the expansion to be an
-              expansion OF: the section reads as a video fading up rather than
-              as a frame opening. It has to leave, though. A border around a
-              full-bleed hero is a mistake, so it fades with the radius. */}
-          <motion.span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              borderRadius: radius,
-              opacity: rimOpacity,
-              boxShadow:
-                "inset 0 0 0 1px rgba(255,255,255,0.16), inset 0 1px 0 0 rgba(255,255,255,0.22)",
-            }}
-          />
         </motion.div>
 
         {/* Type sits above the card and is not clipped by it. */}

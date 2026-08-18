@@ -96,7 +96,16 @@ export default function MaskText({
             }}
           >
             <motion.span
-              style={{ display: "inline-block", willChange: "transform" }}
+              style={{
+                display: "inline-block",
+                /* RELEASED ONCE IT HAS LANDED. `will-change` is a promise that
+                   something is about to move, and the browser pays for it by
+                   holding a composited layer. Left on permanently it becomes a
+                   lie: every word of every heading on the page keeps its own
+                   layer forever, which measured at 84 of them on the homepage,
+                   for an animation each one runs exactly once. */
+                willChange: shown ? "auto" : "transform",
+              }}
               /* Identical on server and client, so the two renders agree.
                  Branching on the motion preference to emit different markup is
                  what leaves elements hidden forever. */

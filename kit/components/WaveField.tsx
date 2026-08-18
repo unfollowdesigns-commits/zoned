@@ -167,6 +167,17 @@ export function WaveField({ height = 0.86, opacity = 1, className }: WaveFieldPr
         left: 0,
         bottom: 0,
         width: "100%",
+        /* THE HEIGHT IS SET HERE AS WELL AS IN `resize`, and leaving it out was
+           a measurable layout shift rather than an untidiness. A canvas with no
+           CSS height falls back to its intrinsic 150px, paints at that size, and
+           then jumps to full height the moment the effect runs. It is `fixed`,
+           so nothing else on the page moves with it, but the element itself
+           resizing in the viewport is still a shift and was scoring 0.125 on
+           the homepage on its own.
+
+           Stated as vh so the first paint already matches what `resize` will
+           compute, which makes the later assignment a no-op instead of a jump. */
+        height: `${height * 100}vh`,
         zIndex: -3,
         pointerEvents: "none",
         opacity,
