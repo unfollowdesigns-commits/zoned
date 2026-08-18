@@ -455,9 +455,26 @@ function Media({
   scale?: MotionValue<number>;
 }) {
   return (
+    /* THE MEDIA LAYER IS OVERSIZED, AND IT HAS TO BE.
+
+       This was `inset-0`, exactly the card's box, and then translated by the
+       parallax. A layer that is precisely the size of its frame cannot be moved
+       within that frame without uncovering the edge it moves away from: at the
+       end of the scrub the translate is -3%, so on a 900px viewport the video
+       sat from -27 to 873 and left a 27px strip of bare ground along the bottom
+       of an otherwise full-bleed hero, right where it meets the next section.
+       Measured, not guessed: card 0 to 900, video -27 to 873.
+
+       Scale did not save it either. The scale runs 1.18 down to 1, so it is
+       largest exactly where the translation is smallest and offers nothing at
+       the end where the gap opens.
+
+       5% against a travel of 3% leaves margin at both extremes, and the card
+       clips the excess, so the only visible consequence is that the frame is
+       cropped very slightly tighter. */
     <motion.div
-      className="absolute inset-0 bg-[linear-gradient(155deg,#1b2438_0%,#101728_52%,#0a0e1b_100%)]"
-      style={{ y, scale, willChange: "transform" }}
+      className="absolute bg-[linear-gradient(155deg,#1b2438_0%,#101728_52%,#0a0e1b_100%)]"
+      style={{ inset: "-5%", y, scale, willChange: "transform" }}
     >
       <video
         className="absolute inset-0 h-full w-full object-cover"
