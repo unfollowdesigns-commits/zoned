@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Familjen_Grotesk, Space_Grotesk, Archivo } from "next/font/google";
+import { DM_Sans, Familjen_Grotesk, Lora, Archivo } from "next/font/google";
 import { Shell, Atmosphere } from "@/kit/components/Atmosphere";
 import { prePaintScript } from "@/lib/preload";
 import Preloader from "@/components/Preloader";
@@ -16,25 +16,31 @@ const body = DM_Sans({
   subsets: ["latin"],
 });
 
-/* Eyebrows and labels only. Never used for body or display. */
-const label = Space_Grotesk({
-  variable: "--font-label-face",
+/* Serif accent, for editorial passages and pull quotes only.
+ *
+ * Deliberately narrow in scope. A serif dropped into a grotesque system reads
+ * as an accident unless it is reserved for a role the sans is not doing, so it
+ * carries editorial voice and nothing else: never a label, never UI, never a
+ * section title. */
+const serif = Lora({
+  variable: "--font-serif-face",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  display: "swap",
 });
 
 /* Display: everything above 20px.
  *
- * The brand face is GT America, which is licensed commercial type from Grilli
- * Type. It cannot be fetched, bundled from a CDN, or served from a free mirror,
- * and a "free download" of it is a pirated copy that would put the client in
- * breach on their own site. So it is declared in globals.css against files in
- * public/fonts/ and simply takes over the moment those files exist.
+ * The brand face is Neue Haas Grotesk Display, licensed commercial type from
+ * Monotype. It cannot be fetched, bundled from a CDN, or served from a free
+ * mirror, and a "free download" of it is a pirated copy that would put the
+ * client in breach on their own site. So it is declared in globals.css against
+ * files in public/fonts/ and takes over the moment those files exist.
  *
- * Archivo loads as the fallback and is chosen to fail well: it is a neo-
- * grotesque of the same American gothic lineage, with a comparable x-height and
- * width, so the layout does not reflow when the real face lands. See the
- * @font-face block in globals.css for the exact filenames. */
+ * Archivo is the LAST fallback, not the first. Neue Haas Grotesk is Helvetica
+ * redrawn, so the stack in --font-display reaches for Helvetica Neue and Arial
+ * ahead of it: those are near matches, already on most machines, and cost no
+ * download. Archivo covers the platforms that have neither, and is kept for
+ * that alone. See public/fonts/README.md. */
 const display = Archivo({
   variable: "--font-display-fallback",
   subsets: ["latin"],
@@ -60,7 +66,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${body.variable} ${display.variable} ${label.variable} ${wordmark.variable} h-full antialiased`}
+      className={`${body.variable} ${display.variable} ${serif.variable} ${wordmark.variable} h-full antialiased`}
       // The pre-paint script below stamps `data-loaded` on this element before
       // React ever runs, which is the entire point of it: the curtain has to be
       // decided before the first paint. React then hydrates, finds an attribute

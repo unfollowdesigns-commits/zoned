@@ -15,12 +15,12 @@
    assembly, the footer wordmark, the glow control and the sticky rail.
    ========================================================================= */
 
-/* ---- GT America ---------------------------------------------------------
-   The brand display face, licensed from Grilli Type.
+/* ---- Neue Haas Grotesk --------------------------------------------------
+   The brand display face, licensed from Monotype / Linotype.
 
-   It is commercial type: it cannot be fetched from a CDN or a free mirror, and
-   a "free download" is a pirated copy that would put the client in breach on
-   their own live site.
+   Commercial type, exactly like the GT America it replaces: it cannot be
+   fetched from a CDN or a free mirror, and a "free download" is a pirated copy
+   that would put the client in breach on their own live site.
 
    THE @font-face RULES BELOW ARE COMMENTED OUT ON PURPOSE. A declared family
    whose file does not exist is not inert: the browser requests it on every page
@@ -28,31 +28,40 @@
    all 37 routes, three times each, which is exactly the kind of noise that
    hides a real error later.
 
-   TO INSTALL: buy the web licence at grillitype.com, drop the three woff2 files
-   into public/fonts/ under the names below, and uncomment this block. Nothing
-   else changes; every heading switches over on the next load.
+   TO INSTALL: buy the web licence, drop the three woff2 files into public/fonts/
+   under the names below, and uncomment this block. Nothing else changes; every
+   heading switches over on the next load.
 
-   Until then the site renders in Archivo, chosen so the swap is barely visible:
-   same neo-grotesque American gothic lineage, comparable x-height and width, so
-   the layout does not reflow when the real face lands.
+   THE FALLBACK CHAIN CHANGED WITH THE FACE, and it matters more here than it
+   did before. Neue Haas Grotesk is Helvetica redrawn, so the closest thing to
+   it on a visitor's machine is Helvetica itself: Helvetica Neue ships on every
+   Apple device and Arial is metrically compatible on Windows, which between
+   them is most traffic, at no download. Archivo stays at the back of the chain
+   for platforms that have neither, since it is still a neo-grotesque of
+   comparable proportions and keeps the layout from reflowing.
+
+   Archivo is now rarely the face actually used, so it is a candidate for
+   removal from the bundle once the licensed files are installed. Left in for
+   now because dropping it would leave Android and most Linux with a generic
+   sans, which is the one substitution that does visibly reflow the page.
 
 @font-face {
-  font-family: "GT America";
-  src: url("/fonts/GT-America-Standard-Regular.woff2") format("woff2");
+  font-family: "Neue Haas Grotesk Display";
+  src: url("/fonts/NeueHaasGroteskDisplay-Roman.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "GT America";
-  src: url("/fonts/GT-America-Standard-Medium.woff2") format("woff2");
+  font-family: "Neue Haas Grotesk Display";
+  src: url("/fonts/NeueHaasGroteskDisplay-Medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "GT America";
-  src: url("/fonts/GT-America-Standard-Bold.woff2") format("woff2");
+  font-family: "Neue Haas Grotesk Display";
+  src: url("/fonts/NeueHaasGroteskDisplay-Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -85,16 +94,26 @@
   --t-lede: 1.1875rem;   /* 19px */
   --t-action: 0.9375rem; /* 15px */
 
-  /* Three faces, each with one job.
+  /* The faces, and what each one is for.
 
-     The kit specifies two, strictly separated. This brand system names a third
-     for eyebrows and labels, so the separation rule still holds: no face is
-     ever used for two roles. Space Grotesk appears only in small caps, DM Sans
-     only in body and UI, the display face only above 20px. */
+     Labels moved to DM Sans at the client's direction, so the body face now
+     carries body, UI and eyebrows. That is a deliberate relaxation of the kit's
+     one-face-one-role rule, not an oversight: uppercase at 11px with 9 percent
+     tracking is a different enough object from running body copy that the two
+     do not read as the same type, and dropping the separate label face removes
+     a whole font download for a role that is a handful of words per page.
+
+     Lora joins as a serif accent for editorial passages and pull quotes only.
+     It is kept out of labels, UI and section titles, because a serif used in
+     more than one role stops reading as an accent and starts reading as an
+     inconsistency. */
   --font-body: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
   --font-ui: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
-  --font-display: "GT America", var(--font-display-fallback), var(--font-body-face), sans-serif;
-  --font-label: var(--font-label-face), var(--font-body-face), sans-serif;
+  --font-display:
+    "Neue Haas Grotesk Display", "Neue Haas Grotesk Display Pro",
+    "Helvetica Neue", Helvetica, Arial, var(--font-display-fallback), sans-serif;
+  --font-label: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif-face), Georgia, "Times New Roman", serif;
   /* The logo's own face, pinned so the lockup never follows a type change. */
   --font-wordmark: var(--font-wordmark-face), var(--font-body-face), sans-serif;
 
@@ -130,8 +149,11 @@
    near-black ground it glares. This carries a little of the warm side so the
    navy reads as deliberate rather than as "dark mode with a white section". */
 .v-light {
-  --v-cream: #f2efe7;
-  --v-cream-2: #e9e5da;
+  /* The client's two creams. Lighter and less yellow than the pair they
+     replace, which is what lets the accent blue sit on them without the two
+     fighting. */
+  --v-cream: #f9f7f3;
+  --v-cream-2: #f4f1eb;
   --v-ink: #12151f;
   --v-muted: #565d70;
   --v-border: rgba(18, 21, 31, 0.13);
@@ -149,7 +171,13 @@
      reasoning as html/body in the tokens file. */
   overflow: clip;
   isolation: isolate;
-  background: var(--v-cream);
+  /* BOTH CREAMS, AS A GRADIENT. `--v-cream-2` had been declared and then never
+     referenced, so every cream band was a single flat fill. Running the pair
+     top to foot gives the band the same lit-side/dark-side depth the dark band
+     already gets from its radials, and at four points of luminance apart it is
+     felt rather than seen: nobody should be able to point at a gradient, they
+     should just stop reading the section as a plain rectangle. */
+  background: linear-gradient(180deg, var(--v-cream) 0%, var(--v-cream-2) 100%);
   color: var(--v-ink);
 }
 
@@ -164,7 +192,10 @@
 
 /* Panels on cream are lit the same way, just inverted in value. */
 .v-light .g-glass {
-  background: linear-gradient(180deg, #ffffff, #fbfaf6);
+  /* Held to pure white at the top and barely off it at the foot. The ground is
+     lighter than it was, so the old panel gradient came within a point or two
+     of it lower down the band and the card lost its edge. */
+  background: linear-gradient(180deg, #ffffff, #fdfcfa);
   box-shadow:
     0 1px 0 0 rgba(255, 255, 255, 0.9) inset,
     0 1px 2px 0 rgba(18, 21, 31, 0.06),
@@ -865,9 +896,102 @@ html[data-loaded] .dp-scale-in {
    the kit imports so it wins without !important. */
 .v-eyebrow {
   font-family: var(--font-label);
+  /* 600 rather than 500. Both are in spec; at 11px uppercase, on a cream ground
+     in the accent blue, medium goes thin and the eyebrow stops holding its line
+     against the heading beneath it. */
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: var(--tr-label);
   font-size: var(--t-label);
   color: var(--v-primary);
+}
+
+/* ---- Editorial serif ------------------------------------------------------
+   For pull quotes and editorial passages. Deliberately not a heading class:
+   the display face owns headings, and a serif that turns up in titles as well
+   as in quotes reads as two systems rather than one with an accent. */
+.v-serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+
+/* ---- Ambient heading glow -------------------------------------------------
+
+   A soft focal glow behind a section's heading, per the client's gradient
+   spec: very low opacity, no harsh edges, focal point directly behind the
+   heading. It is anchored to the heading rather than to the band because a
+   band-wide wash lifts the whole panel evenly and therefore points at nothing.
+   The dark band already has that wash; this is the hot spot on top of it, and
+   on the cream bands it is the only lift there is.
+
+   NO `filter: blur()`, AND THAT IS THE SPEC HONOURED RATHER THAN IGNORED. The
+   brief asks for an 80px to 120px blur, and states the reason plainly: seamless
+   blending with no harsh edges. A radial gradient has no edges to soften. It is
+   a continuous falloff by construction, so blurring one is a large offscreen
+   buffer and a per-frame GPU cost that buys nothing you can see. The stops
+   below reproduce what a blurred circle actually looks like, which is the part
+   that matters: a flat core out to about a third, then a long tail to nothing,
+   rather than the linear ramp a naive two-stop radial gives.
+
+   Two overlapping radials, offset from each other, for the mesh character. One
+   alone reads as a spotlight.
+
+   Strength is a token so each ground can set its own. The same alpha that
+   reads as ambient on near-black is a visible blue smudge on cream. */
+:root {
+  --v-glow: 0.22;
+}
+.v-light {
+  --v-glow: 0.1;
+}
+.v-dark-band {
+  --v-glow: 0.3;
+}
+
+.v-heading-glow {
+  position: absolute;
+  /* Wider than tall, and pulled up and left so the focus sits on the first
+     line of the heading rather than in the middle of the whole block. */
+  top: -46%;
+  left: -18%;
+  width: 96%;
+  aspect-ratio: 5 / 4;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--v-glow);
+  /* `closest-side` IS THE WHOLE FIX, and it is not a preference.
+
+     These were sized `farthest-corner`, which is the default. The radius is
+     then measured to the furthest corner, so a focal point placed off centre
+     still has real alpha when the gradient reaches the NEAR edge, and the
+     element's own box clips it there. The result was a hard vertical seam down
+     the cream bands: a gradient added to avoid harsh edges, producing the
+     harshest edge on the page.
+
+     `closest-side` measures to the nearest edge instead, so the gradient is
+     guaranteed to have reached zero before every boundary of the box, in every
+     direction, at any focal position. The element can then be moved and resized
+     freely without anyone having to re-check that it still fades out. */
+  background:
+    radial-gradient(
+      circle closest-side at 34% 40%,
+      var(--v-primary) 0%,
+      color-mix(in srgb, var(--v-primary) 55%, transparent) 42%,
+      transparent 100%
+    ),
+    radial-gradient(
+      circle closest-side at 72% 66%,
+      color-mix(in srgb, var(--v-primary-deep) 65%, transparent) 0%,
+      transparent 100%
+    );
+}
+
+@media (max-width: 640px) {
+  /* Narrower viewports put the heading closer to both edges, so the same glow
+     reads as a wash across the whole screen rather than as a focus. */
+  .v-heading-glow {
+    width: 116%;
+    top: -26%;
+  }
 }

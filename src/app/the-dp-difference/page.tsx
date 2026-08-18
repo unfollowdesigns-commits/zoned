@@ -196,8 +196,13 @@ export default function DPDifferencePage() {
           {/* The closing statement is the memorable line, so it is set apart at
               display size rather than left as the last sentence of a column. */}
           <Reveal delay={0.2}>
+            {/* The serif accent, used where it belongs. This is a pull quote:
+                the one line on the page that is a claim rather than an
+                explanation, set apart from the columns above it. That is the
+                editorial role Lora was added for, and keeping it to that role
+                is what stops a second face reading as an inconsistency. */}
             <p
-              className="v-display mt-20 max-w-[22ch] text-balance border-t border-[var(--v-border)] pt-12"
+              className="v-serif mt-20 max-w-[24ch] text-balance border-t border-[var(--v-border)] pt-12 italic"
               style={{
                 fontSize: "clamp(24px, 3vw, 44px)",
                 lineHeight: 1.15,
@@ -234,7 +239,7 @@ export default function DPDifferencePage() {
                    ragged. Reveal renders a div in between, so skipping it there
                    silently breaks the chain. */
                 <li key={item.title} className="h-full">
-                  <Reveal delay={Math.min(i * 0.05, 0.25)} className="h-full">
+                  <Reveal delay={Math.min(i * 0.05, 0.25)} className="h-full" fill>
                     <div className="flex h-full flex-col rounded-[16px] bg-white/[0.035] p-6 ring-1 ring-inset ring-white/[0.08]">
                       <span className="grid h-10 w-10 place-items-center rounded-[11px] bg-[var(--v-primary)]/14 text-[var(--v-primary)]">
                         <Icon size={18} strokeWidth={1.75} />
