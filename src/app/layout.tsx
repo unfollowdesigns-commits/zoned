@@ -61,6 +61,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${body.variable} ${display.variable} ${label.variable} ${wordmark.variable} h-full antialiased`}
+      // The pre-paint script below stamps `data-loaded` on this element before
+      // React ever runs, which is the entire point of it: the curtain has to be
+      // decided before the first paint. React then hydrates, finds an attribute
+      // on the client that was not in the server HTML, and reports a mismatch on
+      // every route. The warning is correct and the behaviour is intended, which
+      // is the case this prop exists for. It matters beyond tidiness: an error
+      // thrown unconditionally on every page is one nobody reads, so a real
+      // mismatch would arrive into a log already full of this one. The prop is
+      // shallow, covering this element's own attributes and nothing below it.
+      suppressHydrationWarning
     >
       <head>
         {/* Must be inline and synchronous. Anything deferred runs after the

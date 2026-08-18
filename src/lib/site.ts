@@ -54,13 +54,13 @@ export const INDUSTRIES: NavItem[] = [
     href: "/who-we-serve/tech-ai-digital-platforms",
     icon: "brain",
   },
-  { label: "GovCon & Public Sector", href: "/who-we-serve/govcon-public-sector", icon: "briefcase" },
+  { label: "GovCon & Public Sector", href: "/who-we-serve/govcon-public-sector", icon: "landmark" },
   { label: "Financial Services", href: "/who-we-serve/financial-services", icon: "building" },
-  { label: "Wealth Management", href: "/who-we-serve/wealth-management", icon: "brain" },
+  { label: "Wealth Management", href: "/who-we-serve/wealth-management", icon: "trending" },
   {
     label: "Real Estate, Construction, & Manufacturing",
     href: "/who-we-serve/real-estate-construction-manufacturing",
-    icon: "landmark",
+    icon: "factory",
   },
   { label: "Healthcare", href: "/who-we-serve/healthcare", icon: "health" },
 ];

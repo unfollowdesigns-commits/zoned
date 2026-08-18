@@ -113,14 +113,28 @@ function Chip({
          control announces as an ordinary button and nothing conveys which
          filter is currently applied. */
       aria-pressed={active}
-      className={`rounded-full border px-4 py-2 text-[length:var(--t-small)] font-medium transition-[background-color,border-color,color] duration-200 ${
+      /* `ring-1 ring-inset` rather than `border`: an outline that lives on the
+         edge instead of in the box means the selected and unselected states are
+         the same size, so the row does not reflow by a pixel per chip as the
+         selection moves. The unselected state is a soft surface rather than an
+         outline, which is the part that had aged: a hairline-outlined pill is
+         the 2020 tag, and next to a solid selected chip it reads as two
+         unrelated components rather than two states of one. */
+      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[length:var(--t-small)] font-medium ring-1 ring-inset transition-[background-color,box-shadow,color,transform] duration-200 ${
         active
-          ? "border-transparent bg-[var(--v-primary)] text-white"
-          : "border-[var(--v-border)] text-[var(--v-muted)] hover:border-[var(--v-border-strong)] hover:text-[var(--v-ink)]"
+          ? "bg-[var(--v-primary)] text-white ring-transparent"
+          : "bg-[var(--v-ink)]/[0.045] text-[var(--v-muted)] ring-[var(--v-ink)]/[0.07] hover:-translate-y-px hover:bg-[var(--v-ink)]/[0.075] hover:text-[var(--v-ink)]"
       }`}
     >
       {label}
-      <span className={`ml-2 tabular-nums ${active ? "text-white/60" : "text-[var(--v-muted)]/60"}`}>
+      {/* The count sits in its own well rather than as dimmed text beside the
+          label, so it reads as metadata attached to the chip instead of as part
+          of the category's name. */}
+      <span
+        className={`grid min-w-[1.35rem] place-items-center rounded-full px-1 py-px text-[length:var(--t-label)] tabular-nums ${
+          active ? "bg-white/20 text-white" : "bg-[var(--v-ink)]/[0.07] text-[var(--v-muted)]"
+        }`}
+      >
         {count}
       </span>
     </button>

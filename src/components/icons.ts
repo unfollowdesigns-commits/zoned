@@ -18,6 +18,7 @@ import {
   Accessibility,
   Paperclip,
   MessagesSquare,
+  Factory,
 } from "lucide-react";
 
 export type IconComponent = React.ComponentType<{
@@ -47,4 +48,5 @@ export const ICONS: Record<string, IconComponent> = {
   accessibility: Accessibility,
   paperclip: Paperclip,
   messages: MessagesSquare,
+  factory: Factory,
 };

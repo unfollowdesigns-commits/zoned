@@ -5,6 +5,7 @@ import Link from "@/components/SiteLink";
 import { motion, AnimatePresence } from "framer-motion";
 import { EASE, SPRING_ICON, useReducedMotion } from "@/lib/motion";
 import { FUNCTIONS, INDUSTRIES } from "@/lib/site";
+import { ICONS } from "@/components/icons";
 import SectionHeading from "@/components/ui/SectionHeading";
 
 /**
@@ -123,28 +124,77 @@ export default function Specializations() {
                       // border for the length of the animation.
                       style={{ overflow: "hidden" }}
                     >
-                      <ul className="flex flex-wrap gap-2.5 pb-9">
-                        {row.items.map((item, i) => (
-                          <motion.li
-                            key={item.href}
-                            initial={reduced ? false : { opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{
-                              duration: 0.4,
-                              ease: EASE,
-                              // Capped, so a twelve-item row does not take three
-                              // times as long to finish as a four-item one.
-                              delay: Math.min(i * 0.035, 0.28),
-                            }}
-                          >
-                            <Link
-                              href={item.href}
-                              className="v-lift inline-flex rounded-full border border-[var(--v-border-strong)] bg-white/[0.04] px-5 py-2.5 text-[length:var(--t-small)] text-[var(--v-ink)]/85 hover:border-[var(--v-primary)] hover:bg-[var(--v-primary)]/12 hover:text-[var(--v-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+                      {/* A GRID OF TILES, NOT A WRAPPED CLOUD OF PILLS.
+
+                          The outlined full-radius pill is the dated part, and
+                          the ragged right edge is why. These labels run from
+                          "Controller" to "Professional & Business Services", so
+                          wrapping them produced rows of wildly uneven blocks
+                          ending wherever the text happened to stop: the cloud
+                          read as leftover text rather than as a set of
+                          destinations. A grid aligns them, and alignment is most
+                          of what reads as considered.
+
+                          The icons were the other half of it. Every function and
+                          industry in lib/site.ts already carries an icon key and
+                          the pills threw it away, so twelve links looked
+                          identical and the eye had nothing to scan by. */}
+                      <ul className="grid gap-2 pb-9 sm:grid-cols-2 lg:grid-cols-3">
+                        {row.items.map((item, i) => {
+                          const Icon = item.icon ? ICONS[item.icon] : undefined;
+                          return (
+                            <motion.li
+                              key={item.href}
+                              initial={reduced ? false : { opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{
+                                duration: 0.4,
+                                ease: EASE,
+                                // Capped, so a twelve-item row does not take three
+                                // times as long to finish as a four-item one.
+                                delay: Math.min(i * 0.035, 0.28),
+                              }}
                             >
-                              {item.label}
-                            </Link>
-                          </motion.li>
-                        ))}
+                              <Link
+                                href={item.href}
+                                /* `ring-1` rather than `border`, so the hairline
+                                   sits on the edge instead of adding a pixel to
+                                   the box and shifting the text by half of one.
+                                   A named group so the icon and the arrow can
+                                   react to the tile being hovered, not to
+                                   themselves. */
+                                className="group/tile flex items-center gap-3 rounded-[14px] bg-white/[0.035] px-4 py-3.5 ring-1 ring-inset ring-white/[0.08] transition-[background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-white/[0.07] hover:ring-[var(--v-primary)]/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+                              >
+                                {Icon && (
+                                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-[var(--v-primary)]/14 text-[var(--v-primary)] transition-colors duration-300 group-hover/tile:bg-[var(--v-primary)] group-hover/tile:text-white">
+                                    <Icon size={17} strokeWidth={1.75} />
+                                  </span>
+                                )}
+                                <span className="text-[length:var(--t-small)] leading-[1.35] text-[var(--v-ink)]/85 transition-colors duration-300 group-hover/tile:text-[var(--v-ink)]">
+                                  {item.label}
+                                </span>
+                                {/* Arrives on hover. Present but transparent at
+                                    rest so nothing reflows when it appears. */}
+                                <svg
+                                  aria-hidden="true"
+                                  viewBox="0 0 24 24"
+                                  width="15"
+                                  height="15"
+                                  fill="none"
+                                  className="ml-auto shrink-0 -translate-x-1 text-[var(--v-primary)] opacity-0 transition-[opacity,transform] duration-300 group-hover/tile:translate-x-0 group-hover/tile:opacity-100"
+                                >
+                                  <path
+                                    d="M5 12h13M13 6.5 18.5 12 13 17.5"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              </Link>
+                            </motion.li>
+                          );
+                        })}
                       </ul>
                     </motion.div>
                   )}
