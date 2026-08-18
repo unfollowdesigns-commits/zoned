@@ -68,8 +68,11 @@ function Rail({
     mass: 0.6,
   });
   /* Clamped: a trackpad flick can produce velocities that would otherwise blur
-     the type into an unreadable smear. */
-  const factor = useTransform(smooth, [-2200, 0, 2200], [-4, 0, 4], {
+     the type into an unreadable smear. Held to 2.5 rather than 4, because the
+     coupling should be felt as the rail responding, not seen as it lurching:
+     past about this much the row stops being readable during a fast scroll and
+     the effect reads as a glitch. */
+  const factor = useTransform(smooth, [-2200, 0, 2200], [-2.5, 0, 2.5], {
     clamp: true,
   });
 
@@ -89,7 +92,25 @@ function Rail({
   const percent = useTransform(x, (v) => `${v}%`);
 
   return (
-    <div className="flex overflow-hidden">
+    <div
+      className="flex overflow-hidden"
+      /* THE RAILS DISSOLVE AT THE EDGES INSTEAD OF BEING CUT.
+
+         Without this the viewport edge guillotines whatever word happens to be
+         crossing it, so the row begins and ends on half a letter. At small
+         sizes you might forgive it; at any size it is the single thing that
+         makes a marquee read as broken rather than as continuous. The mask
+         means type arrives and leaves rather than starting and stopping, and
+         it costs one composited layer.
+
+         12 percent is enough to fade a whole word at this size. */
+      style={{
+        maskImage:
+          "linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%)",
+        WebkitMaskImage:
+          "linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%)",
+      }}
+    >
       <motion.div
         className="flex shrink-0 whitespace-nowrap"
         style={{ x: percent }}
@@ -105,21 +126,43 @@ function Rail({
   );
 }
 
+/**
+ * THE SIZE IS THE WHOLE POINT OF THIS COMPONENT'S LAST REVISION.
+ *
+ * These ran at `--t-display-fluid`, which tops out at 64px, in the display
+ * weight of 700, in full-strength ink and full-strength blue. That is the
+ * treatment reserved for a section's actual heading, and it was being spent on
+ * a supporting detail: the result was two black-and-blue bands that dominated
+ * the page and left nothing for the real headings to be louder than.
+ *
+ * Scale is relative. Making the loudest thing on the page something that only
+ * supports the argument does not just make that element too big, it flattens
+ * everything else by removing the contrast the hierarchy depends on.
+ *
+ * So this drops to roughly a third of the size, out of the display weight, and
+ * to a tone that recedes. It reads as a quiet ticker running under the section,
+ * which is what a list of job titles should be. The blue survives only in the
+ * separator dots: one accent, used small, is what keeps two rows of repeating
+ * text from turning into wallpaper.
+ */
 function Titles({ tint }: { tint: boolean }) {
   return (
     <>
       {PLACED_POSITIONS.map((title) => (
         <span key={title} className="flex shrink-0 items-center">
           <span
-            className={`v-display px-[0.35em] text-[length:var(--t-display-fluid)] leading-[1.15] tracking-[-0.03em] ${
-              tint ? "text-[var(--v-primary-deep)]" : "text-[var(--v-ink)]"
+            className={`px-[0.9em] text-[length:clamp(15px,1.5vw,21px)] font-medium leading-[1.4] tracking-[-0.005em] ${
+              /* Two tones a step apart, not two colours. The difference gives
+                 the pair depth so it does not read as one printed block, and it
+                 is small enough that neither row competes for attention. */
+              tint ? "text-[var(--v-muted)]" : "text-[var(--v-ink)]/75"
             }`}
           >
             {title}
           </span>
           <span
             aria-hidden="true"
-            className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--v-primary)]/50"
+            className="h-[3px] w-[3px] shrink-0 rounded-full bg-[var(--v-primary)]/60"
           />
         </span>
       ))}
@@ -132,30 +175,36 @@ export default function PlacedPositions() {
 
   return (
     <LightBand>
-      <div className="py-24 sm:py-28">
-        <div className="mx-auto mb-12 max-w-[1280px] px-6">
+      {/* Less air than before, because the band itself is now much shorter and
+          a section's padding should be proportional to what it contains. The
+          old 24/28 was sized for two 64px rows. */}
+      <div className="py-20 sm:py-24">
+        <div className="mx-auto mb-8 max-w-[1280px] px-6">
           <p className="v-eyebrow">Frequently placed</p>
         </div>
 
         {reduced ? (
           /* No belt under reduced motion: the same information as a list, which
              is what the rails are saying anyway. */
-          <ul className="mx-auto flex max-w-[1280px] flex-wrap gap-x-8 gap-y-3 px-6">
+          <ul className="mx-auto flex max-w-[1280px] flex-wrap gap-x-7 gap-y-2 px-6">
             {PLACED_POSITIONS.map((t) => (
               <li
                 key={t}
-                className="v-display text-[length:var(--t-title)] text-[var(--v-ink)]"
+                className="text-[length:clamp(15px,1.5vw,21px)] font-medium text-[var(--v-ink)]/75"
               >
                 {t}
               </li>
             ))}
           </ul>
         ) : (
-          <div className="flex flex-col gap-3">
-            <Rail direction={-1} baseSpeed={2.2}>
+          /* The rows sit close together now. At 64px they needed separating or
+             they collided; at this size a tight pair reads as one object, which
+             is the calmer picture and one fewer thing on the page. */
+          <div className="flex flex-col gap-1">
+            <Rail direction={-1} baseSpeed={1.8}>
               <Titles tint={false} />
             </Rail>
-            <Rail direction={1} baseSpeed={1.6}>
+            <Rail direction={1} baseSpeed={1.3}>
               <Titles tint />
             </Rail>
           </div>
