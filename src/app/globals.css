@@ -1034,14 +1034,27 @@ html[data-loaded] .dp-scale-in {
    watch a page they have already left; in is slower and starts after the old
    one is gone, because the arrival is the part worth seeing. */
 
+/* THE WHOLE THING RUNS 880ms, and the first pass at 530ms was the mistake.
+
+   A transition has to be slower than it feels necessary or it does not read as
+   a transition at all: under about half a second the eye registers a flicker
+   between two states rather than a movement from one to the other, which is
+   the opposite of soothing. Long enough to watch is the point.
+
+   Out is 380 and in is 560 starting at 300, so the dark holds for about 80ms
+   in the middle. That gap is what separates the two pages instead of blending
+   them, and it is short enough not to feel like a load. */
 ::view-transition-old(page) {
-  animation:
-    220ms cubic-bezier(0.4, 0, 1, 1) both dp-page-out;
+  /* Gentle in and out rather than an accelerating ease-in. A curve that starts
+     slow lets the page begin leaving almost imperceptibly, which is most of
+     what makes the exit feel soft rather than snatched away. */
+  animation: 380ms cubic-bezier(0.4, 0, 0.2, 1) both dp-page-out;
 }
 
 ::view-transition-new(page) {
-  animation:
-    360ms cubic-bezier(0, 0, 0.2, 1) 170ms both dp-page-in;
+  /* A long decelerating tail. The last third of this curve is nearly still,
+     so the page settles rather than arriving. */
+  animation: 560ms cubic-bezier(0.16, 0.68, 0.24, 1) 300ms both dp-page-in;
 }
 
 @keyframes dp-page-out {

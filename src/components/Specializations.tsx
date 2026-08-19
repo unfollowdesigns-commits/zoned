@@ -124,27 +124,32 @@ export default function Specializations() {
                       // border for the length of the animation.
                       style={{ overflow: "hidden" }}
                     >
-                      {/* A GRID OF TILES, NOT A WRAPPED CLOUD OF PILLS.
+                      {/* RULES, NOT BOXES.
 
-                          The outlined full-radius pill is the dated part, and
-                          the ragged right edge is why. These labels run from
-                          "Controller" to "Professional & Business Services", so
-                          wrapping them produced rows of wildly uneven blocks
-                          ending wherever the text happened to stop: the cloud
-                          read as leftover text rather than as a set of
-                          destinations. A grid aligns them, and alignment is most
-                          of what reads as considered.
+                          These were twelve tiles, each a rounded panel with its
+                          own ring and fill wrapped around one short link. A box
+                          is a claim that the thing inside it is a separate
+                          object worth separating, and "Controller" is not: it is
+                          a line in a list. Twelve of them turned a simple set of
+                          destinations into twelve competing rectangles, which is
+                          most of what makes a page feel cluttered.
 
-                          The icons were the other half of it. Every function and
-                          industry in lib/site.ts already carries an icon key and
-                          the pills threw it away, so twelve links looked
-                          identical and the eye had nothing to scan by. */}
-                      <ul className="grid gap-2 pb-9 sm:grid-cols-2 lg:grid-cols-3">
+                          A hairline between rows does the same job for a
+                          fraction of the ink. The row still has an icon to scan
+                          by, still lifts its label on hover, and still lands an
+                          arrow; it just no longer carries a frame to say so.
+
+                          The pills this replaced were dated for a different
+                          reason, the ragged right edge from wrapping labels of
+                          wildly uneven length. A two column list fixes that too,
+                          because the rules align even when the words do not. */}
+                      <ul className="grid gap-x-14 pb-9 sm:grid-cols-2">
                         {row.items.map((item, i) => {
                           const Icon = item.icon ? ICONS[item.icon] : undefined;
                           return (
                             <motion.li
                               key={item.href}
+                              className="border-b border-[var(--v-border)]"
                               initial={reduced ? false : { opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{
@@ -157,31 +162,30 @@ export default function Specializations() {
                             >
                               <Link
                                 href={item.href}
-                                /* `ring-1` rather than `border`, so the hairline
-                                   sits on the edge instead of adding a pixel to
-                                   the box and shifting the text by half of one.
-                                   A named group so the icon and the arrow can
-                                   react to the tile being hovered, not to
-                                   themselves. */
-                                className="group/tile flex items-center gap-3 rounded-[14px] bg-white/[0.035] px-4 py-3.5 ring-1 ring-inset ring-white/[0.08] transition-[background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-white/[0.07] hover:ring-[var(--v-primary)]/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+                                className="group/row flex items-center gap-4 py-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
                               >
                                 {Icon && (
-                                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-[var(--v-primary)]/14 text-[var(--v-primary)] transition-colors duration-300 group-hover/tile:bg-[var(--v-primary)] group-hover/tile:text-white">
-                                    <Icon size={17} strokeWidth={1.75} />
-                                  </span>
+                                  /* No well behind it any more. The icon carries
+                                     the accent on its own, which is enough to
+                                     scan by and one less shape per row. */
+                                  <Icon
+                                    size={17}
+                                    strokeWidth={1.75}
+                                    className="shrink-0 text-[var(--v-primary)] transition-opacity duration-300 opacity-70 group-hover/row:opacity-100"
+                                  />
                                 )}
-                                <span className="text-[length:var(--t-small)] leading-[1.35] text-[var(--v-ink)]/85 transition-colors duration-300 group-hover/tile:text-[var(--v-ink)]">
+                                <span className="text-[length:var(--t-small)] leading-[1.35] text-[var(--v-ink)]/80 transition-colors duration-300 group-hover/row:text-[var(--v-ink)]">
                                   {item.label}
                                 </span>
-                                {/* Arrives on hover. Present but transparent at
-                                    rest so nothing reflows when it appears. */}
+                                {/* Present but transparent at rest, so nothing
+                                    reflows when it appears. */}
                                 <svg
                                   aria-hidden="true"
                                   viewBox="0 0 24 24"
                                   width="15"
                                   height="15"
                                   fill="none"
-                                  className="ml-auto shrink-0 -translate-x-1 text-[var(--v-primary)] opacity-0 transition-[opacity,transform] duration-300 group-hover/tile:translate-x-0 group-hover/tile:opacity-100"
+                                  className="ml-auto shrink-0 -translate-x-1 text-[var(--v-primary)] opacity-0 transition-[opacity,transform] duration-300 group-hover/row:translate-x-0 group-hover/row:opacity-100"
                                 >
                                   <path
                                     d="M5 12h13M13 6.5 18.5 12 13 17.5"

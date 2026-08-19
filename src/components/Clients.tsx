@@ -33,7 +33,23 @@ export default function Clients() {
           {CLIENT_LOGOS.map((client, i) => (
             <li key={client.name}>
               <Reveal delay={Math.min(i * 0.04, 0.24)}>
-                <div className="flex h-[104px] items-center justify-center rounded-[14px] bg-white px-6 ring-1 ring-inset ring-[var(--v-ink)]/[0.07]">
+                {/* THE CARD APPEARS WITH THE LOGO, NOT BEFORE IT.
+
+                    A white panel exists here to give a logo a consistent
+                    ground, because client marks are drawn for white and ten
+                    transparent PNGs on a tinted band produce ten different
+                    halos. That reason does not apply to a company NAME set in
+                    type: framing text in a box says the text is a separate
+                    object, and eight boxes around eight words is just eight
+                    rectangles. So the frame is conditional on the thing it
+                    exists to serve. */}
+                <div
+                  className={
+                    client.file
+                      ? "flex h-[104px] items-center justify-center rounded-[14px] bg-white px-6 ring-1 ring-inset ring-[var(--v-ink)]/[0.07]"
+                      : "flex h-[104px] items-center justify-center px-6"
+                  }
+                >
                   {client.file ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
