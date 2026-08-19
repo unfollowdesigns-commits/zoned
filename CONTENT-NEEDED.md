@@ -1,0 +1,115 @@
+# Content needed
+
+Everything below is a slot that is already built and wired. Drop the file in
+the named folder, or paste the text into the named file, and it appears. No
+code changes are needed for any of it.
+
+This list exists because the site's remaining weakness is not craft. It is that
+a firm which sells judgement about people currently shows no people, no named
+proof, and no client marks. That reads as a shell, and no amount of motion or
+typography fixes it.
+
+Ordered by how much each one changes the impression of the site.
+
+---
+
+## 1. Photography of the team
+
+**The single biggest gap.** An executive search firm with no faces on its
+website is the thing that makes a visitor doubt the firm exists. This is a
+people business and the site currently has zero people in it.
+
+    public/team/<firstname>-<lastname>.jpg
+
+- 800 x 1000 (4:5 portrait), or 1000 x 1000 square. Consistent across the set.
+- Shot against a consistent background. Mixed backgrounds are worse than no
+  photos: they read as scraped from LinkedIn.
+- One per person who appears on `/about/team`.
+
+If a full shoot is not happening soon, **even four good portraits of the
+partners is enough** to change the page. The team grid is built and reads them
+by filename.
+
+## 2. Client logos
+
+Currently the eight client names render as **text**, which is what a site does
+when it could not get the logos. It reads that way.
+
+    public/logos/<slug>.svg      (preferred)
+    public/logos/<slug>.png      (fallback, 2x, transparent background)
+
+Then add the filename to the matching entry in `src/lib/proof.ts`:
+
+    { name: "Walker & Dunlop", file: "walker-dunlop.svg" },
+
+Needed for: Walker & Dunlop, Riveron, OTJ, Guidehouse, BRG, Washington
+Commanders, ChamberOfCommerce.com, MAI Capital Management.
+
+**They can arrive one at a time.** Each entry switches from type to logo on its
+own, so there is no need to wait for all eight.
+
+One caution: check the usage terms. Some companies restrict use of their mark
+to imply endorsement, and a client list is close to that line. If any of these
+have not been cleared, leave them as type rather than adding the file.
+
+## 3. Testimonials
+
+`src/lib/proof.ts` exports an empty `TESTIMONIALS` array and the section
+renders nothing at all until it is not empty. That is deliberate: invented
+quotes are fabricated evidence, and a visible "testimonials coming soon" panel
+tells every visitor that no client would give one.
+
+Each one needs, and **cannot ship without**, all four:
+
+    quote     the words, exactly as given, not tightened or shortened
+    name      the person
+    title     their job title at the time of the engagement
+    company   their employer
+
+Optionally a headshot at `public/testimonials/<firstname>-<lastname>.jpg`,
+400 x 400.
+
+**Three is enough.** Two is enough. One real named quote outperforms six
+anonymous ones, because "a client" is not a source.
+
+## 4. The homepage copy
+
+The DP Difference page uses District Partners' own words throughout, from the
+brief. **The homepage does not.** Its headline, standfirst and the two-column
+section beneath it were written by me to fill the layout, and they read like it.
+
+Send whatever exists: the current site's copy, a deck, a one-pager. Anything
+in the firm's actual voice beats anything invented in its style.
+
+## 5. The blog archive
+
+Six of the nine posts in `src/lib/site.ts` are marked `placeholder: true` and
+are **not** District Partners' writing. They exist because an index built for a
+featured stack plus a filterable grid cannot be judged with three items in it.
+
+Send the real archive and they get deleted. The three unmarked posts are real
+titles from the live navigation and need only their bodies.
+
+## 6. The CRM screenshot
+
+Named in the DP Difference brief, not attached. The framed slot is built and
+waiting in section 5 of `/the-dp-difference`.
+
+    public/dp-difference/crm.png     1600 x 1200 or wider, 2x
+
+## 7. The hero video
+
+Currently loaded from `cdn.sceneai.art`, a third-party host. If that is slow or
+goes down, the hero degrades to a gradient.
+
+    public/hero.mp4
+
+Self-hosting it removes the dependency. Also worth having a poster frame at
+`public/hero-poster.jpg` so the first paint is the film rather than a flat
+colour.
+
+## 8. Neue Haas Grotesk
+
+Licensed commercial type. See `public/fonts/README.md` for exactly which cut to
+buy and the filenames. Until it is installed the site renders in Helvetica on
+Apple devices, Arial on Windows, and Archivo elsewhere.
