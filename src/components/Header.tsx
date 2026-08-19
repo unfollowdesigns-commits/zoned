@@ -133,6 +133,11 @@ export default function Header() {
       ref={containerRef}
       className="sticky top-0 z-50 border-b border-[var(--v-border)] bg-[var(--v-bg-2)]/85 backdrop-blur-md"
       onMouseLeave={scheduleClose}
+    
+      /* Anchors the header through a page transition. See the
+         ::view-transition-group(site-header) rules in globals.css: without a
+         name it is part of the root snapshot and dissolves with the page. */
+      style={{ viewTransitionName: "site-header" }}
     >
       <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-6">
         <Link href="/" aria-label="District Partners home">

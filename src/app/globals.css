@@ -995,3 +995,110 @@ html[data-loaded] .dp-scale-in {
     top: -26%;
   }
 }
+
+/* ---- Page transition ------------------------------------------------------
+
+   A feathered dissolve through the site's own ground, driven by the browser's
+   View Transitions API. The <ViewTransition> in app/template.tsx is what makes
+   the browser start a transition on navigation at all; everything below is the
+   animation it runs.
+
+   TARGETED AT `root`, NOT AT A CLASS. The obvious version of this selects a
+   `view-transition-class` set from React, and it silently did nothing:
+   `view-transition-class` is a newer part of the API than the pseudo-elements
+   themselves, so on a browser with the base support the rules simply never
+   match and the navigation falls back to the default crossfade. Verified by
+   probing the animations that actually ran during a navigation: the keyframes
+   below were absent and only the user-agent default was present.
+
+   The group is `page`, named explicitly on the ViewTransition in template.tsx.
+   `root` was the next attempt and was also wrong: React had already split the
+   subtree into seven auto-named groups, so the new page was arriving in pieces
+   that `root` did not contain. See the note in template.tsx.
+
+   THE OLD PAGE LEAVES BEFORE THE NEW ONE ARRIVES, WITH A BEAT OF DARK BETWEEN.
+   A straight crossfade has both pages visible at once, and for a moment the
+   viewer sees two headlines overlapping at half strength, which reads as a
+   glitch rather than as a cut. Going out to the ground and back means there is
+   never more than one page legible on screen.
+
+   FEATHERED MEANS THE BLUR, and the blur is doing the real work. Opacity alone
+   dissolves every edge on the page at the same rate, so type stays razor sharp
+   right down to invisible and the eye tracks it the whole way. Softening as it
+   goes is what makes it read as a camera losing focus rather than a layer
+   losing alpha. The small scale is the second half of the same idea: a picture
+   that recedes slightly as it fades is leaving, where one that holds its exact
+   size is just being switched off.
+
+   The timings are asymmetric on purpose. Out is quick because nobody wants to
+   watch a page they have already left; in is slower and starts after the old
+   one is gone, because the arrival is the part worth seeing. */
+
+::view-transition-old(page) {
+  animation:
+    220ms cubic-bezier(0.4, 0, 1, 1) both dp-page-out;
+}
+
+::view-transition-new(page) {
+  animation:
+    360ms cubic-bezier(0, 0, 0.2, 1) 170ms both dp-page-in;
+}
+
+@keyframes dp-page-out {
+  from {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    filter: blur(7px);
+    transform: scale(1.015);
+  }
+}
+
+@keyframes dp-page-in {
+  from {
+    opacity: 0;
+    filter: blur(9px);
+    transform: scale(1.012);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
+  }
+}
+
+/* The transition overlay sits above the document and swallows clicks for the
+   length of the animation, so anything tapped mid-transition is simply lost.
+   Half a second of a dead page is the kind of thing nobody reports and
+   everybody feels. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* THE HEADER DOES NOT DISSOLVE. It is the same object on both pages, and
+   fading it out and back in says otherwise: the chrome should stay put while
+   the content behind it changes, which is what makes the navigation read as
+   moving within one site rather than as loading a different one. `display:
+   none` on the old snapshot stops both copies being briefly visible at once. */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* A cut, not a dissolve. The navigation still works and the page still
+     changes; it simply does so in one frame. */
+  ::view-transition-old(.page-dissolve),
+  ::view-transition-new(page) {
+    animation: none;
+  }
+}
