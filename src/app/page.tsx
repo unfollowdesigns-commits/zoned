@@ -5,6 +5,7 @@ import Specializations from "@/components/Specializations";
 import PlacedPositions from "@/components/PlacedPositions";
 import AskAI from "@/components/AskAI";
 import Testimonials from "@/components/Testimonials";
+import Clients from "@/components/Clients";
 import Reveal from "@/components/Reveal";
 import LightBand from "@/components/ui/LightBand";
 
@@ -94,6 +95,12 @@ export default function Home() {
       <StickyServices />
 
       <PlacedPositions />
+
+      {/* The proof, grouped: who hired us, then what they said about it. Both
+          read from lib/proof.ts, and neither is something the firm asserts
+          about itself, which is why they sit together and away from the
+          sections that do. */}
+      <Clients />
 
       {/* Renders nothing until lib/proof.ts has a real named quote in it. The
           slot is wired so content appears the moment it exists, and the page

@@ -1,58 +1,74 @@
-"use client";
-
-import { CLIENT_LOGOS } from "@/lib/proof";
-import { Marquee } from "@/kit/components/Interactions";
+import LightBand from "@/components/ui/LightBand";
+import Reveal from "@/components/Reveal";
+import { CLIENT_LOGOS, HAS_CLIENT_LOGOS } from "@/lib/proof";
 
 /**
- * Client logos.
+ * The client wall.
  *
- * A marquee is for texture, never for information: a ticker you cannot read at
- * speed and cannot stop is decoration wearing the costume of content. These are
- * names rather than claims, the strip pauses on hover, and the full list is
- * readable in the footer, so nothing here is only available in motion.
+ * A GRID, NOT A MARQUEE, AND THAT IS THE POINT OF THE SECTION. This was a
+ * scrolling strip, which is the wrong instrument twice over. A ticker you
+ * cannot read at speed and cannot stop is decoration wearing the costume of
+ * content, and the one thing this section exists to do is be read: these are
+ * the names that answer "has anyone serious hired them". Motion actively works
+ * against that. A visitor scanning for a company they recognise needs the set
+ * to hold still.
  *
- * EACH ENTRY RENDERS AS A LOGO THE MOMENT ITS FILE EXISTS, and as type until
- * then. That mixed state is deliberate rather than a compromise: logos can
- * arrive one at a time, and waiting for all eight before any of them shows
- * would mean the strip stays a row of words for as long as the slowest legal
- * approval takes.
+ * It also was not rendered anywhere. The component existed, nothing imported
+ * it, so the site made no client claim at all.
  *
- * The name set in type is a placeholder, not a design. A wall of company names
- * in the body face is what a site does when it could not get the logos, and it
- * reads that way to anyone who has seen a real one. See CONTENT-NEEDED.md.
+ * White cards on cream, because a logo needs a consistent ground. Client marks
+ * arrive drawn for white, and dropping ten of them straight onto a tinted band
+ * gives you ten different halos where the transparent PNGs disagree with the
+ * background.
  */
 export default function Clients() {
   return (
-    <section className="py-16" aria-label="Selected clients">
-      <Marquee speed={46}>
-        {CLIENT_LOGOS.map((client) =>
-          client.file ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              key={client.name}
-              src={`/logos/${client.file}`}
-              alt={client.name}
-              loading="lazy"
-              /* Height-constrained, width auto. Logos arrive at wildly different
-                 aspect ratios, and constraining the width instead makes a wide
-                 wordmark tiny next to a square mark. Optical sizing by height is
-                 what makes a mixed set look like one row.
+    <LightBand>
+      <div className="mx-auto max-w-[1280px] px-6 py-20 sm:py-24">
+        <Reveal>
+          <p className="v-eyebrow text-center">Trusted by</p>
+        </Reveal>
 
-                 Desaturated and dimmed at rest, true colour on hover: eight
-                 brand palettes at full strength in one strip fights everything
-                 else on the page and makes the row read as advertising. */
-              className="mx-7 h-7 w-auto max-w-[170px] object-contain opacity-60 grayscale transition-[opacity,filter] duration-300 hover:opacity-100 hover:grayscale-0"
-            />
-          ) : (
-            <span
-              key={client.name}
-              className="v-display whitespace-nowrap px-7 text-[length:var(--t-heading)] tracking-tight text-[var(--v-muted)] transition-colors duration-200 hover:text-[var(--v-ink)]"
-            >
-              {client.name}
-            </span>
-          ),
+        <ul className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {CLIENT_LOGOS.map((client, i) => (
+            <li key={client.name}>
+              <Reveal delay={Math.min(i * 0.04, 0.24)}>
+                <div className="flex h-[104px] items-center justify-center rounded-[14px] bg-white px-6 ring-1 ring-inset ring-[var(--v-ink)]/[0.07]">
+                  {client.file ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={`/logos/${client.file}`}
+                      alt={client.name}
+                      loading="lazy"
+                      /* Height-capped with width auto. Logos arrive at wildly
+                         different aspect ratios, and capping width instead makes
+                         a wide wordmark tiny beside a square mark. Optical sizing
+                         by height is what makes a mixed set read as one row. */
+                      className="max-h-9 w-auto max-w-full object-contain"
+                    />
+                  ) : (
+                    /* The name until the file exists. Set quietly and centred so
+                       the card is still a card: a placeholder that shouts is
+                       worse than one that waits. */
+                    <span className="text-center text-[length:var(--t-small)] font-medium text-[var(--v-muted)]">
+                      {client.name}
+                    </span>
+                  )}
+                </div>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+
+        {!HAS_CLIENT_LOGOS && (
+          /* Visible to nobody but the people building the site. The wall is the
+             single highest-value asset gap and it should not be possible to
+             forget it while looking straight at the section. */
+          <p className="sr-only">
+            Client logo files have not been supplied yet. See CONTENT-NEEDED.md.
+          </p>
         )}
-      </Marquee>
-    </section>
+      </div>
+    </LightBand>
   );
 }
