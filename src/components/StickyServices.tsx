@@ -8,6 +8,7 @@ import { SPRING_SOFT, useReducedMotion } from "@/lib/motion";
 import { SERVICES } from "@/lib/site";
 import SectionHeading from "@/components/ui/SectionHeading";
 import StickyStack from "@/components/ui/StickyStack";
+import PointerLight from "@/components/ui/PointerLight";
 import { ICONS } from "@/components/icons";
 
 /* THE FIVE BESPOKE GLYPHS ARE GONE, and what replaced them is the icon the
@@ -111,14 +112,13 @@ export default function StickyServices() {
                   animate="rest"
                   whileHover={reduced ? undefined : "hover"}
                   whileFocus={reduced ? undefined : "hover"}
-                  className="v-glass v-lift v-spotlight group relative overflow-hidden p-8 sm:p-10"
-                  onPointerMove={(e) => {
-                    const el = e.currentTarget;
-                    const r = el.getBoundingClientRect();
-                    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
-                    el.style.setProperty("--my", `${e.clientY - r.top}px`);
-                  }}
+                  /* `v-spotlight` is gone with the inline handler: its
+                     ::before is the same pseudo-element as the glass rim, so it
+                     never drew anything. PointerLight below replaces both, and
+                     carries its own listener. */
+                  className="v-glass v-lift group relative overflow-hidden p-8 sm:p-10"
                 >
+                  <PointerLight size={300} />
                   <div className="relative z-[2] flex items-start justify-between gap-6">
                     <p className="text-[length:var(--t-small)] font-semibold tabular-nums text-[var(--v-ring)]">
                       {String(i + 1).padStart(2, "0")}

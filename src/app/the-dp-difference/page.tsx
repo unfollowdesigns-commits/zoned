@@ -14,6 +14,7 @@ import LightBand from "@/components/ui/LightBand";
 import SectionHeading from "@/components/ui/SectionHeading";
 import GlowButton from "@/components/ui/GlowButton";
 import Reveal from "@/components/Reveal";
+import PointerLight from "@/components/ui/PointerLight";
 
 /**
  * The DP Difference.
@@ -240,7 +241,10 @@ export default function DPDifferencePage() {
                    silently breaks the chain. */
                 <li key={item.title} className="h-full">
                   <Reveal delay={Math.min(i * 0.05, 0.25)} className="h-full" fill>
-                    <div className="flex h-full flex-col rounded-[16px] bg-white/[0.035] p-6 ring-1 ring-inset ring-white/[0.08]">
+                    {/* `group` and `relative` are what let the pointer light
+                        below attach and reveal on hover. */}
+                    <div className="group relative flex h-full flex-col overflow-hidden rounded-[16px] bg-white/[0.035] p-6 ring-1 ring-inset ring-white/[0.08]">
+                      <PointerLight size={220} />
                       <span className="grid h-10 w-10 place-items-center rounded-[11px] bg-[var(--v-primary)]/14 text-[var(--v-primary)]">
                         <Icon size={18} strokeWidth={1.75} />
                       </span>

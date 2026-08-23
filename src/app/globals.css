@@ -1139,3 +1139,62 @@ html[data-loaded] .dp-scale-in {
     animation: none;
   }
 }
+
+/* ---- Pointer light --------------------------------------------------------
+
+   The lit edge that follows the cursor. Paired with components/ui/PointerLight,
+   which feeds it `--mx` and `--my`.
+
+   A REAL ELEMENT, NOT A PSEUDO-ELEMENT, and that is forced rather than chosen.
+   `.v-glass::before` is the static lit rim and `.v-spotlight::before` is the
+   pointer radial, and on a card carrying both classes those are the same
+   pseudo-element on the same node: one background wins, the other is discarded
+   without a warning. `::after` is the specular sweep. Both were taken, so the
+   pointer handler on the service cards had been writing coordinates into a rule
+   that lost the cascade and drew nothing.
+
+   THE EDGE IS THE EFFECT. A soft radial on the face of a card is the common
+   version of this and it reads as a smudge under the cursor. What makes a card
+   feel like an object is its edge catching light: a rim that brightens where
+   the pointer is and stays dark elsewhere tells the eye there is a bevel there,
+   and the card gains a thickness it did not have. It is also one masked
+   gradient with no transform, so it cannot fight the scale and lift that the
+   sticky stack applies to the same element. */
+.v-pointer-light {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  /* The 1px padding plus the xor mask is what turns a filled rectangle into a
+     one pixel band. A border property cannot carry a gradient along its length. */
+  padding: 1px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 420ms var(--ease-out);
+  background: radial-gradient(
+    var(--pl-size, 260px) circle at var(--mx, 50%) var(--my, 50%),
+    rgba(190, 214, 255, 0.9),
+    rgba(143, 180, 255, 0.35) 42%,
+    transparent 72%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+/* `focus-within` as well as hover, so the same edge lights when the card is
+   reached from a keyboard. An effect that only exists for a mouse is an effect
+   half the point of which is missing. */
+.group:hover > .v-pointer-light,
+.group:focus-within > .v-pointer-light,
+.v-glass:hover > .v-pointer-light,
+.v-glass:focus-within > .v-pointer-light {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v-pointer-light {
+    display: none;
+  }
+}
