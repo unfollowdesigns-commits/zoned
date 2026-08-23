@@ -1,4 +1,3 @@
-import LightBand from "@/components/ui/LightBand";
 import Reveal from "@/components/Reveal";
 import { CLIENT_LOGOS, HAS_CLIENT_LOGOS } from "@/lib/proof";
 
@@ -22,11 +21,13 @@ import { CLIENT_LOGOS, HAS_CLIENT_LOGOS } from "@/lib/proof";
  * background.
  */
 export default function Clients() {
+  /* Composed into the proof band rather than owning a section. See the note in
+     PlacedPositions. */
   return (
-    <LightBand>
-      <div className="mx-auto max-w-[1280px] px-6 py-20 sm:py-24">
+    <div className="mx-auto max-w-[1280px] px-6">
+      <div>
         <Reveal>
-          <p className="v-eyebrow text-center">Trusted by</p>
+          <p className="v-eyebrow">Trusted by</p>
         </Reveal>
 
         <ul className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -47,7 +48,11 @@ export default function Clients() {
                   className={
                     client.file
                       ? "flex h-[104px] items-center justify-center rounded-[14px] bg-white px-6 ring-1 ring-inset ring-[var(--v-ink)]/[0.07]"
-                      : "flex h-[104px] items-center justify-center px-6"
+                      /* Half the height without a logo in it. 104px is sized
+                         for a mark that needs room to breathe inside a card;
+                         applied to a line of text it just spaces eight names
+                         out until the grid reads as empty. */
+                      : "flex h-[52px] items-center justify-center px-4"
                   }
                 >
                   {client.file ? (
@@ -85,6 +90,6 @@ export default function Clients() {
           </p>
         )}
       </div>
-    </LightBand>
+    </div>
   );
 }

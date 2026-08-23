@@ -12,7 +12,6 @@ import {
 } from "framer-motion";
 import { PLACED_POSITIONS } from "@/lib/site";
 import { useReducedMotion } from "@/lib/motion";
-import LightBand from "@/components/ui/LightBand";
 
 /**
  * The seats we fill, as two rails that run past each other.
@@ -173,13 +172,16 @@ function Titles({ tint }: { tint: boolean }) {
 export default function PlacedPositions() {
   const reduced = useReducedMotion();
 
+  /* NO BAND OF ITS OWN ANY MORE. This used to be a whole cream section 306px
+     tall carrying one eyebrow and two rails, sitting directly above another
+     cream section 479px tall carrying one eyebrow and eight names. Two thin
+     pale strips back to back read as one washed out zone with nothing in it,
+     and they broke the alternation the rest of the page keeps. Both are
+     evidence, so they are now one band. See components/Proof. */
   return (
-    <LightBand>
-      {/* Less air than before, because the band itself is now much shorter and
-          a section's padding should be proportional to what it contains. The
-          old 24/28 was sized for two 64px rows. */}
-      <div className="py-20 sm:py-24">
-        <div className="mx-auto mb-8 max-w-[1280px] px-6">
+    <>
+      <div>
+        <div className="mx-auto mb-6 max-w-[1280px] px-6">
           <p className="v-eyebrow">Frequently placed</p>
         </div>
 
@@ -218,6 +220,6 @@ export default function PlacedPositions() {
           ))}
         </ul>
       </div>
-    </LightBand>
+    </>
   );
 }

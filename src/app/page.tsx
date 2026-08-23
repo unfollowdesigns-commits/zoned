@@ -2,10 +2,9 @@ import CinematicHero from "@/components/CinematicHero";
 import Stats from "@/components/Stats";
 import StickyServices from "@/components/StickyServices";
 import Specializations from "@/components/Specializations";
-import PlacedPositions from "@/components/PlacedPositions";
 import AskAI from "@/components/AskAI";
 import Testimonials from "@/components/Testimonials";
-import Clients from "@/components/Clients";
+import Proof from "@/components/Proof";
 import Reveal from "@/components/Reveal";
 import LightBand from "@/components/ui/LightBand";
 
@@ -94,13 +93,11 @@ export default function Home() {
 
       <StickyServices />
 
-      <PlacedPositions />
-
-      {/* The proof, grouped: who hired us, then what they said about it. Both
-          read from lib/proof.ts, and neither is something the firm asserts
-          about itself, which is why they sit together and away from the
-          sections that do. */}
-      <Clients />
+      {/* One band of evidence rather than two thin strips. The seats we fill
+          and the firms we fill them for were separate cream sections of 306px
+          and 479px stacked directly on each other, which broke the alternation
+          and left the middle of the page flat. See components/Proof. */}
+      <Proof />
 
       {/* Renders nothing until lib/proof.ts has a real named quote in it. The
           slot is wired so content appears the moment it exists, and the page
