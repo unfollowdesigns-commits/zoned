@@ -360,6 +360,30 @@
   color: var(--v-primary-deep);
 }
 
+/* THE ACCENT LIFTS ON THE GRADIENT BAND, AND THIS IS A CONTRAST FIX RATHER
+   THAN A PREFERENCE.
+
+   --v-primary is #3e7bfa, chosen against a near-black ground where it scored
+   comfortably. The band is now a royal blue running to #1d3d8a, and measured
+   against the bright end of that ramp the accent falls to 2.6:1, under the 3:1
+   floor for large text and well under the 4.5:1 every one of these eyebrows
+   needs at 11px. Blue type on a blue ground is the oldest way to lose a
+   heading.
+
+   #8fb4ff measures 4.86:1 at the worst point on the ramp and better everywhere
+   else, so it clears AA at any size rather than only for the display steps. It
+   is still unmistakably the brand blue, just lit for the ground it now sits
+   on. */
+.v-dark-band {
+  --v-accent-on-band: #8fb4ff;
+}
+.v-dark-band .v-section-title .turn {
+  color: var(--v-accent-on-band);
+}
+.v-dark-band .v-eyebrow {
+  color: var(--v-accent-on-band);
+}
+
 /* ---- Dark band ----------------------------------------------------------
    A dark section that carries light rather than sitting flat.
 
@@ -383,17 +407,17 @@
      creating a scrollport. */
   overflow: clip;
   background:
+    /* One white corner light, not the two accent radials this replaces. Those
+       existed to lift a near-black ground; against a ground already this blue
+       they were invisible at 17 percent and muddy above it. A highlight puts a
+       light source in the frame, so the diagonal reads as a lit surface rather
+       than as a colour ramp. */
     radial-gradient(
-      120% 90% at 12% 0%,
-      color-mix(in srgb, var(--v-primary) 17%, transparent),
-      transparent 58%
-    ),
-    radial-gradient(
-      80% 70% at 88% 108%,
-      color-mix(in srgb, var(--v-primary-deep) 22%, transparent),
+      100% 80% at 6% -4%,
+      rgba(255, 255, 255, 0.09),
       transparent 62%
     ),
-    linear-gradient(180deg, var(--v-bg-2), var(--v-bg));
+    linear-gradient(135deg, #102258 0%, #172d6e 52%, #1d3d8a 100%);
 }
 
 /* A hairline of accent at each edge, so the band reads as a deliberate joint
@@ -810,7 +834,7 @@ html[data-loaded] .dp-scale-in {
       rgba(255, 255, 255, 0.045) 46%,
       rgba(255, 255, 255, 0.022)
     ),
-    linear-gradient(160deg, #161d33 0%, #111729 55%, #0c1120 100%);
+    linear-gradient(160deg, #16255c 0%, #101c47 55%, #0b1433 100%);
   backdrop-filter: blur(22px) saturate(1.5);
   -webkit-backdrop-filter: blur(22px) saturate(1.5);
   box-shadow:
@@ -946,7 +970,7 @@ html[data-loaded] .dp-scale-in {
   --v-glow: 0.1;
 }
 .v-dark-band {
-  --v-glow: 0.3;
+  --v-glow: 0.14;
 }
 
 .v-heading-glow {
