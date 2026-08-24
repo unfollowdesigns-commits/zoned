@@ -13,7 +13,7 @@ import {
 } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useReducedMotion } from "@/lib/motion";
-import { WaveField } from "@/kit/components/WaveField";
+import NetworkField from "@/components/NetworkField";
 import { SERVICES } from "@/lib/site";
 
 /**
@@ -354,7 +354,7 @@ export default function CinematicHero() {
             without it the dark sections are flat colour. It sits behind the
             card, so the card opening over it is a real occlusion rather than a
             crossfade between two backgrounds. */}
-        <WaveField height={1} opacity={0.85} />
+        <NetworkField opacity={0.9} />
         {/* Echoes first, so they sit behind the card. Furthest back drawn first. */}
         <Echo progress={scrollYProgress} depth={2} rest={rest} />
         <Echo progress={scrollYProgress} depth={1} rest={rest} />
