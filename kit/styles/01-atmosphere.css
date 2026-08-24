@@ -56,20 +56,14 @@
     radial-gradient(145% 122% at 50% 36%, transparent 44%, rgba(0, 0, 0, 0.74) 100%);
 }
 
-/* ---- Mesh grid. 0.02 alpha. Not 0.04. ---------------------------------- */
-.v-shell::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 52px 52px;
-  mask-image: radial-gradient(1200px 820px at 60% 0%, #000 28%, transparent 78%);
-  -webkit-mask-image: radial-gradient(1200px 820px at 60% 0%, #000 28%, transparent 78%);
-}
+/* ---- Mesh grid: REMOVED ---------------------------------------------------
+   A 52px white mesh used to run behind everything at 0.02 alpha. It earned its
+   place when the ground was flat colour and needed some structure in it. The
+   wave field is that structure now, and the two read as two grids at different
+   scales laid over each other: the mesh sits flat on the glass while the wave
+   recedes, so it flattens the depth the wave exists to create. One structural
+   layer, not two. If a future section needs the mesh back, it belongs scoped to
+   that section rather than fixed behind the whole document. */
 
 /* ---- Grain ---------------------------------------------------------------
    Sits ABOVE the colour fields and BELOW content. Five lines that do more for

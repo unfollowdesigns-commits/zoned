@@ -14,7 +14,6 @@ import {
 import { ArrowRight } from "lucide-react";
 import { useReducedMotion } from "@/lib/motion";
 import ParticleWave from "@/components/ParticleWave";
-import { VOCAB_HOME } from "@/lib/vocabulary";
 import { SERVICES } from "@/lib/site";
 
 /**
@@ -322,7 +321,7 @@ export default function CinematicHero() {
             now the section's main visual: without it the reduced-motion visitor
             gets flat navy where everyone else gets the surface. The component
             draws once and never starts its loop when the preference is set. */}
-        <ParticleWave labels={VOCAB_HOME} opacity={0.9} />
+        <ParticleWave opacity={0.9} />
         <Media />
         <div className="absolute inset-x-0 bottom-0 mx-auto max-w-[1280px] px-6 pb-14">
           <h1
@@ -361,7 +360,7 @@ export default function CinematicHero() {
             without it the dark sections are flat colour. It sits behind the
             card, so the card opening over it is a real occlusion rather than a
             crossfade between two backgrounds. */}
-        <ParticleWave labels={VOCAB_HOME} opacity={0.9} />
+        <ParticleWave opacity={0.9} />
         {/* Echoes first, so they sit behind the card. Furthest back drawn first. */}
         <Echo progress={scrollYProgress} depth={2} rest={rest} />
         <Echo progress={scrollYProgress} depth={1} rest={rest} />
