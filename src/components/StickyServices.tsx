@@ -9,7 +9,7 @@ import { SERVICES } from "@/lib/site";
 import SectionHeading from "@/components/ui/SectionHeading";
 import StickyStack from "@/components/ui/StickyStack";
 import PointerLight from "@/components/ui/PointerLight";
-import { ICONS } from "@/components/icons";
+import DrawIcon from "@/components/ui/DrawIcon";
 
 /* THE FIVE BESPOKE GLYPHS ARE GONE, and what replaced them is the icon the
    service already carries in lib/site.ts.
@@ -104,7 +104,6 @@ export default function StickyServices() {
         <div ref={trackRef}>
           <StickyStack>
             {SERVICES.map((service, i) => {
-              const Icon = service.icon ? ICONS[service.icon] : undefined;
               return (
                 <motion.article
                   key={service.href}
@@ -116,6 +115,9 @@ export default function StickyServices() {
                      ::before is the same pseudo-element as the glass rim, so it
                      never drew anything. PointerLight below replaces both, and
                      carries its own listener. */
+                  /* Arms the icon redraw. See ui/DrawIcon: the 19px mark is not
+                     what anyone is pointing at, so the card is what triggers it. */
+                  data-draw-group=""
                   className="v-glass v-lift group relative overflow-hidden p-8 sm:p-10"
                 >
                   <PointerLight size={300} />
@@ -123,7 +125,7 @@ export default function StickyServices() {
                     <p className="text-[length:var(--t-small)] font-semibold tabular-nums text-[var(--v-ring)]">
                       {String(i + 1).padStart(2, "0")}
                     </p>
-                    {Icon && (
+                    {service.icon && (
                       /* Fills solid on hover, driven by the card's own `group`,
                          so a pointer and a keyboard focus produce the same
                          thing. Colour only: no transform, so the mark cannot
@@ -132,7 +134,7 @@ export default function StickyServices() {
                         aria-hidden="true"
                         className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--v-primary)]/14 text-[var(--v-primary)] transition-colors duration-300 group-hover:bg-[var(--v-primary)] group-hover:text-white"
                       >
-                        <Icon size={19} strokeWidth={1.75} />
+                        <DrawIcon name={service.icon} size={19} delay={i * 0.06} />
                       </span>
                     )}
                   </div>

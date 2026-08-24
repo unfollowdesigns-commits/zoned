@@ -1,14 +1,5 @@
 import type { Metadata } from "next";
-import {
-  ScanSearch,
-  MapPinned,
-  ChartColumn,
-  MonitorDot,
-  Layers,
-  Radar,
-  MessageCircleHeart,
-  Radio,
-} from "lucide-react";
+import DrawIcon from "@/components/ui/DrawIcon";
 import PageHero from "@/components/ui/PageHero";
 import LightBand from "@/components/ui/LightBand";
 import SectionHeading from "@/components/ui/SectionHeading";
@@ -55,42 +46,42 @@ export const metadata: Metadata = {
 /** Section 3. Icons follow the concepts named in the brief for each feature. */
 const STACK = [
   {
-    icon: ScanSearch,
+    icon: "scan",
     title: "Market Motion Detection",
     body: "Identifies shifts, hiring activity, and emerging talent trends before they become obvious in the broader market.",
   },
   {
-    icon: MapPinned,
+    icon: "mapped",
     title: "Predictive Talent Mapping",
     body: "Maps talent markets and identifies the people, companies, and career paths most relevant to a search.",
   },
   {
-    icon: ChartColumn,
+    icon: "chart",
     title: "Smart Candidate Scoring",
     body: "Helps our team quickly assess and prioritize candidates against the experience and criteria that matter most.",
   },
   {
-    icon: MonitorDot,
+    icon: "monitor",
     title: "Real-Time Role Intelligence",
     body: "Surfaces changes in roles, organizations, and talent demand so our searches evolve with the market.",
   },
   {
-    icon: Layers,
+    icon: "layers",
     title: "Hidden Talent Discovery",
     body: "Expands our reach beyond traditional sourcing channels to uncover candidates others may never find.",
   },
   {
-    icon: Radar,
+    icon: "radar",
     title: "Competitor Activity Radar",
     body: "Tracks relevant hiring and talent movement across the competitive landscape.",
   },
   {
-    icon: MessageCircleHeart,
+    icon: "care",
     title: "Candidate Sentiment Analytics",
     body: "Helps our recruiters understand candidate engagement, responsiveness, and signals of potential interest.",
   },
   {
-    icon: Radio,
+    icon: "radio",
     title: "Dynamic Market Pulse",
     body: "Provides current insight into talent supply, compensation, market activity, and search conditions.",
   },
@@ -232,9 +223,7 @@ export default function DPDifferencePage() {
               same quiet tile treatment as the specializations grid rather than
               the brighter card the site uses for its own propositions. */}
           <ul className="mt-16 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {STACK.map((item, i) => {
-              const Icon = item.icon;
-              return (
+            {STACK.map((item, i) => (
                 /* `h-full` has to run the whole way down, li to Reveal to card,
                    or the cards sit at their natural heights and the row ends
                    ragged. Reveal renders a div in between, so skipping it there
@@ -243,10 +232,14 @@ export default function DPDifferencePage() {
                   <Reveal delay={Math.min(i * 0.05, 0.25)} className="h-full" fill>
                     {/* `group` and `relative` are what let the pointer light
                         below attach and reveal on hover. */}
-                    <div className="group relative flex h-full flex-col overflow-hidden rounded-[16px] bg-white/[0.035] p-6 ring-1 ring-inset ring-white/[0.08]">
+                    <div
+                      /* Arms the icon redraw. See ui/DrawIcon. */
+                      data-draw-group=""
+                      className="group relative flex h-full flex-col overflow-hidden rounded-[16px] bg-white/[0.035] p-6 ring-1 ring-inset ring-white/[0.08]"
+                    >
                       <PointerLight size={220} />
                       <span className="grid h-10 w-10 place-items-center rounded-[11px] bg-[var(--v-primary)]/14 text-[var(--v-primary)]">
-                        <Icon size={18} strokeWidth={1.75} />
+                        <DrawIcon name={item.icon} size={18} delay={Math.min(i * 0.05, 0.25)} />
                       </span>
                       <h3 className="v-display mt-5 text-[length:var(--t-heading)] leading-[1.3]">
                         {item.title}
@@ -257,8 +250,7 @@ export default function DPDifferencePage() {
                     </div>
                   </Reveal>
                 </li>
-              );
-            })}
+            ))}
           </ul>
         </div>
       </section>

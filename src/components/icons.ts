@@ -19,6 +19,14 @@ import {
   Paperclip,
   MessagesSquare,
   Factory,
+  ScanSearch,
+  MapPinned,
+  ChartColumn,
+  MonitorDot,
+  Layers,
+  Radar,
+  MessageCircleHeart,
+  Radio,
 } from "lucide-react";
 
 export type IconComponent = React.ComponentType<{
@@ -27,7 +35,16 @@ export type IconComponent = React.ComponentType<{
   className?: string;
 }>;
 
-/** Resolves the string keys used in lib/site.ts to icon components. */
+/**
+ * Resolves the string keys used in lib/site.ts to icon components.
+ *
+ * EVERY ICON THE SITE DRAWS GOES THROUGH HERE, and that is a constraint rather
+ * than a convenience. Icons are animated by ui/DrawIcon, which is a client
+ * component, and a server component cannot hand a client component a function:
+ * `icon={ScanSearch}` throws at the boundary. A string key crosses it fine. So
+ * pages name an icon and this table is the one place that knows what that name
+ * means, which also means the whole set can be swapped without touching a page.
+ */
 export const ICONS: Record<string, IconComponent> = {
   search: Search,
   briefcase: Briefcase,
@@ -49,4 +66,13 @@ export const ICONS: Record<string, IconComponent> = {
   paperclip: Paperclip,
   messages: MessagesSquare,
   factory: Factory,
+  /* The DP Difference stack. */
+  scan: ScanSearch,
+  mapped: MapPinned,
+  chart: ChartColumn,
+  monitor: MonitorDot,
+  layers: Layers,
+  radar: Radar,
+  care: MessageCircleHeart,
+  radio: Radio,
 };

@@ -1198,3 +1198,38 @@ html[data-loaded] .dp-scale-in {
     display: none;
   }
 }
+
+/* ---- Line icons that draw themselves ---------------------------------------
+   See components/ui/DrawIcon.tsx for the mechanism. Two things about these
+   rules specifically.
+
+   THEY ARE SCOPED TO [data-ready], WHICH ONLY THE COMPONENT'S EFFECT SETS.
+   Drawing a stroke on means hiding it first, so an unscoped rule would leave
+   every icon on the site invisible if the JavaScript failed or was still
+   loading, and it would never show up in testing because testing runs with
+   JavaScript working. Scoped this way the failure mode is a plain icon.
+
+   pathLength IS SET TO 1 ON EVERY SHAPE, in the effect. That is what lets one
+   dasharray value fit every shape in every icon regardless of its real
+   geometry, and it makes a long path and a short one take the same time to
+   draw, so an icon arrives as one gesture rather than in pieces. */
+.dp-draw {
+  display: inline-flex;
+}
+.dp-draw[data-ready] svg :is(path, circle, ellipse, line, polyline, polygon, rect) {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.dp-draw[data-ready][data-drawn] svg :is(path, circle, ellipse, line, polyline, polygon, rect) {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 560ms cubic-bezier(0.22, 1, 0.36, 1);
+  /* Per shape, so the parts arrive in order. An icon whose parts appear
+     together is a fade; one whose parts appear in sequence reads as drawn. */
+  transition-delay: calc(var(--draw-delay, 0s) + var(--i, 0) * 80ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dp-draw[data-ready] svg :is(path, circle, ellipse, line, polyline, polygon, rect) {
+    stroke-dashoffset: 0;
+    transition: none;
+  }
+}
