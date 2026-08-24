@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import CircuitField from "@/components/CircuitField";
+import NodeField from "@/components/NodeField";
 import {
   VOCAB_DIFFERENCE,
   VOCAB_HOME,
@@ -11,7 +11,7 @@ import {
 } from "@/lib/vocabulary";
 
 /**
- * Picks the circuit's vocabulary from the route.
+ * Picks the node field's vocabulary from the route.
  *
  * WHY THE ROUTE AND NOT A PROP. The words have to change per page or the whole
  * idea collapses into wallpaper with text on it, and a prop means every one of
@@ -29,7 +29,7 @@ const BY_PREFIX: Array<[string, string[]]> = [
   ["/resources", VOCAB_RESOURCES],
 ];
 
-export default function PageCircuit() {
+export default function PageNodes() {
   const pathname = usePathname() ?? "/";
   const match = BY_PREFIX.find(([prefix]) => pathname.startsWith(prefix));
   /* Falls back to the homepage set rather than to nothing: a page outside the
@@ -40,5 +40,5 @@ export default function PageCircuit() {
   /* Dimmer than the homepage. Interior page heroes are short, so the board is
      seen at close quarters against a headline that sits right on it, and the
      0.9 that reads as atmosphere across a full viewport reads as noise here. */
-  return <CircuitField labels={labels} opacity={0.55} />;
+  return <NodeField labels={labels} opacity={0.55} />;
 }

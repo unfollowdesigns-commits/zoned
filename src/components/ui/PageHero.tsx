@@ -1,6 +1,6 @@
 import Link from "@/components/SiteLink";
 import Reveal from "@/components/Reveal";
-import PageCircuit from "@/components/ui/PageCircuit";
+import PageNodes from "@/components/ui/PageNodes";
 
 export type Crumb = { label: string; href?: string };
 
@@ -26,8 +26,8 @@ export default function PageHero({
         className="pointer-events-none absolute inset-x-0 top-0 h-full bg-[radial-gradient(70%_120%_at_20%_-20%,rgba(62,123,250,0.16),transparent_62%)]"
       />
       {/* The board runs behind every interior hero, annotated with whatever
-          that section of the site is about. See PageCircuit. */}
-      <PageCircuit />
+          that section of the site is about. See PageNodes. */}
+      <PageNodes />
       <div className="relative mx-auto max-w-[1280px] px-6 pb-16 pt-14 sm:pb-20 sm:pt-16">
         {crumbs.length > 0 && (
           <nav aria-label="Breadcrumb" className="mb-7">
