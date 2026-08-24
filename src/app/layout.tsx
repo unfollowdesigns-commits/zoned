@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, Familjen_Grotesk, Lora, Archivo } from "next/font/google";
 import { Shell, Atmosphere } from "@/kit/components/Atmosphere";
 import { prePaintScript } from "@/lib/preload";
+import BubbleBackground from "@/components/ui/BubbleBackground";
 import Preloader from "@/components/Preloader";
 import Assistant from "@/components/Assistant";
 import MotionProvider from "@/components/MotionProvider";
@@ -93,7 +94,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-          <Atmosphere />
+          {/* The bubbles ARE the ambient wash now, so the kit's aurora is off:
+              see ui/BubbleBackground. Mounted here rather than per page,
+              because it is the ground the whole site sits on. */}
+          <Atmosphere aurora={false} />
+          <BubbleBackground />
           <MotionProvider>
             <ScrollProgress />
             <Header />

@@ -16,15 +16,22 @@
 export function Atmosphere({
   depth = true,
   sweep = true,
+  aurora = true,
 }: {
   /** The three parallax point layers. Turn off for dense application screens. */
   depth?: boolean
   /** The slow conic rotation. */
   sweep?: boolean
+  /**
+   * The blurred colour wash. Turn off when the app supplies its own ambient
+   * field: two full-viewport blurred washes composite every frame for a result
+   * muddier than either, because overlapping soft gradients average to flat.
+   */
+  aurora?: boolean
 }) {
   return (
     <>
-      <div aria-hidden className="v-aurora" />
+      {aurora && <div aria-hidden className="v-aurora" />}
       {sweep && <div aria-hidden className="v-sweep" />}
       {depth && (
         <>

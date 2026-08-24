@@ -1233,3 +1233,105 @@ html[data-loaded] .dp-scale-in {
     transition: none;
   }
 }
+
+/* ---- Bubble background -----------------------------------------------------
+   See components/ui/BubbleBackground.tsx for the palette and blend decisions.
+   This file holds the geometry and the drift.
+
+   THE BLUR SITS ON THE WRAPPER, THE TRANSFORMS SIT ON THE CHILDREN. A blur is
+   a paint-time filter and re-running it per element per frame is what makes
+   this pattern expensive. Blurring the container once and moving the children
+   inside it means the filter rasterises a single layer while the drift stays
+   pure transform on the compositor. */
+.dp-bubbles {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  overflow: hidden;
+  /* Atmosphere, not decoration. At full strength this reads as a screensaver
+     behind the copy. */
+  opacity: 0.5;
+}
+/* The filter definitions must be in the document but must never take space. */
+.dp-bubbles-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.dp-bubbles-goo {
+  position: absolute;
+  inset: 0;
+  filter: url(#dp-goo) blur(44px);
+}
+
+.dp-bubble {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(
+      circle at center,
+      rgba(var(--c), 0.82) 0%,
+      rgba(var(--c), 0) 52%
+    )
+    no-repeat;
+  /* See the component: hard-light would multiply half this palette to nothing
+     against a near-black page. */
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+@keyframes dp-bubble-v {
+  0%, 100% { transform: translateY(-46%); }
+  50%      { transform: translateY(46%); }
+}
+@keyframes dp-bubble-h {
+  0%, 100% { transform: translateX(-46%) translateY(-9%); }
+  50%      { transform: translateX(46%) translateY(9%); }
+}
+@keyframes dp-bubble-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Different durations AND different origins. Matching either one makes two
+   bubbles visibly move as a pair, which is the tell that this is five elements
+   rather than one field. */
+.dp-bubble-1 { animation: dp-bubble-v 32s ease-in-out infinite; }
+.dp-bubble-2 {
+  transform-origin: calc(50% - 420px) 50%;
+  animation: dp-bubble-spin 24s linear infinite reverse;
+}
+.dp-bubble-3 {
+  top: calc(10% + 190px);
+  left: calc(10% - 480px);
+  transform-origin: calc(50% + 420px) 50%;
+  animation: dp-bubble-spin 46s linear infinite;
+}
+.dp-bubble-4 {
+  transform-origin: calc(50% - 220px) 50%;
+  animation: dp-bubble-h 44s ease-in-out infinite;
+  opacity: 0.72;
+}
+.dp-bubble-5 {
+  top: 0;
+  left: 0;
+  width: 120%;
+  height: 120%;
+  transform-origin: calc(50% - 760px) calc(50% + 190px);
+  animation: dp-bubble-spin 26s linear infinite;
+}
+.dp-bubble-i {
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 60%;
+  opacity: 0.65;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-bubble {
+    animation: none !important;
+  }
+}
