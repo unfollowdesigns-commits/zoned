@@ -4,85 +4,90 @@ import * as React from "react";
 import { useReducedMotion } from "@/lib/motion";
 
 /**
- * A drifting node field with proximity links, pointer repulsion, and the firm's
- * own vocabulary surfacing among the nodes.
+ * A warping grid of nodes, with the firm's own vocabulary surfacing on it.
  *
- * THIS IS THE REFERENCE'S MECHANICS, NOT A REINTERPRETATION OF THEM. Nodes
- * drift at constant velocity and bounce off the edges, a link is drawn between
- * any two within a fixed radius and fades out as that distance grows, the
- * pointer pushes nodes away from it inside a radius, and one node in seven
- * carries a word instead of a dot. That is the reference behaviour, kept.
+ * WHY THE TOPOLOGY IS FIXED, AND WHY THAT IS THE WHOLE POINT. The obvious way
+ * to build a field like this is to link any two nodes that come within a
+ * radius, which is what the reference implementation does. That is exactly what
+ * produces constellations: three nodes near each other make a triangle, and a
+ * screen full of triangles is a star map, not a grid. No amount of tuning the
+ * radius fixes it, because the triangles are what proximity linking MEANS.
  *
- * WHAT CHANGED, AND WHY. Four things in the source break once it is a real page
- * rather than a demo tab, and copying them faithfully would be copying bugs.
+ * So the links are not proximity based at all. Nodes sit on a lattice and each
+ * one links to its right and down neighbour, permanently. Those pairs never
+ * change, so the figure is a grid by construction: it cannot form a triangle,
+ * and links never flicker in and out as nodes drift past each other, which is
+ * the other tell of the proximity version.
  *
- * 1. THE CANVAS WAS DRAWN AT HALF RESOLUTION ON EVERY RETINA SCREEN. The source
- *    sets `canvas.width = window.innerWidth` while CSS stretches it to `100vw`,
- *    so on a 2x display every line is a blurry two-pixel smear. Fixed by
- *    backing the canvas at devicePixelRatio and scaling the context.
+ * WHAT MOVES, THEN. Each node has a fixed home on the lattice and is displaced
+ * from it by two things. A travelling sine gives the whole sheet a slow wave,
+ * phase-shifted by lattice position so it reads as one wave crossing the field
+ * rather than every node bobbing on its own clock. The pointer shoves nodes
+ * outward, and a spring pulls them back. Because the links follow the nodes,
+ * the grid bulges around the cursor and settles after it, which is the thing
+ * worth looking at: a surface being pushed, rather than dots being scattered.
  *
- * 2. THE LINK PASS WAS THE FRAME BUDGET. At 1920x1080 the source creates 207
- *    nodes and tests every pair, which is 21,528 `Math.sqrt` calls and up to
- *    that many separate `stroke()` submissions per frame. Two changes: pairs
- *    are rejected on squared distance so the square root only runs for the few
- *    hundred that actually link, and links are bucketed into a handful of alpha
- *    bands and stroked as one path per band. That turns several hundred draw
- *    calls into six.
+ * The spring is why the pointer displacement is a velocity rather than a
+ * position. Writing position directly, as the reference does, means the grid
+ * snaps back the instant the pointer leaves and there is no settle at all.
  *
- * 3. A NODE COULD BE DELETED BY A DIVISION. `dirX = dx / distance` is NaN when
- *    the pointer is exactly on a node, and NaN propagates into that node's
- *    position permanently, so it disappears for the rest of the session. Rare
- *    per frame, certain over a long visit.
+ * PERFORMANCE. Links are bucketed into a few alpha bands and each band is
+ * stroked as one path, so a field of several hundred links is a handful of draw
+ * calls rather than one per link. Nodes are one path and one fill. The canvas is
+ * backed at devicePixelRatio, because a canvas sized in CSS pixels and stretched
+ * to full width is drawn at half resolution on every retina screen.
  *
- * 4. NODES JITTERED AGAINST THE EDGES. The source flips velocity on the border
- *    but never puts the node back inside, so a node the pointer has shoved past
- *    the edge flips its velocity every frame while it sits out there. Position
- *    is clamped as well as reflected.
- *
- * Motion is per second rather than per frame throughout, for the same reason as
- * the hero scrub: the source's `x += vx` moves twice as fast on a 120Hz panel,
- * which makes the feel of the page a property of the display.
- *
- * WHY THE WORDS ARE THE POINT. On the reference they read as ports and hex,
- * because that firm sells proxies and those are the units of its work. Taking
- * the figure without that takes the decoration and leaves the reason. Here they
- * are the seats this firm fills and the ways it works, and they are different
- * on every page, because each page is about something different. They also sit
- * nearly invisible until the pointer is near them, so the field is calm until
- * someone moves, and moving it reads the board rather than disturbing it.
+ * WHY THE WORDS MATTER. On the reference these are ports and hex, because that
+ * firm sells proxies. Taking the figure without that takes the decoration and
+ * leaves the reason. Here they are the things this firm is actually hired for,
+ * and they differ per page because each page is about something different. They
+ * rest near invisible and come up under the pointer, so the field is calm until
+ * someone moves it.
  */
 
 type Node = {
-  x: number;
-  y: number;
+  /** Lattice home. Never changes. */
+  hx: number;
+  hy: number;
+  /** Displacement from home, and its velocity. */
+  ox: number;
+  oy: number;
   vx: number;
   vy: number;
-  r: number;
-  /** Empty for a dot, a word for a label node. */
+  /** Resolved position for this frame. */
+  x: number;
+  y: number;
+  /** Index of the right and down neighbours, or -1 at the edges. */
+  right: number;
+  down: number;
+  /** Empty for a plain node, a word for a label node. */
   text: string;
   /** Cached text width. Measured once, not per frame. */
   tw: number;
 };
 
-/** Link radius, in CSS pixels. From the reference. */
-const LINK = 120;
-/** Pointer influence radius and shove speed, in CSS pixels and px/s. */
-const REPEL = 150;
-const REPEL_SPEED = 300;
-/** One node per this many square pixels. */
-const AREA_PER_NODE = 12000;
-const MAX_NODES = 190;
-/** Every Nth node carries a word. */
-const LABEL_EVERY = 7;
+/** Lattice spacing in CSS pixels. */
+const CELL = 78;
+/** Wave amplitude in CSS pixels, and its speed. */
+const WAVE = 7;
+const WAVE_SPEED = 0.55;
+/** Pointer influence radius, and the impulse it applies. */
+const REPEL = 165;
+const PUSH = 2600;
+/** Spring back to home. Damped so the sheet settles rather than ringing. */
+const STIFF = 46;
+const DAMP = 9;
+/** Physics timestep ceiling. Large steps make a spring explode. */
+const MAX_STEP = 0.04;
 /** Link alpha is quantised into this many bands so each is one stroke call. */
-const BANDS = 6;
+const BANDS = 5;
 
 export default function NodeField({
   labels,
   className = "",
   opacity = 1,
 }: {
-  /** The words that surface in the field. Page specific by design. */
+  /** The words that surface on the grid. Page specific by design. */
   labels: string[];
   className?: string;
   opacity?: number;
@@ -90,7 +95,7 @@ export default function NodeField({
   const ref = React.useRef<HTMLCanvasElement>(null);
   const reduced = useReducedMotion();
   /* Stringified so a caller passing an inline array literal does not re-seed
-     the whole field on every render. */
+     the whole grid on every render. */
   const labelKey = labels.join("|");
 
   React.useEffect(() => {
@@ -111,6 +116,7 @@ export default function NodeField({
     let px = -9999;
     let py = -9999;
     let last = 0;
+    let clock = 0;
 
     /* Reused across frames so the link pass allocates nothing. Each band holds
        a flat run of x1,y1,x2,y2. */
@@ -125,60 +131,78 @@ export default function NodeField({
       canvas!.height = Math.round(h * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const count = Math.min(MAX_NODES, Math.round((w * h) / AREA_PER_NODE));
+      /* One cell of bleed on every side. The wave and the pointer both move
+         nodes, and a lattice that stops exactly at the edge shows its border as
+         a row of links that end in mid air. */
+      const cols = Math.ceil(w / CELL) + 2;
+      const rows = Math.ceil(h / CELL) + 2;
       nodes = [];
-      for (let i = 0; i < count; i += 1) {
-        const isText = i % LABEL_EVERY === 0;
-        nodes.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          /* The reference's +/-0.4 px per frame, expressed per second. */
-          vx: (Math.random() - 0.5) * 48,
-          vy: (Math.random() - 0.5) * 48,
-          r: isText ? 0 : Math.random() * 1.6 + 0.9,
-          text: isText ? words[(i / LABEL_EVERY) % words.length].toUpperCase() : "",
-          tw: 0,
-        });
+      for (let r = 0; r < rows; r += 1) {
+        for (let c = 0; c < cols; c += 1) {
+          const i = r * cols + c;
+          /* A small fixed jitter per node, from its own coordinates rather than
+             from Math.random. A perfect lattice reads as graph paper; a jittered
+             one reads as a mesh. Deterministic so a resize does not reshuffle
+             the whole field. */
+          const j = Math.sin(c * 12.9898 + r * 78.233) * 43758.5453;
+          const jitter = (j - Math.floor(j) - 0.5) * CELL * 0.28;
+          const j2 = Math.sin(c * 39.3468 + r * 11.135) * 24634.6345;
+          const jitter2 = (j2 - Math.floor(j2) - 0.5) * CELL * 0.28;
+
+          /* Scattered rather than every Nth, so the words do not line up into
+             columns of their own. */
+          const isText = (c * 5 + r * 3) % 13 === 0;
+
+          nodes.push({
+            hx: (c - 1) * CELL + jitter,
+            hy: (r - 1) * CELL + jitter2,
+            ox: 0,
+            oy: 0,
+            vx: 0,
+            vy: 0,
+            x: 0,
+            y: 0,
+            right: c < cols - 1 ? i + 1 : -1,
+            down: r < rows - 1 ? i + cols : -1,
+            text: isText ? words[(c + r * 3) % words.length].toUpperCase() : "",
+            tw: 0,
+          });
+        }
       }
+      resolve(0);
     }
 
-    function step(dt: number) {
+    /** Writes each node's position for this frame: home, plus wave, plus spring. */
+    function resolve(dt: number) {
       for (const n of nodes) {
-        n.x += n.vx * dt;
-        n.y += n.vy * dt;
-
-        /* Reflect AND clamp. Reflecting alone leaves a node that the pointer
-           pushed out of bounds flipping its velocity every frame while it stays
-           out there, which looks like a stuck, vibrating dot on the edge. */
-        if (n.x < 0) {
-          n.x = 0;
-          n.vx = Math.abs(n.vx);
-        } else if (n.x > w) {
-          n.x = w;
-          n.vx = -Math.abs(n.vx);
-        }
-        if (n.y < 0) {
-          n.y = 0;
-          n.vy = Math.abs(n.vy);
-        } else if (n.y > h) {
-          n.y = h;
-          n.vy = -Math.abs(n.vy);
-        }
-
-        if (px > -9000) {
-          const dx = px - n.x;
-          const dy = py - n.y;
-          const d2 = dx * dx + dy * dy;
-          /* The lower bound is not fussiness. At distance zero the direction is
-             0/0, and a NaN written into a position is permanent: that node is
-             gone for the rest of the session. */
-          if (d2 < REPEL * REPEL && d2 > 0.01) {
-            const d = Math.sqrt(d2);
-            const force = (REPEL - d) / REPEL;
-            n.x -= (dx / d) * force * REPEL_SPEED * dt;
-            n.y -= (dy / d) * force * REPEL_SPEED * dt;
+        if (dt > 0) {
+          if (px > -9000) {
+            const dx = n.x - px;
+            const dy = n.y - py;
+            const d2 = dx * dx + dy * dy;
+            /* The lower bound is not fussiness. At distance zero the direction
+               is 0/0, and a NaN written into a velocity is permanent: that node
+               and its four links are gone for the rest of the session. */
+            if (d2 < REPEL * REPEL && d2 > 0.01) {
+              const d = Math.sqrt(d2);
+              const k = (REPEL - d) / REPEL;
+              n.vx += (dx / d) * k * PUSH * dt;
+              n.vy += (dy / d) * k * PUSH * dt;
+            }
           }
+          /* Damped spring back to home. Velocity rather than position, so the
+             sheet settles after the pointer leaves instead of snapping. */
+          n.vx += (-STIFF * n.ox - DAMP * n.vx) * dt;
+          n.vy += (-STIFF * n.oy - DAMP * n.vy) * dt;
+          n.ox += n.vx * dt;
+          n.oy += n.vy * dt;
         }
+
+        /* Phase from lattice position, so this is one wave crossing the field
+           rather than every node bobbing on its own clock. */
+        const p = n.hx * 0.011 + n.hy * 0.017;
+        n.x = n.hx + n.ox + Math.sin(clock * WAVE_SPEED + p) * WAVE;
+        n.y = n.hy + n.oy + Math.cos(clock * WAVE_SPEED * 0.82 + p * 1.3) * WAVE;
       }
     }
 
@@ -187,35 +211,41 @@ export default function NodeField({
       ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      /* ---- Links --------------------------------------------------------
-         Pairs are rejected on squared distance, so the square root only runs
-         for the few hundred that actually link rather than for all twenty-odd
-         thousand. Survivors are bucketed by alpha and each bucket is stroked
-         once, because a stroke() per link is what makes this pattern expensive
-         at full-viewport scale. */
+      /* ---- Grid lines ---------------------------------------------------
+         Right and down neighbours only. Fixed pairs, so this is a grid by
+         construction and never a constellation. Brightness follows proximity to
+         the pointer, so the sheet lights where it is being touched, and the
+         bands keep that to one stroke call each. */
       for (const b of bands) b.length = 0;
-      const LINK_SQ = LINK * LINK;
-      for (let a = 0; a < nodes.length; a += 1) {
-        const na = nodes[a];
-        for (let b = a + 1; b < nodes.length; b += 1) {
-          const nb = nodes[b];
-          const dx = na.x - nb.x;
-          const dy = na.y - nb.y;
-          const d2 = dx * dx + dy * dy;
-          if (d2 >= LINK_SQ) continue;
-          const k = 1 - Math.sqrt(d2) / LINK;
+      const NEAR = 250;
+      const NEAR_SQ = NEAR * NEAR;
+      for (const n of nodes) {
+        for (const j of [n.right, n.down]) {
+          if (j < 0) continue;
+          const m = nodes[j];
+          const mx = (n.x + m.x) / 2;
+          const my = (n.y + m.y) / 2;
+          let k = 0;
+          if (px > -9000) {
+            const dx = mx - px;
+            const dy = my - py;
+            const d2 = dx * dx + dy * dy;
+            if (d2 < NEAR_SQ) k = 1 - d2 / NEAR_SQ;
+          }
           const band = Math.min(BANDS - 1, Math.floor(k * BANDS));
           const run = bands[band];
-          run.push(na.x, na.y, nb.x, nb.y);
+          run.push(n.x, n.y, m.x, m.y);
         }
       }
-      ctx!.lineWidth = 0.8;
+      ctx!.lineWidth = 1;
       for (let i = 0; i < BANDS; i += 1) {
         const run = bands[i];
         if (run.length === 0) continue;
-        /* Band centre, so a band reads as the average of what it holds. */
         const k = (i + 0.5) / BANDS;
-        ctx!.strokeStyle = `rgba(143, 180, 255, ${(k * 0.3).toFixed(3)})`;
+        /* A floor so the grid is always faintly there, and a rise so the part
+           under the pointer is clearly the part being touched. */
+        const a = 0.07 + k * 0.34;
+        ctx!.strokeStyle = `rgba(143, 180, 255, ${a.toFixed(3)})`;
         ctx!.beginPath();
         for (let j = 0; j < run.length; j += 4) {
           ctx!.moveTo(run[j], run[j + 1]);
@@ -224,67 +254,66 @@ export default function NodeField({
         ctx!.stroke();
       }
 
-      /* ---- Nodes --------------------------------------------------------
-         One path, one fill, for the same reason as the links. */
-      ctx!.fillStyle = "rgba(176, 206, 255, 0.7)";
+      /* ---- Junctions ----------------------------------------------------
+         One path, one fill, for the same reason as the lines. */
+      ctx!.fillStyle = "rgba(176, 206, 255, 0.34)";
       ctx!.beginPath();
       for (const n of nodes) {
-        if (n.r === 0) continue;
-        ctx!.moveTo(n.x + n.r, n.y);
-        ctx!.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx!.moveTo(n.x + 1.1, n.y);
+        ctx!.arc(n.x, n.y, 1.1, 0, Math.PI * 2);
       }
       ctx!.fill();
 
-      /* A hot core on the few nodes nearest the pointer, so the thing under the
-         cursor is visibly the thing being touched rather than just an area that
-         got brighter. */
+      /* A hot core on the junctions the pointer is over. */
       if (px > -9000) {
-        /* WIDER THAN THE REPULSION RADIUS, ON PURPOSE. Nodes are shoved out to
-           REPEL and cannot be closer than that, so a hot radius inside it would
-           light nothing and the effect would be dead code that looks correct in
-           review. Reaching past it lights the ring the shove creates, which is
-           the part there is actually something to see. */
-        const HOT = 230 * 230;
-        ctx!.fillStyle = "rgba(232, 241, 255, 0.95)";
+        const HOT = 150 * 150;
+        ctx!.fillStyle = "rgba(226, 238, 255, 0.9)";
         ctx!.beginPath();
         for (const n of nodes) {
-          if (n.r === 0) continue;
           const dx = n.x - px;
           const dy = n.y - py;
           if (dx * dx + dy * dy > HOT) continue;
-          ctx!.moveTo(n.x + n.r + 0.6, n.y);
-          ctx!.arc(n.x, n.y, n.r + 0.6, 0, Math.PI * 2);
+          ctx!.moveTo(n.x + 1.8, n.y);
+          ctx!.arc(n.x, n.y, 1.8, 0, Math.PI * 2);
         }
         ctx!.fill();
       }
 
       /* ---- Words --------------------------------------------------------
          Set to the house eyebrow: uppercase, medium, wide tracking. The
-         reference uses 11px monospace because its labels are hex and port
-         numbers; ours are English words, and monospace would make them read as
-         code the firm does not write. */
+         reference uses monospace because its labels are hex and port numbers;
+         ours are English terms, and monospace would make them read as code the
+         firm does not write. */
       ctx!.font = "500 10px ui-sans-serif, system-ui, -apple-system, sans-serif";
       ctx!.letterSpacing = "0.09em";
       ctx!.textBaseline = "middle";
-      const NEAR = 190 * 190;
+      const WNEAR = 200 * 200;
       for (const n of nodes) {
-        if (n.r !== 0) continue;
+        if (n.text === "") continue;
+        /* The lattice has a cell of bleed on every side so the links do not end
+           in mid air at the border. Those outer nodes should carry lines, not
+           words: a label hung off a node beyond the edge has nowhere to sit. */
+        if (n.x < 0 || n.x > w || n.y < 0 || n.y > h) continue;
         /* Nearly invisible at rest, full near the pointer. The field should be
-           calm until someone moves, and the words should feel found rather than
+           calm until someone moves, and a word should feel found rather than
            printed on the background. */
         let a = 0.1;
         const dx = n.x - px;
         const dy = n.y - py;
         const d2 = dx * dx + dy * dy;
-        if (px > -9000 && d2 < NEAR) a += (1 - d2 / NEAR) * 0.84;
+        if (px > -9000 && d2 < WNEAR) a += (1 - d2 / WNEAR) * 0.84;
         ctx!.fillStyle = `rgba(168, 200, 255, ${a.toFixed(3)})`;
 
         /* Measured once per node, not per frame. */
         if (n.tw === 0) n.tw = ctx!.measureText(n.text).width;
-        /* Flips to the left of its node rather than running off the canvas. A
-           word sliced by the right edge reads as a rendering fault, and these
-           drift, so any fixed layout will eventually put one there. */
-        const x = n.x + 9 + n.tw > w ? n.x - 9 - n.tw : n.x + 9;
+        /* Flips to the left of its junction rather than running off the canvas,
+           then clamps. A word sliced by the right edge reads as a rendering
+           fault, and these move, so any fixed layout eventually puts one there.
+           The clamp is the part that actually holds: flipping alone still
+           overflows for a node close enough to the edge that its own width no
+           longer fits on either side. */
+        const flipped = n.x + 9 + n.tw > w ? n.x - 9 - n.tw : n.x + 9;
+        const x = Math.max(4, Math.min(flipped, w - n.tw - 4));
         ctx!.fillText(n.text, x, n.y);
       }
     }
@@ -292,7 +321,16 @@ export default function NodeField({
     function frame(now: number) {
       const dt = last ? Math.min((now - last) / 1000, 0.1) : 0.016;
       last = now;
-      step(dt);
+      clock += dt;
+      /* Substepped. A damped spring integrated in one large step overshoots and
+         then diverges, and frame times spike on any real page, so the ceiling
+         has to be on the physics step rather than on the frame. */
+      let rest = dt;
+      while (rest > 0) {
+        const s = Math.min(rest, MAX_STEP);
+        resolve(s);
+        rest -= s;
+      }
       draw();
       raf = requestAnimationFrame(frame);
     }
