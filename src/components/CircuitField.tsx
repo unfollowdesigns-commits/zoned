@@ -32,15 +32,15 @@ import { useReducedMotion } from "@/lib/motion";
  * instead of several hundred paths per frame.
  */
 
-type Seg = { x1: number; y1: number; x2: number; y2: number; len: number };
+type Seg = { x1: number; y1: number; x2: number; y2: number; len: number; mx: number; my: number };
 type Trace = { segs: Seg[]; total: number };
 type Pulse = { trace: number; dist: number; speed: number };
 type Node = { x: number; y: number; text: string; t: number; period: number };
 
-const GRID = 78;
+const GRID = 64;
 /** Trace count per million square pixels. */
-const DENSITY = 26;
-const MAX_TRACES = 40;
+const DENSITY = 40;
+const MAX_TRACES = 58;
 
 export default function CircuitField({
   labels,
@@ -70,6 +70,7 @@ export default function CircuitField({
     let h = 0;
     let dpr = 1;
     let traces: Trace[] = [];
+    let allSegs: Seg[] = [];
     let pulses: Pulse[] = [];
     let nodes: Node[] = [];
     let still: HTMLCanvasElement | null = null;
@@ -117,7 +118,15 @@ export default function CircuitField({
           const b = pts[k + 1];
           const len = Math.abs(b.x - a.x) + Math.abs(b.y - a.y);
           if (len < 1) continue;
-          segs.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, len });
+          segs.push({
+            x1: a.x,
+            y1: a.y,
+            x2: b.x,
+            y2: b.y,
+            len,
+            mx: (a.x + b.x) / 2,
+            my: (a.y + b.y) / 2,
+          });
           total += len;
         }
         if (segs.length) traces.push({ segs, total });
@@ -138,6 +147,10 @@ export default function CircuitField({
         });
       }
 
+      /* Flattened once so the pointer pass below is a loop over an array of
+         about a hundred segments rather than a nested walk of the traces. */
+      allSegs = traces.flatMap((t) => t.segs);
+
       pulses = traces.map((_, i) => ({
         trace: i,
         dist: Math.random() * traces[i].total,
@@ -154,7 +167,7 @@ export default function CircuitField({
       const sc = still.getContext("2d");
       if (sc) {
         sc.setTransform(dpr, 0, 0, dpr, 0, 0);
-        sc.strokeStyle = "rgba(126, 165, 250, 0.13)";
+        sc.strokeStyle = "rgba(126, 165, 250, 0.2)";
         sc.lineWidth = 1;
         sc.beginPath();
         for (const tr of traces) {
@@ -165,7 +178,7 @@ export default function CircuitField({
         }
         sc.stroke();
         /* A pad at every corner and end, the way a real board has one. */
-        sc.fillStyle = "rgba(143, 180, 255, 0.3)";
+        sc.fillStyle = "rgba(143, 180, 255, 0.42)";
         for (const tr of traces) {
           for (const s of tr.segs) {
             sc.fillRect(s.x2 - 1.5, s.y2 - 1.5, 3, 3);
@@ -194,13 +207,52 @@ export default function CircuitField({
       if (still) ctx!.drawImage(still, 0, 0);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+      /* ---- The board reacts around the pointer --------------------------
+      
+         THIS IS THE HOVER EFFECT, and its absence is most of why the field read
+         as flat. Everything else here is ambient: it runs whether or not
+         anyone is there, so within a second the eye files it as wallpaper. A
+         board that brightens where you point stops being a backdrop and starts
+         being a surface you are touching.
+      
+         It lights whole SEGMENTS rather than a soft circular blob. A radial
+         glow over a circuit reads as a smudge sitting on top of it; lighting
+         the runs themselves means the light is travelling in the traces, which
+         is what the picture is about. */
+      const LIT = 240;
+      const LIT_SQ = LIT * LIT;
+      if (px > -9000) {
+        ctx!.lineWidth = 1.2;
+        ctx!.shadowColor = "rgba(120, 170, 255, 0.9)";
+        for (const sg of allSegs) {
+          const dx = sg.mx - px;
+          const dy = sg.my - py;
+          const d2 = dx * dx + dy * dy;
+          if (d2 > LIT_SQ) continue;
+          const k = 1 - d2 / LIT_SQ;
+          ctx!.shadowBlur = 10 * k;
+          ctx!.strokeStyle = `rgba(176, 206, 255, ${(k * 0.7).toFixed(3)})`;
+          ctx!.beginPath();
+          ctx!.moveTo(sg.x1 + 0.5, sg.y1 + 0.5);
+          ctx!.lineTo(sg.x2 + 0.5, sg.y2 + 0.5);
+          ctx!.stroke();
+          /* The pad at the end of a lit run comes up hot, so the junctions read
+             as the things the light is arriving at. */
+          ctx!.fillStyle = `rgba(226, 238, 255, ${(k * 0.95).toFixed(3)})`;
+          ctx!.fillRect(sg.x2 - 2, sg.y2 - 2, 4, 4);
+        }
+        ctx!.shadowBlur = 0;
+      }
+
       /* ---- Pulses ------------------------------------------------------- */
       for (const p of pulses) {
         const tr = traces[p.trace];
         if (!tr) continue;
         p.dist = (p.dist + p.speed * dt) % tr.total;
         const head = pointAt(tr, p.dist);
-        const tail = pointAt(tr, (p.dist - 30 + tr.total) % tr.total);
+        /* 64 rather than 30. A short streak reads as a moving dot; the length
+           is what makes it read as something travelling at speed. */
+        const tail = pointAt(tr, (p.dist - 64 + tr.total) % tr.total);
 
         /* Drawn as a short bright run rather than a dot, because what reads as
            a signal is the streak behind it. Only straight when head and tail
@@ -209,16 +261,31 @@ export default function CircuitField({
         if (head.x === tail.x || head.y === tail.y) {
           const g = ctx!.createLinearGradient(tail.x, tail.y, head.x, head.y);
           g.addColorStop(0, "rgba(143, 180, 255, 0)");
-          g.addColorStop(1, "rgba(198, 220, 255, 0.85)");
+          g.addColorStop(0.7, "rgba(170, 200, 255, 0.4)");
+          g.addColorStop(1, "rgba(226, 238, 255, 1)");
           ctx!.strokeStyle = g;
-          ctx!.lineWidth = 1.4;
+          ctx!.lineWidth = 1.6;
+          /* BLOOM, and it is the single biggest reason this was flat. A hairline
+             at full alpha is still a hairline: what makes a light read as a
+             light is the halo around it, because that is how a bright thing
+             behaves against a dark ground in every photograph anyone has seen.
+             Canvas shadow gives it for one property rather than a second
+             blurred pass. */
+          ctx!.shadowColor = "rgba(120, 170, 255, 0.95)";
+          ctx!.shadowBlur = 9;
           ctx!.beginPath();
           ctx!.moveTo(tail.x, tail.y);
           ctx!.lineTo(head.x, head.y);
           ctx!.stroke();
+          ctx!.shadowBlur = 0;
         }
-        ctx!.fillStyle = "rgba(214, 230, 255, 0.95)";
-        ctx!.fillRect(head.x - 1, head.y - 1, 2, 2);
+        /* The head is a hot core with its own halo, drawn after the streak so
+           it sits on top of it. */
+        ctx!.shadowColor = "rgba(150, 190, 255, 1)";
+        ctx!.shadowBlur = 8;
+        ctx!.fillStyle = "rgba(238, 245, 255, 1)";
+        ctx!.fillRect(head.x - 1.5, head.y - 1.5, 3, 3);
+        ctx!.shadowBlur = 0;
       }
 
       /* ---- Labels ------------------------------------------------------- */
@@ -237,7 +304,7 @@ export default function CircuitField({
         const dx = n.x - px;
         const dy = n.y - py;
         const d2 = dx * dx + dy * dy;
-        if (d2 < 200 * 200) a = Math.min(1, a + (1 - d2 / (200 * 200)) * 0.9);
+        if (d2 < 240 * 240) a = Math.min(1, a + (1 - d2 / (240 * 240)) * 0.95);
         if (a < 0.02) continue;
 
         ctx!.fillStyle = `rgba(160, 195, 255, ${a.toFixed(3)})`;
