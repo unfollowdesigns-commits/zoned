@@ -13,7 +13,8 @@ import {
 } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useReducedMotion } from "@/lib/motion";
-import NetworkField from "@/components/NetworkField";
+import CircuitField from "@/components/CircuitField";
+import { VOCAB_HOME } from "@/lib/vocabulary";
 import { SERVICES } from "@/lib/site";
 
 /**
@@ -354,7 +355,7 @@ export default function CinematicHero() {
             without it the dark sections are flat colour. It sits behind the
             card, so the card opening over it is a real occlusion rather than a
             crossfade between two backgrounds. */}
-        <NetworkField opacity={0.9} />
+        <CircuitField labels={VOCAB_HOME} opacity={0.9} />
         {/* Echoes first, so they sit behind the card. Furthest back drawn first. */}
         <Echo progress={scrollYProgress} depth={2} rest={rest} />
         <Echo progress={scrollYProgress} depth={1} rest={rest} />
