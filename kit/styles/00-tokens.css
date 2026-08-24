@@ -24,7 +24,7 @@
   --v-positive: #4ade9b;
 
   /* ---- Grounds. Nudge these toward the accent's hue family. ------------ */
-  --v-bg: #060814;        /* page */
+  --v-bg: #04060f;        /* page */
   --v-bg-2: #0a0d1c;      /* raised ground: sidebar, top bar */
   --v-surface: #0d1122;   /* panels */
   --v-surface-2: #11162970;

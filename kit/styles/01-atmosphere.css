@@ -38,10 +38,22 @@
   z-index: -2;
   pointer-events: none;
   background:
-    radial-gradient(1100px 640px at 82% -12%, rgba(62, 123, 250, 0.22), transparent 60%),
-    radial-gradient(760px 520px at 4% 2%, rgba(47, 95, 214, 0.16), transparent 55%),
-    radial-gradient(1200px 820px at 50% 120%, rgba(74, 222, 155, 0.07), transparent 60%),
-    radial-gradient(140% 120% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+    /* Key light, high right. Royal blue, the accent's own family. */
+    radial-gradient(1150px 680px at 80% -14%, rgba(37, 84, 205, 0.30), transparent 62%),
+    /* Fill, low left. A deeper indigo, so the two lights are a different
+       DEPTH of blue rather than the same blue twice: that difference is what
+       makes the ground read as lit from somewhere. */
+    radial-gradient(880px 600px at 0% 8%, rgba(22, 46, 128, 0.26), transparent 58%),
+    /* The floor. The page sinks toward black at the bottom instead of holding
+       one flat navy all the way down. */
+    radial-gradient(1300px 780px at 50% 118%, rgba(8, 20, 58, 0.55), transparent 64%),
+    /* One cyan kiss, at the crest colour of the wave field. This is the whole
+       trick of the section: the surface stops looking pasted on when the ground
+       it sits on carries a trace of the same light. */
+    radial-gradient(560px 400px at 68% 32%, rgba(56, 158, 224, 0.10), transparent 66%),
+    /* Vignette. Deeper than before, because the wave is a bright figure and it
+       needs the frame to fall away for it to read as bright. */
+    radial-gradient(145% 122% at 50% 36%, transparent 44%, rgba(0, 0, 0, 0.74) 100%);
 }
 
 /* ---- Mesh grid. 0.02 alpha. Not 0.04. ---------------------------------- */
@@ -88,13 +100,22 @@
   inset: -25%;
   z-index: -3;
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.44;
   filter: blur(90px) saturate(140%);
+  /* ONE HUE FAMILY, FOUR DEPTHS OF IT.
+
+     The mint here was --v-positive, the token reserved for "this is true":
+     confirmations, passing states, verified numbers. Spending it on wallpaper
+     costs the palette its one semantic colour AND, over a blue field, mixes to
+     the olive cast that was sitting on the wave. The four stops are now royal,
+     indigo, near-black navy and a pale blue highlight, which is a range of
+     DEPTH rather than a range of hue: that is what reads as one lit volume
+     instead of several coloured lamps. */
   background:
-    radial-gradient(38% 44% at 22% 28%, rgba(62, 123, 250, 0.55), transparent 62%),
-    radial-gradient(32% 38% at 74% 22%, rgba(47, 95, 214, 0.45), transparent 60%),
-    radial-gradient(34% 40% at 62% 76%, rgba(74, 222, 155, 0.22), transparent 62%),
-    radial-gradient(30% 34% at 30% 78%, rgba(143, 176, 255, 0.28), transparent 60%);
+    radial-gradient(38% 44% at 22% 28%, rgba(40, 90, 212, 0.52), transparent 62%),
+    radial-gradient(32% 38% at 74% 22%, rgba(24, 52, 146, 0.48), transparent 60%),
+    radial-gradient(34% 40% at 62% 76%, rgba(13, 30, 88, 0.45), transparent 62%),
+    radial-gradient(30% 34% at 30% 78%, rgba(92, 138, 255, 0.22), transparent 60%);
   animation: v-aurora 34s ease-in-out infinite;
   will-change: transform;
 }
@@ -116,7 +137,7 @@
     rgba(62, 123, 250, 0.9) 60deg,
     transparent 140deg,
     transparent 220deg,
-    rgba(74, 222, 155, 0.55) 290deg,
+    rgba(34, 76, 186, 0.6) 290deg,
     transparent 350deg);
   animation: v-sweep 70s linear infinite;
   will-change: transform;
