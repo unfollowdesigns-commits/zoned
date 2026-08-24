@@ -13,7 +13,7 @@ import {
 } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useReducedMotion } from "@/lib/motion";
-import NodeField from "@/components/NodeField";
+import ParticleWave from "@/components/ParticleWave";
 import { VOCAB_HOME } from "@/lib/vocabulary";
 import { SERVICES } from "@/lib/site";
 
@@ -317,6 +317,12 @@ export default function CinematicHero() {
   if (reduced) {
     return (
       <section className="relative h-screen overflow-hidden">
+        {/* The field renders here too, as one static frame. Reduced motion is a
+            request not to animate, not a request for a blank hero, and this is
+            now the section's main visual: without it the reduced-motion visitor
+            gets flat navy where everyone else gets the surface. The component
+            draws once and never starts its loop when the preference is set. */}
+        <ParticleWave labels={VOCAB_HOME} opacity={0.9} />
         <Media />
         <div className="absolute inset-x-0 bottom-0 mx-auto max-w-[1280px] px-6 pb-14">
           <h1
@@ -355,7 +361,7 @@ export default function CinematicHero() {
             without it the dark sections are flat colour. It sits behind the
             card, so the card opening over it is a real occlusion rather than a
             crossfade between two backgrounds. */}
-        <NodeField labels={VOCAB_HOME} opacity={0.9} />
+        <ParticleWave labels={VOCAB_HOME} opacity={0.9} />
         {/* Echoes first, so they sit behind the card. Furthest back drawn first. */}
         <Echo progress={scrollYProgress} depth={2} rest={rest} />
         <Echo progress={scrollYProgress} depth={1} rest={rest} />

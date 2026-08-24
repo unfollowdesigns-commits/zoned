@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import NodeField from "@/components/NodeField";
+import ParticleWave from "@/components/ParticleWave";
 import {
   VOCAB_DIFFERENCE,
   VOCAB_HOME,
@@ -40,5 +40,5 @@ export default function PageNodes() {
   /* Dimmer than the homepage. Interior page heroes are short, so the board is
      seen at close quarters against a headline that sits right on it, and the
      0.9 that reads as atmosphere across a full viewport reads as noise here. */
-  return <NodeField labels={labels} opacity={0.55} />;
+  return <ParticleWave labels={labels} opacity={0.55} />;
 }
