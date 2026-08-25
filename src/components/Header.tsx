@@ -40,14 +40,14 @@ function MenuLink({ item }: { item: NavItem }) {
     <motion.div initial="rest" animate="rest" whileHover={reduced ? undefined : "hover"}>
     <Link
       href={item.href}
-      className="group flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-white/[0.05]"
+      className="group flex items-start gap-3 rounded-[13px] p-3 transition-colors duration-200 hover:bg-white/[0.07]"
     >
       {Icon && (
         /* Tile and glyph on separate springs, the glyph stiffer, so the small
            thing moves faster than the big one. A colour change alone reads as
            the same object recoloured rather than as the object responding. */
         <motion.span
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[var(--v-border)] bg-white/[0.04] text-[var(--v-muted)] transition-colors duration-300 group-hover:border-[var(--v-primary)]/50 group-hover:bg-[var(--v-primary)]/10 group-hover:text-[var(--v-primary)]"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-white/[0.06] text-[var(--v-muted)] transition-colors duration-300 group-hover:bg-[var(--v-primary)]/20 group-hover:text-[var(--v-ring)]"
           variants={{ rest: { scale: 1, rotate: 0 }, hover: { scale: 1.08, rotate: -5 } }}
           transition={SPRING_ICON}
         >
@@ -79,7 +79,7 @@ function MenuLink({ item }: { item: NavItem }) {
 }
 
 function ColumnHeading({ children }: { children: React.ReactNode }) {
-  return <div className="v-eyebrow mb-3 border-b border-[var(--v-border)] pb-2.5">{children}</div>;
+  return <div className="v-eyebrow mb-2 px-3">{children}</div>;
 }
 
 export default function Header() {
@@ -131,7 +131,19 @@ export default function Header() {
   return (
     <header
       ref={containerRef}
-      className="sticky top-0 z-50 border-b border-[var(--v-border)] bg-[var(--v-bg-2)]/85 backdrop-blur-md"
+      /* A DETACHED ISLAND, NOT A BAR ACROSS THE TOP.
+
+         The old header was full width with a border along the bottom, which
+         pinned the logo to one corner of a 1440px screen and the button to the
+         other, 1170px apart, with nothing between them but air. That reads as a
+         browser chrome rather than as part of the page. Contained and floated,
+         the same elements become one object: the eye takes the nav in as a
+         single thing, and the page visibly passes BEHIND it, which is what
+         makes a site feel like it has layers.
+
+         No bottom border, on purpose. A rule across the full width would put
+         back the exact line this is getting rid of. */
+      className="sticky top-0 z-50 px-4 pt-3 sm:pt-4"
       onMouseLeave={scheduleClose}
     
       /* Anchors the header through a page transition. See the
@@ -139,7 +151,7 @@ export default function Header() {
          name it is part of the root snapshot and dissolves with the page. */
       style={{ viewTransitionName: "site-header" }}
     >
-      <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-6">
+      <div className="mx-auto flex h-[58px] max-w-[1040px] items-center justify-between gap-4 rounded-[17px] border border-white/[0.08] bg-[#070a15]/80 pl-5 pr-2 backdrop-blur-xl shadow-[0_20px_60px_-30px_rgba(0,0,0,0.95)]">
         <Link href="/" aria-label="District Partners home">
           <Logo />
         </Link>
@@ -173,9 +185,12 @@ export default function Header() {
                 )}
                 <span className="relative">{name}</span>
                 {active && (
+                  /* A dot, not an underline. The underline was positioned
+                     against the old bar's bottom edge; inside a rounded island
+                     it sat off the shape entirely. */
                   <span
                     aria-hidden="true"
-                    className="absolute inset-x-4 -bottom-px h-px bg-[var(--v-primary)]"
+                    className="absolute inset-x-0 -bottom-0.5 mx-auto h-1 w-1 rounded-full bg-[var(--v-primary)]"
                   />
                 )}
               </button>
@@ -186,7 +201,7 @@ export default function Header() {
         <div className="hidden lg:block">
           <Link
             href="/contact"
-            className="rounded-full bg-[var(--v-primary)] px-5 py-2.5 text-[length:var(--t-secondary)] font-semibold text-white transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[var(--v-primary-deep)] active:scale-[0.97]"
+            className="rounded-[12px] bg-[var(--v-primary)] px-4 py-2 text-[length:var(--t-secondary)] font-semibold text-white transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[var(--v-primary-deep)] active:scale-[0.97]"
           >
             Get Started
           </Link>
@@ -212,9 +227,9 @@ export default function Header() {
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               exit={{ opacity: 0, y: -6, filter: "blur(6px)" }}
               transition={{ duration: 0.22, ease: EASE }}
-              className="absolute left-0 right-0 top-full flex justify-center px-6"
+              className="absolute left-0 right-0 top-full flex justify-center px-4"
             >
-              <div className="g-glass mt-3 w-full max-w-[720px] overflow-hidden rounded-2xl p-6">
+              <div className="g-glass mt-2 w-full max-w-[680px] overflow-hidden rounded-[18px] border border-white/[0.08] bg-[#070a15]/90 p-4 backdrop-blur-xl shadow-[0_30px_80px_-40px_rgba(0,0,0,0.95)]">
                 {open === "What We Do" && (
                   <div className="grid grid-cols-2 gap-8">
                     {WHAT_WE_DO_MENU.map((col) => (

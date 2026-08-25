@@ -22,12 +22,42 @@ export type NavGroup = {
   items: NavItem[];
 };
 
+/* `note` is what each service IS, in one line. The menu rows were a bare list
+   of five labels, which tells a visitor nothing they could not guess and left
+   the panel mostly empty. These are descriptive only: no claim about speed,
+   volume or outcome appears here, because a nav menu is the last place anyone
+   would think to fact-check one. */
 export const SERVICES: NavItem[] = [
-  { label: "Executive Search", href: "/what-we-do/executive-search", icon: "search" },
-  { label: "Professional Search", href: "/what-we-do/professional-search", icon: "briefcase" },
-  { label: "Interim Solutions", href: "/what-we-do/interim-solutions", icon: "timer" },
-  { label: "Fractional", href: "/what-we-do/fractional", icon: "brackets" },
-  { label: "Project Support & Expertise", href: "/what-we-do/project-support", icon: "presentation" },
+  {
+    label: "Executive Search",
+    href: "/what-we-do/executive-search",
+    icon: "search",
+    note: "Board and C-suite appointments, retained.",
+  },
+  {
+    label: "Professional Search",
+    href: "/what-we-do/professional-search",
+    icon: "briefcase",
+    note: "Manager through director hires.",
+  },
+  {
+    label: "Interim Solutions",
+    href: "/what-we-do/interim-solutions",
+    icon: "timer",
+    note: "Leadership in the seat while you hire.",
+  },
+  {
+    label: "Fractional",
+    href: "/what-we-do/fractional",
+    icon: "brackets",
+    note: "Senior expertise, part time and ongoing.",
+  },
+  {
+    label: "Project Support & Expertise",
+    href: "/what-we-do/project-support",
+    icon: "presentation",
+    note: "Scoped teams for defined programmes.",
+  },
 ];
 
 export const WHAT_WE_DO_MENU: NavGroup[] = [
