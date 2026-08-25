@@ -46,26 +46,47 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="v-rule my-10" />
+      </div>
 
-        {/* The name at a size nothing else on the site gets, and a contrast low
-            enough that it reads as ground rather than as a heading. */}
+      {/* THE NAME, EDGE TO EDGE.
+
+          It used to sit inside the 1280px column with a rule above and below,
+          which made it one more block in a stack of blocks. The reference ends
+          on the name running the full width of the window, and the reason it
+          works is that nothing else on the page is allowed to be that size:
+          the jump from 14px legal type to a word as wide as the screen is the
+          whole effect, and a container around it caps exactly that jump. So it
+          breaks out of the column, takes a small side gutter and nothing else,
+          and the rule above it is gone. One hairline, under it, before the
+          legal line. */}
+      <div className="px-4 sm:px-6">
         <div className="v-footer-wordmark" aria-hidden="true">
           <span>DISTRICT PARTNERS</span>
         </div>
+      </div>
 
-        <div className="v-rule my-10" />
-
-        <div className="flex flex-col gap-3 text-[length:var(--t-small)] text-[var(--v-muted)] sm:flex-row sm:items-center sm:justify-between">
-          <p>&copy; {new Date().getFullYear()} District Partners. All rights reserved.</p>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="transition-colors hover:text-[var(--v-ink)]">
-              Privacy Policy
-            </Link>
+      <div className="border-t border-[var(--v-border)]">
+        <div className="mx-auto flex max-w-[1280px] flex-col gap-3 px-6 pb-12 pt-6 text-[length:var(--t-small)] text-[var(--v-muted)] sm:flex-row sm:items-center sm:justify-between sm:pr-32">
+          {/* Compact and quiet. The legal line is the one part of a footer
+              nobody is looking for, so it gets no more room than it needs. */}
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <p>District Partners &copy; {new Date().getFullYear()}</p>
             <Link href="/terms" className="transition-colors hover:text-[var(--v-ink)]">
               Terms of Use
             </Link>
+            <Link href="/privacy" className="transition-colors hover:text-[var(--v-ink)]">
+              Privacy Policy
+            </Link>
           </div>
+          <a
+            href={LINKEDIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="District Partners on LinkedIn"
+            className="text-[var(--v-muted)] transition-colors hover:text-[var(--v-ink)]"
+          >
+            <LinkedInIcon size={17} />
+          </a>
         </div>
       </div>
     </footer>

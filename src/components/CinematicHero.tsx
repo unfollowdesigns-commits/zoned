@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "@/components/SiteLink";
 import {
-  AnimatePresence,
   cubicBezier,
   motion,
   useMotionTemplate,
@@ -545,43 +544,78 @@ function Media({
  */
 function FlipWord({ words, reduced }: { words: string[]; reduced: boolean }) {
   const [i, setI] = React.useState(0);
+  const [typed, setTyped] = React.useState(words[0]);
+  /* AN EXPLICIT PHASE, NOT AN INFERRED ONE. The first version worked out
+     whether it was deleting by asking whether the target word still started
+     with the text on screen. It does: deleting one character from
+     "Professionals." leaves "Professionals", which the target still starts
+     with, so the next tick typed the character straight back. The word
+     oscillated between two states forever and never advanced. Deleting is a
+     state the component is IN, so it is stored. */
+  const [deleting, setDeleting] = React.useState(false);
+  const [caret, setCaret] = React.useState(true);
 
+  /* One timer, re-armed with a different delay each tick, rather than an
+     interval per phase. A typewriter is a sequence of unequal waits: fast while
+     deleting, slower while typing, and a long hold on the finished word. Three
+     intervals racing each other is how this effect usually ends up dropping or
+     doubling a character. */
   React.useEffect(() => {
     if (reduced) return;
-    const id = setInterval(() => setI((n) => (n + 1) % words.length), 2600);
+    const full = words[i];
+    let t: ReturnType<typeof setTimeout>;
+
+    if (!deleting && typed === full) {
+      /* Finished. Hold on the whole word, then start erasing. */
+      t = setTimeout(() => setDeleting(true), 2100);
+    } else if (deleting && typed.length > 0) {
+      /* Backspacing is faster than typing, which is how a real one behaves and
+         what keeps the hold the thing you notice rather than the erase. */
+      t = setTimeout(() => setTyped(typed.slice(0, -1)), 34);
+    } else if (deleting) {
+      t = setTimeout(() => {
+        setDeleting(false);
+        setI((n) => (n + 1) % words.length);
+      }, 120);
+    } else {
+      t = setTimeout(() => setTyped(full.slice(0, typed.length + 1)), 62);
+    }
+    return () => clearTimeout(t);
+  }, [typed, i, deleting, words, reduced]);
+
+  /* The caret blinks on its own clock and never stops. A caret that only blinks
+     while idle reads as a bug the moment the two rhythms drift. */
+  React.useEffect(() => {
+    if (reduced) return;
+    const id = setInterval(() => setCaret((c) => !c), 530);
     return () => clearInterval(id);
-  }, [words.length, reduced]);
+  }, [reduced]);
 
   if (reduced) {
     return <span className="text-[var(--v-ring)]">{words[words.length - 1]}</span>;
   }
 
   return (
-    <span
-      className="relative inline-block align-bottom text-[var(--v-ring)]"
-      style={{ perspective: "700px" }}
-    >
+    /* The slot is held open by a hidden copy of the longest word, so the line
+       never reflows as the text grows and shrinks. Without it the headline
+       above jitters on every keystroke. */
+    <span className="relative inline-block align-bottom">
       <span aria-hidden="true" className="invisible block">
         {words[0]}
       </span>
+      {/* Announced once per word, not once per character: a live region on the
+          typing text would read the word out letter by letter. */}
       <span className="sr-only">{words[i]}</span>
-      <AnimatePresence initial={false}>
-        <motion.span
-          key={words[i]}
-          aria-hidden="true"
-          className="absolute left-0 top-0 whitespace-nowrap"
-          style={{ transformOrigin: "50% 50% -0.55em", backfaceVisibility: "hidden" }}
-          initial={{ rotateX: -92, opacity: 0 }}
-          animate={{ rotateX: 0, opacity: 1 }}
-          exit={{ rotateX: 92, opacity: 0 }}
-          transition={{
-            rotateX: { duration: 0.72, ease: [0.16, 1, 0.3, 1] },
-            opacity: { duration: 0.34, ease: [0.4, 0, 0.2, 1] },
-          }}
-        >
-          {words[i]}
-        </motion.span>
-      </AnimatePresence>
+      <span
+        aria-hidden="true"
+        className="absolute left-0 top-0 whitespace-nowrap text-[var(--v-ring)]"
+      >
+        {typed}
+        <span
+          className="ml-[0.06em] inline-block w-[0.055em] -translate-y-[0.06em] align-middle bg-[var(--v-ring)]"
+          style={{ height: "0.86em", opacity: caret ? 1 : 0 }}
+        />
+      </span>
     </span>
   );
 }
