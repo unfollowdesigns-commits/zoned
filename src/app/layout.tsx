@@ -4,6 +4,7 @@ import { Shell, Atmosphere } from "@/kit/components/Atmosphere";
 import { prePaintScript } from "@/lib/preload";
 import BubbleBackground from "@/components/ui/BubbleBackground";
 import Preloader from "@/components/Preloader";
+import SmoothScroll from "@/components/SmoothScroll";
 import Assistant from "@/components/Assistant";
 import MotionProvider from "@/components/MotionProvider";
 import { ScrollProgress } from "@/kit/components/Scroll";
@@ -99,6 +100,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               because it is the ground the whole site sits on. */}
           <Atmosphere aurora={false} />
           <BubbleBackground />
+          <SmoothScroll />
           <MotionProvider>
             <ScrollProgress />
             <Header />
