@@ -37,11 +37,11 @@ export default function Industries() {
               <Reveal key={industry.href} delay={Math.min(i, 5) * 0.06}>
                 <Link
                   href={industry.href}
-                  className="group flex h-full items-center gap-5 rounded-[var(--radius)] border border-[var(--v-border)] bg-white/[0.035] p-6 transition-colors duration-300 hover:border-[var(--v-primary)]/50 hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)] sm:p-7"
+                  className="group flex h-full items-center gap-5 rounded-[20px] bg-white/[0.055] p-6 transition-colors duration-300 hover:bg-white/[0.09] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)] sm:p-7"
                 >
                   <span
                     aria-hidden="true"
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[var(--v-border)] bg-[var(--v-primary)]/10 text-[var(--v-ring)] transition-colors duration-300 group-hover:bg-[var(--v-primary)]/20"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--v-primary)]/14 text-[var(--v-ring)] transition-colors duration-300 group-hover:bg-[var(--v-primary)]/25"
                   >
                     {Icon ? <Icon size={19} strokeWidth={1.7} /> : null}
                   </span>

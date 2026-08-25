@@ -235,7 +235,7 @@ export default function DPDifferencePage() {
                     <div
                       /* Arms the icon redraw. See ui/DrawIcon. */
                       data-draw-group=""
-                      className="group relative flex h-full flex-col overflow-hidden rounded-[16px] bg-white/[0.035] p-6 ring-1 ring-inset ring-white/[0.08]"
+                      className="group relative flex h-full flex-col overflow-hidden rounded-[20px] bg-white/[0.055] p-7 transition-colors duration-300 hover:bg-white/[0.085]"
                     >
                       <PointerLight size={220} />
                       <span className="grid h-10 w-10 place-items-center rounded-[11px] bg-[var(--v-primary)]/14 text-[var(--v-primary)]">
