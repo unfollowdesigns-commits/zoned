@@ -5,7 +5,7 @@ import Link from "@/components/SiteLink";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronRight, ArrowRight } from "lucide-react";
-import { EASE, SPRING_SOFT } from "@/lib/motion";
+import { EASE, SPRING_SOFT, useReducedMotion } from "@/lib/motion";
 import LinkedInIcon from "./LinkedInIcon";
 import Logo from "./Logo";
 import MenuVisual from "@/components/ui/MenuVisual";
@@ -92,6 +92,12 @@ function ColumnHeading({ children }: { children: React.ReactNode }) {
 }
 
 export default function Header() {
+  /* HONOURED HERE TOO, not only in the components that obviously move. The
+     panels open, morph height and stagger their rows, which is exactly the
+     class of motion the preference asks to be spared. Everything below
+     collapses to a zero-duration transition when it is set, so the menus
+     still function, they simply arrive. */
+  const reduced = useReducedMotion();
   const [open, setOpen] = React.useState<NavName | null>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   /* False over the hero, true once past it, and it stays true. See the effect. */
@@ -304,7 +310,7 @@ export default function Header() {
                   <motion.span
                     layoutId="nav-pill"
                     className="absolute inset-0 rounded-full bg-white/10"
-                    transition={SPRING_SOFT}
+                    transition={reduced ? { duration: 0 } : SPRING_SOFT}
                   />
                 )}
                 <span className="relative">{name}</span>
@@ -367,8 +373,8 @@ export default function Header() {
               style={{ transformOrigin: `${originPct}% top` }}
               initial={{ opacity: 0, scaleY: 0.86, scaleX: 0.97, y: -4 }}
               animate={{ opacity: 1, scaleY: 1, scaleX: 1, y: 0 }}
-              exit={{ opacity: 0, scaleY: 0.94, y: -4, transition: { duration: 0.13, ease: EASE } }}
-              transition={SPRING_SOFT}
+              exit={{ opacity: 0, scaleY: 0.94, y: -4, transition: { duration: reduced ? 0 : 0.13, ease: EASE } }}
+              transition={reduced ? { duration: 0 } : SPRING_SOFT}
               className="absolute left-0 right-0 top-full flex justify-center px-4"
             >
               {/* THE PANEL MORPHS BETWEEN MENUS INSTEAD OF SNAPPING.
@@ -391,7 +397,7 @@ export default function Header() {
                    than a duration because this is an object changing size, and
                    the weight is what stops it reading as a swap. */
                 animate={{ height: panelH ?? "auto" }}
-                transition={SPRING_SOFT}
+                transition={reduced ? { duration: 0 } : SPRING_SOFT}
                 className="g-glass mt-2 w-full max-w-[880px] overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#070a15]/92 backdrop-blur-xl shadow-[0_30px_80px_-40px_rgba(0,0,0,0.95)]"
               >
               {/* Padding lives on the measured element, not on the animated box:
@@ -407,7 +413,7 @@ export default function Header() {
                    first. */
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.22, ease: EASE, delay: 0.04 }}
+                transition={reduced ? { duration: 0 } : { duration: 0.22, ease: EASE, delay: 0.04 }}
                 /* Rows arrive in sequence rather than as one block. See the
                    dp-menu-stagger rules: the delay is per row within its
                    column, so the columns cascade together and the whole panel
@@ -663,6 +669,9 @@ function MobileSection({
   pathname: string;
 }) {
   const [open, setOpen] = React.useState(false);
+  /* Its own call: this is a separate component, so the page-level one is not
+     in scope here. */
+  const reduced = useReducedMotion();
   return (
     <div className="border-b border-[var(--v-border)] py-1">
       <button
@@ -685,7 +694,7 @@ function MobileSection({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: EASE }}
+            transition={reduced ? { duration: 0 } : { duration: 0.22, ease: EASE }}
             className="overflow-hidden"
           >
             <div className="flex flex-col pb-2">

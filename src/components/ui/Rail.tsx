@@ -10,6 +10,7 @@ import {
   useTransform,
   useVelocity,
 } from "framer-motion";
+import { SPRING_VELOCITY, useReducedMotion } from "@/lib/motion";
 
 /**
  * A belt that runs continuously and answers the scroll.
@@ -53,11 +54,7 @@ export default function Rail({
   /* Softened, or every wheel tick jolts the rail. The spring is on the INPUT
      here, not on the position, which is the difference between a belt with
      inertia and a rubber band. */
-  const smooth = useSpring(scrollVelocity, {
-    damping: 48,
-    stiffness: 380,
-    mass: 0.6,
-  });
+  const smooth = useSpring(scrollVelocity, SPRING_VELOCITY);
   /* Clamped: a trackpad flick can produce velocities that would otherwise blur
      the type into an unreadable smear. Held to 2.5 rather than 4, because the
      coupling should be felt as the rail responding, not seen as it lurching:
@@ -68,8 +65,15 @@ export default function Rail({
   });
 
   const previous = React.useRef(0);
+  const reduced = useReducedMotion();
 
   useAnimationFrame((t) => {
+    /* BELT AND BRACES. Both callers already render a static list when the
+       preference is set, so this frame loop should never be reachable. It is
+       checked here anyway because a perpetually moving band of text is one of
+       the specific things the preference exists to stop, and a future caller
+       that forgets would ship exactly that with nothing to catch it. */
+    if (reduced) return;
     const dt = previous.current ? (t - previous.current) / 1000 : 0;
     previous.current = t;
 

@@ -111,14 +111,25 @@ export default function WhoWeServePage() {
 
       {/* ---- The claim, set large ----------------------------------------- */}
       <LightBand>
-        <div className="mx-auto max-w-[1280px] px-6 py-24 sm:py-28">
+        <div className="mx-auto max-w-[1280px] px-6 py-20 sm:py-24">
           <Reveal>
             {/* A pull quote at display size and nothing else in the band. The
                 sentence is the argument for the whole page, so it gets a band
                 to itself rather than a box inside one. */}
-            <figure className="mx-auto max-w-[22ch]">
+            {/* THE MEASURE GOES ON THE ELEMENT THAT SETS THE FONT SIZE. It was
+                `max-w-[22ch]` on this figure, and `ch` resolves against the
+                element's OWN font size, which here is the inherited body size
+                of about 16px. So the cap computed to roughly 180px instead of
+                the ~770px that 22 characters of 64px display type actually
+                occupy, and the quote rendered as a two-word-per-line ribbon
+                down the middle of an empty band. Sized in ch on the blockquote
+                itself, the unit means what it says. */}
+            <figure className="max-w-[52rem]">
+              {/* A rule rather than quotation marks. A 64px curly quote is a
+                  piece of punctuation pretending to be a graphic. */}
+              <span aria-hidden="true" className="mb-8 block h-px w-16 bg-[var(--v-primary-deep)]" />
               <blockquote
-                className="v-display text-balance"
+                className="v-display max-w-[20ch] text-balance"
                 style={{
                   fontSize: "var(--t-display-fluid)",
                   lineHeight: "var(--lh-display-fluid)",

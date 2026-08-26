@@ -2266,119 +2266,246 @@ html[data-loaded] .dp-scale-in {
   .v-curtain-fill { width: 100%; }
 }
 
-/* ---- Engagement map --------------------------------------------------------
-   See components/EngagementMap.tsx. The figure builds itself when it arrives:
-   axes draw along their own length, then the zones open, then the seats land.
-   Everything is keyed off one [data-ready] on the host, so nothing here can
-   fire before the figure is on screen. */
-.dp-map-grid {
-  stroke: rgba(143, 180, 255, 0.09);
-  stroke-width: 1;
+/* ---- Engagement timeline ---------------------------------------------------
+   See components/EngagementMap. A Gantt in normal flow: the bars are divs
+   whose widths are percentages of one shared track, so the figure is typeset
+   by the browser at every width and the labels are always real text at a real
+   size. The scatter plot this replaced was an 800-unit SVG viewBox whose
+   labels fell to six pixels on a phone. */
+.dp-tl-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-.dp-map-axis {
-  stroke: rgba(143, 180, 255, 0.42);
-  stroke-width: 1.5;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-}
-[data-ready] .dp-map-axis {
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.dp-map-axis-name {
-  fill: var(--v-primary);
-  font-size: var(--t-label);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-}
-.dp-map-tick {
-  fill: var(--v-muted);
+/* The ticks sit on the same percentage track the bars do, so a tick and the
+   bar segment beneath it genuinely line up. `justify-between` would space
+   them by their own widths, which is close and wrong. */
+.dp-tl-ticks {
+  display: none;
   font-size: var(--t-small);
+  color: var(--v-muted);
+}
+@media (min-width: 768px) {
+  .dp-tl-ticks {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin-left: calc(38% + 24px);
+    border-top: 1px solid var(--v-border);
+    padding-top: 8px;
+  }
+  .dp-tl-ticks li:last-child {
+    text-align: right;
+  }
 }
 
-/* Each spot arrives after the axes it is plotted against, staggered by --i so
-   the three land in order rather than as one block. */
-.dp-map-spot {
-  opacity: 0;
-  transition: opacity 460ms cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: calc(0.62s + var(--i) * 0.12s);
-}
-[data-ready] .dp-map-spot {
-  opacity: 1;
-}
-/* Dimming is what makes the crosshair legible: without it the other two zones
-   stay bright and the answer is buried in the figure it is meant to isolate. */
-.dp-map-spot[data-dim] {
-  opacity: 0.26;
-  transition-delay: 0s;
+.dp-tl-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 14px;
 }
 
-.dp-map-zone {
-  fill: color-mix(in srgb, var(--c) 16%, transparent);
-  stroke: color-mix(in srgb, var(--c) 46%, transparent);
-  stroke-width: 1;
-  transform-box: fill-box;
-  transform-origin: center;
-  /* Never in unison: three zones breathing on one clock read as a pulse in the
-     page rather than as three separate things being alive. */
-  animation: dp-map-breathe calc(13s + var(--i) * 2.5s) calc(var(--i) * -3s) ease-in-out infinite;
+.dp-tl-row {
+  display: grid;
+  gap: 12px;
+  border-radius: 14px;
+  padding: 18px 14px;
+  transition:
+    background-color 260ms ease-out,
+    opacity 260ms ease-out;
 }
-@keyframes dp-map-breathe {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.045); }
+@media (min-width: 768px) {
+  .dp-tl-row {
+    grid-template-columns: 38% 1fr;
+    gap: 24px;
+    align-items: center;
+  }
 }
-.dp-map-spot[data-on] .dp-map-zone {
-  fill: color-mix(in srgb, var(--c) 26%, transparent);
-  stroke: color-mix(in srgb, var(--c) 78%, transparent);
+.dp-tl-row:hover,
+.dp-tl-row:focus-visible {
+  background: rgba(255, 255, 255, 0.04);
+}
+.dp-tl-row:focus-visible {
+  outline: 2px solid var(--v-ring);
+  outline-offset: 2px;
+}
+/* Dimming the others is what makes a hovered row readable as a comparison
+   rather than merely lit. */
+.dp-tl-row[data-dim] {
+  opacity: 0.42;
 }
 
-.dp-map-cross {
-  stroke: var(--c);
-  stroke-width: 1;
-  stroke-dasharray: 3 4;
-  opacity: 0;
-  transition: opacity 260ms ease-out;
+.dp-tl-name {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
 }
-.dp-map-spot[data-on] .dp-map-cross {
-  opacity: 0.75;
+.dp-tl-swatch {
+  margin-top: 5px;
+  height: 10px;
+  width: 10px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  background: var(--c);
+  transition: transform 260ms cubic-bezier(0.34, 1.26, 0.5, 1);
 }
-
-.dp-map-node {
-  fill: var(--c);
-  stroke: #fff;
-  stroke-width: 1.5;
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: transform 300ms cubic-bezier(0.34, 1.26, 0.5, 1);
-}
-.dp-map-spot[data-on] .dp-map-node {
+.dp-tl-row[data-on] .dp-tl-swatch {
   transform: scale(1.3);
 }
-
-.dp-map-label {
-  fill: var(--v-ink);
-  font-size: var(--t-secondary);
+.dp-tl-title {
+  display: block;
+  font-size: var(--t-body);
   font-weight: 600;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
+  color: var(--v-ink);
+}
+.dp-tl-note {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--t-small);
+  line-height: 1.55;
+  color: var(--v-muted);
+}
+
+/* ---- The track ------------------------------------------------------------
+   Every segment grows from the left on the same curve, staggered by row, so
+   the figure builds itself the way it is read. Keyed off [data-ready] on the
+   host, so nothing runs before the figure is on screen. */
+.dp-tl-track {
+  position: relative;
+  height: 44px;
+  isolation: isolate;
+}
+.dp-tl-search,
+.dp-tl-hold {
+  position: absolute;
+  top: 12px;
+  height: 12px;
+  border-radius: 3px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 780ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 130ms);
+}
+[data-ready] .dp-tl-search,
+[data-ready] .dp-tl-hold {
+  transform: scaleX(1);
+}
+
+/* Hatched: work in progress, not a state. */
+.dp-tl-search {
+  left: 0;
+  width: var(--w);
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--c) 34%, transparent) 0 3px,
+    transparent 3px 7px
+  );
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 22%, transparent);
+}
+
+/* Solid: someone is in the seat. */
+.dp-tl-hold {
+  left: var(--x);
+  width: var(--w);
+  background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 62%, transparent));
+  transition-delay: calc(var(--i, 0) * 130ms + 300ms);
+}
+/* A permanent seat does not end, so its bar does not either: it fades out
+   past the axis instead of stopping on a cap. */
+.dp-tl-hold[data-open] {
+  mask-image: linear-gradient(90deg, #000 72%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, #000 72%, transparent 100%);
+}
+
+/* The moment of placement. */
+.dp-tl-seat {
+  position: absolute;
+  top: 9px;
+  left: var(--x);
+  height: 18px;
+  width: 18px;
+  margin-left: -9px;
+  border-radius: 4px;
+  background: linear-gradient(142deg, #fff, var(--c));
+  box-shadow: 0 0 0 3px rgba(6, 10, 24, 0.55), 0 0 16px 2px color-mix(in srgb, var(--c) 60%, transparent);
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 420ms ease-out,
+    transform 520ms cubic-bezier(0.34, 1.26, 0.5, 1);
+  transition-delay: calc(var(--i, 0) * 130ms + 260ms);
+  z-index: 2;
+}
+[data-ready] .dp-tl-seat {
+  opacity: 1;
+  transform: scale(1);
+}
+.dp-tl-row[data-on] .dp-tl-seat {
+  transform: scale(1.18);
+}
+
+.dp-tl-reading {
+  position: absolute;
+  left: 0;
+  top: 30px;
+  font-size: var(--t-small);
+  color: var(--v-muted);
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+}
+.dp-tl-row[data-on] .dp-tl-reading {
+  opacity: 1;
+}
+
+.dp-tl-key {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  border-top: 1px solid var(--v-border);
+  padding-top: 16px;
+  font-size: var(--t-small);
+  color: var(--v-muted);
+}
+.dp-tl-key-mark {
+  height: 10px;
+  width: 26px;
+  border-radius: 2px;
+}
+.dp-tl-key-mark.is-search {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(143, 180, 255, 0.5) 0 3px,
+    transparent 3px 7px
+  );
+  box-shadow: inset 0 0 0 1px rgba(143, 180, 255, 0.3);
+}
+.dp-tl-key-mark.is-hold {
+  margin-left: 14px;
+  background: linear-gradient(90deg, var(--v-primary), color-mix(in srgb, var(--v-primary) 55%, transparent));
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dp-map-axis {
-    stroke-dashoffset: 0;
+  .dp-tl-search,
+  .dp-tl-hold,
+  .dp-tl-seat,
+  .dp-tl-swatch,
+  .dp-tl-row,
+  .dp-tl-reading {
     transition: none;
   }
-  .dp-map-spot {
+  .dp-tl-search,
+  .dp-tl-hold {
+    transform: scaleX(1);
+  }
+  .dp-tl-seat {
     opacity: 1;
-    transition: none;
-  }
-  .dp-map-zone {
-    animation: none;
-  }
-  .dp-map-node {
-    transition: none;
+    transform: scale(1);
   }
 }
+
 
 /* ---- Function figures ------------------------------------------------------
    See components/ui/FunctionArt.tsx. Each figure performs its own verb on
@@ -2512,5 +2639,154 @@ html[data-loaded] .dp-scale-in {
   .dp-fn-card:hover .dp-fa-area,
   .dp-fn-card:focus-within .dp-fa-area {
     animation: none;
+  }
+}
+
+/* ---- The hero's search panel -----------------------------------------------
+   See components/SearchPanel. Everything below reacts to one `data-stage` on
+   the root and one `data-on` per element, so the whole figure is driven by a
+   single number in state. No element carries its own clock. */
+/* Layered, per the house rule: an inset hairline for the lit top edge, a
+   contact shadow, and a cast shadow. One flat drop shadow is what makes a
+   panel look printed onto the page rather than resting above it. */
+.dp-sp {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 2px 6px -2px rgba(0, 0, 0, 0.5),
+    0 30px 70px -46px rgba(0, 0, 0, 0.95);
+}
+
+/* The stage rail. */
+.dp-sp-step {
+  height: 9px;
+  width: 9px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  border: 1.5px solid color-mix(in srgb, var(--v-primary) 55%, transparent);
+  background: transparent;
+  transition:
+    background-color 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dp-sp-step[data-on] {
+  background: var(--v-primary);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--v-primary) 60%, transparent);
+}
+/* The rail fills from its own left edge, so the progress travels rather than
+   appearing. scaleX on a zero-origin transform is the cheapest honest way to
+   draw a line growing. */
+.dp-sp-rail {
+  position: relative;
+  height: 1px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.12);
+}
+.dp-sp-rail::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--v-primary);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dp-sp-rail[data-on]::after {
+  transform: scaleX(1);
+}
+
+/* The stage name is re-keyed by React on every change, so this runs once per
+   stage rather than looping. */
+@keyframes dp-sp-name {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.dp-sp-name {
+  animation: dp-sp-name 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* A band is dim until its stage is reached, then its seats arrive in sequence
+   across the row. The stagger is the point: a band that lands as one block
+   reads as a slide changing, one that fills left to right reads as work being
+   done. */
+.dp-sp-band {
+  opacity: 0.34;
+  transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dp-sp-band[data-on] {
+  opacity: 1;
+}
+
+/* The bar is the graph: its LENGTH is the narrowing, and it has to be legible
+   at a glance or the row of dots is doing the work alone. Anchored right and
+   drawn solid, so four decreasing lengths line up against one edge and the
+   taper is the first thing the eye gets. */
+.dp-sp-bar {
+  height: 3px;
+  width: var(--w, 100%);
+  max-width: 124px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--v-primary) 30%, transparent), var(--c-bar, var(--v-primary)));
+  transform: scaleX(0.2);
+  transform-origin: left center;
+  transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dp-sp-band[data-on] .dp-sp-bar {
+  transform: scaleX(1);
+}
+
+.dp-sp-node {
+  height: 7px;
+  width: 7px;
+  border-radius: 1.5px;
+  background: rgba(143, 180, 255, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.42);
+  transform: scale(0.4);
+  opacity: 0;
+  transition:
+    transform 380ms cubic-bezier(0.34, 1.26, 0.5, 1),
+    opacity 380ms ease-out;
+  transition-delay: calc(var(--i, 0) * 22ms);
+}
+.dp-sp-band[data-on] .dp-sp-node {
+  transform: scale(1);
+  opacity: 1;
+}
+/* The one that gets placed. Bigger, solid, and the only lit thing in the
+   figure: the whole narrowing exists to arrive at it. */
+.dp-sp-node.is-seat {
+  height: 11px;
+  width: 11px;
+  border-radius: 2.5px;
+  background: linear-gradient(142deg, rgba(226, 238, 255, 0.98), var(--v-primary));
+  /* A lit edge as well as a halo. The glow alone reads as a blur behind the
+     shape; the inset hairline is what gives it a top face and makes it an
+     object that is emitting rather than a smudge. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 0 16px 2px color-mix(in srgb, var(--v-primary) 55%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-sp-step,
+  .dp-sp-rail::after,
+  .dp-sp-bar,
+  .dp-sp-node,
+  .dp-sp-band {
+    transition: none;
+  }
+  .dp-sp-name {
+    animation: none;
+  }
+  /* Rest on the finished figure, not on frame zero: every band present, the
+     seat placed. A reduced-motion visitor gets the diagram, not an empty one. */
+  .dp-sp-band {
+    opacity: 1;
+  }
+  .dp-sp-node {
+    transform: scale(1);
+    opacity: 1;
+  }
+  .dp-sp-bar {
+    transform: scaleX(1);
   }
 }

@@ -57,6 +57,18 @@ export const SPRING_PROGRESS = { stiffness: 220, damping: 34, restDelta: 0.001 }
  */
 export const SPRING_TRACK = { type: "spring", stiffness: 150, damping: 18, mass: 0.6 } as const
 
+/**
+ * Smoothing an INPUT, not animating an object.
+ *
+ * The marquee rails take scroll velocity and feed it into their own speed. Raw
+ * velocity jolts on every wheel tick, so it is sprung first. That makes this a
+ * filter rather than a motion: it wants heavy damping and high stiffness, the
+ * opposite of every spring above, which exist to give objects life. Naming it
+ * keeps the rails out of inline-config territory without pretending a low-pass
+ * filter is a UI gesture.
+ */
+export const SPRING_VELOCITY = { damping: 48, stiffness: 380, mass: 0.6 } as const
+
 /** Deceleration curve for opacity and colour. */
 export const EASE = [0.16, 1, 0.3, 1] as const
 

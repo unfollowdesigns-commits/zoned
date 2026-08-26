@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { EASE } from "@/lib/motion";
+import { EASE, useReducedMotion } from "@/lib/motion";
 
 type Fields = { name: string; email: string; company: string; role: string; message: string };
 type Errors = Partial<Record<keyof Fields, string>>;
@@ -38,6 +38,7 @@ export default function ContactForm() {
   const [intent, setIntent] = React.useState<string>(INTENTS[0]);
   const [errors, setErrors] = React.useState<Errors>({});
   const [submitted, setSubmitted] = React.useState(false);
+  const reduced = useReducedMotion();
   const summaryRef = React.useRef<HTMLDivElement>(null);
 
   const set = (key: keyof Fields) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -61,7 +62,7 @@ export default function ContactForm() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: EASE }}
+        transition={reduced ? { duration: 0 } : { duration: 0.4, ease: EASE }}
         className="g-glass g-ring-accent p-8 sm:p-10"
         role="status"
       >
@@ -99,7 +100,7 @@ export default function ContactForm() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.28, ease: EASE }}
+            transition={reduced ? { duration: 0 } : { duration: 0.28, ease: EASE }}
             className="overflow-hidden"
           >
             <div
