@@ -45,6 +45,8 @@ type Spot = {
   rx: number;
   ry: number;
   note: string;
+  /** The same reading the plot gives, in words. See the note on the legend. */
+  where: string;
 };
 
 /* MEASURED, NOT GUESSED. The left margin was 96, which is narrower than the
@@ -64,6 +66,7 @@ const SPOTS: Spot[] = [
     rx: 84,
     ry: 62,
     note: "Someone in the building now, until the permanent hire is in place.",
+    where: "Days · a bridge",
   },
   {
     label: "Professional Search",
@@ -74,6 +77,7 @@ const SPOTS: Spot[] = [
     rx: 92,
     ry: 68,
     note: "The management teams and individual contributors who execute the vision.",
+    where: "Weeks · a permanent seat",
   },
   {
     label: "Executive Search",
@@ -84,6 +88,7 @@ const SPOTS: Spot[] = [
     rx: 76,
     ry: 52,
     note: "Board and C-suite appointments, retained.",
+    where: "A considered process · a permanent seat",
   },
 ];
 
@@ -109,9 +114,20 @@ export default function EngagementMap() {
 
   return (
     <div ref={ref} data-ready={ready || undefined} className="dp-map">
+      {/* THE PLOT IS A WIDE-SCREEN INSTRUMENT AND IT SAYS SO. Its viewBox is
+          800 units across, so on a 390px phone every label renders at about
+          forty percent of its intended size: measured, the tick labels came
+          out near six pixels and the whole figure was illegible. Scaling the
+          type up inside the same box only trades illegible for collided,
+          because the labels would then overlap the zones they annotate.
+
+          So below `sm` the figure is not shown and the legend carries its
+          reading in words instead. That is not a degradation: "Days, a bridge"
+          IS what the plot says about interim work, and a sentence is a better
+          instrument than a chart nobody can read. */}
       <svg
         viewBox="0 0 800 392"
-        className="w-full"
+        className="hidden w-full sm:block"
         role="img"
         aria-label="A map of the three engagement types, plotted by how quickly the seat is filled against whether the need is a bridge or a permanent appointment."
       >
@@ -248,6 +264,12 @@ export default function EngagementMap() {
               <span className="min-w-0">
                 <span className="block text-[length:var(--t-small)] font-semibold text-[var(--v-ink)]">
                   {s.label}
+                </span>
+                {/* The plot's reading, for the viewports that cannot show
+                    the plot. Hidden where the figure itself is visible, so
+                    nothing is stated twice. */}
+                <span className="mt-1 block text-[length:var(--t-small)] font-medium text-[var(--c-where,var(--v-primary))] sm:hidden">
+                  {s.where}
                 </span>
                 <span className="mt-1 block text-[length:var(--t-small)] leading-[1.55] text-[var(--v-muted)]">
                   {s.note}

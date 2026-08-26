@@ -84,8 +84,32 @@ const LEDE_LANDED =
    already. */
 const SCRUB = cubicBezier(0.65, 0, 0.35, 1);
 
+/**
+ * True below the `sm` breakpoint, watched rather than read once.
+ *
+ * THE DIVE NEEDS A DIFFERENT CHOREOGRAPHY ON A PHONE, and this is what picks
+ * it. On a wide screen the type rides down into the space the four-across
+ * services row does not use. On a phone that row stacks to full height, so the
+ * descending block landed straight on top of it: measured at 390x844, the
+ * second paragraph was printed over "Executive Search" and its note. Same
+ * markup, same values, completely broken, and invisible from any desktop
+ * viewport.
+ */
+function useNarrow() {
+  const [narrow, setNarrow] = React.useState(false);
+  React.useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const apply = () => setNarrow(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+  return narrow;
+}
+
 export default function CinematicHero() {
   const reduced = useReducedMotion();
+  const narrow = useNarrow();
   /* The channel from the typewriter to the field. See WaveSearchApi. */
   const waveApi = React.useRef<WaveSearchApi | null>(null);
   /* The channel from the scroll to the camera. A ref, not state: it changes
@@ -113,8 +137,20 @@ export default function CinematicHero() {
 
      Scaled from its own top left corner, so the block shrinks toward the
      margin it is aligned to rather than drifting inward off the grid. */
-  const typeY = useTransform(scrollYProgress, [0, 1], ["0vh", "31vh"], { ease: SCRUB });
-  const typeScale = useTransform(scrollYProgress, [0, 1], [1, 0.62], { ease: SCRUB });
+  /* On a phone the block holds its place and hands over by fading, because
+     there is no lateral room for it to descend into. See useNarrow. */
+  const typeY = useTransform(scrollYProgress, [0, 1], ["0vh", narrow ? "4vh" : "31vh"], {
+    ease: SCRUB,
+  });
+  const typeScale = useTransform(scrollYProgress, [0, 1], [1, narrow ? 0.86 : 0.62], {
+    ease: SCRUB,
+  });
+  /* No fade on the block. There was one here as insurance against the mobile
+     collision, and two things were wrong with it: framer wrote opacity 1 for
+     the whole scrub whatever the range said, so it never ran, and measuring
+     the layout showed it was not needed anyway. On the smallest phone the
+     block's last line ends 60px above the first service link. Deleting a
+     mechanism that does nothing beats keeping one that looks like it does. */
   /* The two paragraphs are stacked in the same box and cross-faded, so the
      swap costs no layout and the block never jumps as the text changes
      length. */
@@ -142,7 +178,7 @@ export default function CinematicHero() {
         <Shade />
         <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[13vh]">
           <Copy reduced waveApi={waveApi} />
-          <div className="mt-auto pb-12">
+          <div className="mt-auto pb-14 sm:pb-12">
             <Tail />
           </div>
         </div>
@@ -163,7 +199,9 @@ export default function CinematicHero() {
         <Shade />
 
         <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[12vh]">
-          <motion.div style={{ y: typeY, scale: typeScale, transformOrigin: "0% 0%" }}>
+          <motion.div
+            style={{ y: typeY, scale: typeScale, transformOrigin: "0% 0%" }}
+          >
             <Copy
               reduced={false}
               waveApi={waveApi}
@@ -175,7 +213,7 @@ export default function CinematicHero() {
           {/* The payoff row: arrives once the camera is down among the
               crests, taking the place the type left. The frame is never
               carrying both. */}
-          <motion.div className="mt-auto pb-10" style={{ opacity: tailOpacity, y: tailY }}>
+          <motion.div className="mt-auto pb-14 sm:pb-10" style={{ opacity: tailOpacity, y: tailY }}>
             <Tail />
           </motion.div>
         </div>
@@ -402,14 +440,17 @@ function FlipWord({
 function Tail() {
   return (
     <div className="border-t border-white/15 pt-8">
-      <ul className="grid gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Two up and note-less on a phone. Four stacked entries with a line of
+          copy each is over five hundred pixels, which does not fit inside a
+          pinned one-screen frame however the type above it behaves. */}
+      <ul className="grid grid-cols-2 gap-x-5 gap-y-5 sm:gap-x-8 sm:gap-y-7 lg:grid-cols-4">
         {SERVICES.slice(0, 4).map((s) => (
           <li key={s.href}>
             <Link
               href={s.href}
               className="group block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--v-ring)]"
             >
-              <span className="flex items-center gap-2 text-[length:var(--t-action)] font-semibold text-white">
+              <span className="flex items-center gap-2 text-[length:var(--t-small)] font-semibold text-white sm:text-[length:var(--t-action)]">
                 {s.label}
                 <ArrowRight
                   size={15}
@@ -419,7 +460,7 @@ function Tail() {
                 />
               </span>
               {s.note && (
-                <span className="mt-2 block max-w-[26ch] text-[length:var(--t-small)] leading-[1.55] text-[var(--v-muted)]">
+                <span className="mt-2 hidden max-w-[26ch] text-[length:var(--t-small)] leading-[1.55] text-[var(--v-muted)] sm:block">
                   {s.note}
                 </span>
               )}
@@ -428,7 +469,21 @@ function Tail() {
         ))}
       </ul>
 
-      <div className="mt-9 flex flex-wrap items-center justify-end gap-4 border-t border-white/10 pt-6">
+      {/* Left aligned on a phone, and that is a collision fix rather than a
+          preference: the assistant button is fixed in the bottom right corner
+          of every page, and measured at 375x667 this call to action sat
+          underneath it. Nothing may claim that corner on a narrow screen. */}
+      {/* WIDE SCREENS ONLY, and it is a fit problem before it is a taste one.
+          Measured at 375x667: the pinned frame is one screen, the type block
+          and four service links already fill it, and this row pushed the call
+          to action to y=653 on a 667px screen, straight under the assistant
+          button that is fixed in that corner on every page (its pill runs
+          169..351 across, so left-aligning does not clear it either).
+
+          Cutting it on a phone costs nothing. "Get Started" is in the header
+          at every scroll position, and the four services underneath are the
+          payoff this descent was built to deliver. */}
+      <div className="mt-9 hidden flex-wrap items-center justify-end gap-4 border-t border-white/10 pt-6 sm:flex">
         <Link
           href="/contact"
           className="group inline-flex items-center gap-2.5 text-[length:var(--t-action)] font-semibold text-white transition-colors duration-200 hover:text-[var(--v-ring)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--v-ring)]"

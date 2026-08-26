@@ -154,7 +154,7 @@ export default function WhoWeServePage() {
                 >
                   {/* The figure gets the top two thirds. It is the content of
                       this card, not an illustration beside it. */}
-                  <div className="dp-art-frame flex items-center justify-center px-10 pb-4 pt-10 text-[var(--v-primary)]">
+                  <div className="flex items-center justify-center px-10 pb-4 pt-10 text-[var(--v-primary)]">
                     <FunctionArt kind={f.kind} className="max-w-[320px]" />
                   </div>
 
