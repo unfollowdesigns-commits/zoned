@@ -3,7 +3,7 @@
 import * as React from "react";
 import { whenReached } from "@/lib/in-view";
 import { useReducedMotion } from "@/lib/motion";
-import { ICONS } from "@/components/icons";
+import { MARKS } from "@/components/ui/Mark";
 
 /**
  * A line icon that draws itself, and redraws on hover.
@@ -44,21 +44,19 @@ const GEOM = "path, circle, ellipse, line, polyline, polygon, rect";
 export default function DrawIcon({
   name,
   size = 19,
-  strokeWidth = 1.75,
   className = "",
   delay = 0,
 }: {
-  /** A key in components/icons.ts. A string, not a component: see that file. */
+  /** A key in ui/Mark.tsx. A string, not a component: see components/icons.ts. */
   name: string;
   size?: number;
-  strokeWidth?: number;
   className?: string;
   /** Seconds. Staggers a row or grid so they do not all draw at once. */
   delay?: number;
 }) {
   const ref = React.useRef<HTMLSpanElement>(null);
   const reduced = useReducedMotion();
-  const Icon = ICONS[name];
+  const Icon = MARKS[name];
 
   React.useEffect(() => {
     const host = ref.current;
@@ -120,7 +118,9 @@ export default function DrawIcon({
       className={`dp-draw ${className}`}
       style={{ ["--draw-delay" as string]: `${delay}s` }}
     >
-      <Icon size={size} strokeWidth={strokeWidth} />
+      <span style={{ width: size, height: size, display: "block" }}>
+        <Icon />
+      </span>
     </span>
   );
 }

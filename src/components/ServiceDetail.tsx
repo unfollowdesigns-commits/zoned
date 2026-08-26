@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
 import DrawIcon from "@/components/ui/DrawIcon";
+import { hasMark } from "@/components/ui/Mark";
 import PointerLight from "@/components/ui/PointerLight";
 import LightBand from "@/components/ui/LightBand";
 import NavLedger from "@/components/ui/NavLedger";
@@ -55,9 +56,11 @@ export default function ServiceDetail({
                   <Reveal delay={Math.min(i * 0.05, 0.2)} className="h-full" fill>
                     <Link href={fn.href} data-draw-group="" className={CARD}>
                       <PointerLight size={220} />
-                      <span className="grid h-11 w-11 place-items-center rounded-[12px] bg-[var(--v-primary)]/14 text-[var(--v-primary)]">
-                        <DrawIcon name={fn.icon ?? "briefcase"} size={19} delay={i * 0.05} />
-                      </span>
+                      {hasMark(fn.icon) && (
+                        <span className="grid h-11 w-11 place-items-center rounded-[12px] bg-[var(--v-primary)]/14 text-[var(--v-ring)]">
+                          <DrawIcon name={fn.icon!} size={20} delay={i * 0.05} />
+                        </span>
+                      )}
                       <h3 className="v-display mt-6 text-[length:var(--t-heading)] leading-[1.25]">
                         {fn.label}
                       </h3>
@@ -207,10 +210,7 @@ export default function ServiceDetail({
                 <Reveal delay={Math.min(i * 0.04, 0.24)} className="h-full" fill>
                   <Link href={ind.href} data-draw-group="" className={CARD}>
                     <PointerLight size={200} />
-                    <span className="grid h-10 w-10 place-items-center rounded-[11px] bg-[var(--v-primary)]/14 text-[var(--v-primary)]">
-                      <DrawIcon name={ind.icon ?? "briefcase"} size={18} delay={i * 0.04} />
-                    </span>
-                    <h3 className="v-display mt-5 text-[length:var(--t-body)] leading-[1.3]">
+                    <h3 className="v-display text-[length:var(--t-body)] leading-[1.3]">
                       {ind.label}
                     </h3>
                   </Link>
