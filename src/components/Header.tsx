@@ -5,8 +5,7 @@ import Link from "@/components/SiteLink";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronRight } from "lucide-react";
-import { EASE, SPRING_ICON, SPRING_SOFT, useReducedMotion } from "@/lib/motion";
-import { ICONS } from "@/components/icons";
+import { EASE, SPRING_SOFT } from "@/lib/motion";
 import LinkedInIcon from "./LinkedInIcon";
 import Logo from "./Logo";
 import {
@@ -33,48 +32,45 @@ const SECTION_PREFIX: Record<NavName, string> = {
   About: "/about",
 };
 
+/**
+ * A row in a menu panel.
+ *
+ * NO ICON, AND THAT IS THE FIX RATHER THAN A SIMPLIFICATION. Each row used to
+ * carry a rounded tile with a stock line glyph in it: a magnifier for search, a
+ * briefcase for professional, a stopwatch for interim. Those glyphs are not
+ * drawn for this firm and they are not drawn for each other, so the set reads as
+ * a stock icon pack rather than as one house, and a magnifier next to the word
+ * "Search" adds nothing a reader did not already have.
+ *
+ * What replaces it is the line of copy that says what the service IS, which was
+ * already there and was being crowded by a picture of a briefcase. A rule that
+ * appears on the left edge on hover marks the active row instead: it belongs to
+ * the type, it costs no artwork, and it cannot look borrowed.
+ */
 function MenuLink({ item }: { item: NavItem }) {
-  const Icon = item.icon ? ICONS[item.icon] : undefined;
-  const reduced = useReducedMotion();
   return (
-    <motion.div initial="rest" animate="rest" whileHover={reduced ? undefined : "hover"}>
     <Link
       href={item.href}
-      className="group flex items-start gap-3 rounded-[13px] p-3 transition-colors duration-200 hover:bg-white/[0.07]"
+      className="group relative flex flex-col rounded-[13px] py-3 pl-4 pr-3 transition-colors duration-200 hover:bg-white/[0.06]"
     >
-      {Icon && (
-        /* Tile and glyph on separate springs, the glyph stiffer, so the small
-           thing moves faster than the big one. A colour change alone reads as
-           the same object recoloured rather than as the object responding. */
-        <motion.span
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-white/[0.06] text-[var(--v-muted)] transition-colors duration-300 group-hover:bg-[var(--v-primary)]/20 group-hover:text-[var(--v-ring)]"
-          variants={{ rest: { scale: 1, rotate: 0 }, hover: { scale: 1.08, rotate: -5 } }}
-          transition={SPRING_ICON}
-        >
-          <motion.span
-            className="grid place-items-center"
-            variants={{ rest: { y: 0, rotate: 0 }, hover: { y: -2, rotate: 5 } }}
-            transition={{ ...SPRING_ICON, stiffness: 420 }}
-          >
-            <Icon size={18} strokeWidth={1.75} />
-          </motion.span>
-        </motion.span>
-      )}
-      <span className="flex min-w-0 flex-col">
-        <span className="flex items-center gap-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)]">
-          {item.label}
-          {item.badge && (
-            <span className="rounded-full border border-[var(--v-primary)]/40 bg-[var(--v-primary)]/10 px-2 py-0.5 text-[length:var(--t-label)] font-semibold uppercase tracking-wide text-[var(--v-primary)]">
-              {item.badge}
-            </span>
-          )}
-        </span>
-        {item.note && (
-          <span className="mt-0.5 text-[length:var(--t-small)] leading-snug text-[var(--v-muted)]">{item.note}</span>
+      <span
+        aria-hidden="true"
+        className="absolute bottom-3 left-0 top-3 w-[2px] origin-top scale-y-0 rounded-full bg-[var(--v-primary)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100"
+      />
+      <span className="flex items-center gap-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)]">
+        {item.label}
+        {item.badge && (
+          <span className="rounded-full bg-[var(--v-primary)]/15 px-2 py-0.5 text-[length:var(--t-label)] font-semibold uppercase tracking-wide text-[var(--v-ring)]">
+            {item.badge}
+          </span>
         )}
       </span>
+      {item.note && (
+        <span className="mt-1 text-[length:var(--t-small)] leading-snug text-[var(--v-muted)]">
+          {item.note}
+        </span>
+      )}
     </Link>
-    </motion.div>
   );
 }
 
@@ -85,6 +81,8 @@ function ColumnHeading({ children }: { children: React.ReactNode }) {
 export default function Header() {
   const [open, setOpen] = React.useState<NavName | null>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  /* False over the hero, true once past it, and it stays true. See the effect. */
+  const [condensed, setCondensed] = React.useState(false);
   const closeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = React.useRef<HTMLElement>(null);
   const pathname = usePathname();
@@ -107,6 +105,49 @@ export default function Header() {
     setOpen(null);
     setMobileOpen(false);
   }
+
+  /**
+   * The header condenses once you leave the hero, and stays condensed.
+   *
+   * OVER THE HERO IT IS BARELY THERE: full measure, no fill, no edge, so the
+   * picture behind it is the thing you see. Past the hero there is content
+   * under it that has to stay readable, so it pulls in, takes a ground and an
+   * edge, and lifts off the page. One transition, in one direction, at the one
+   * moment the page changes character.
+   *
+   * THE THRESHOLD HAS HYSTERESIS. Condensing and expanding at the same scroll
+   * position means a single pixel of wheel jitter at the boundary flips the
+   * header back and forth, which is the classic version of this effect and it
+   * looks broken. Expanding needs 90px more travel than condensing did, so the
+   * boundary can never be sat on.
+   *
+   * Reading scrollY inside a rAF rather than in the listener: with Lenis the
+   * scroll position is interpolated and fires often, and the state only needs to
+   * be correct once per frame.
+   */
+  React.useEffect(() => {
+    let frame = 0;
+    const check = () => {
+      frame = 0;
+      const y = window.scrollY;
+      /* Tied to the viewport so a tall hero and a short interior header both
+         hand over at roughly their own end, and capped so a very tall screen
+         does not leave the header expanded halfway down the page. */
+      const enter = Math.min(window.innerHeight * 0.45, 360);
+      setCondensed((was) => (was ? y > enter - 90 : y > enter));
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(check);
+    };
+    check();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
 
   React.useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -151,7 +192,13 @@ export default function Header() {
          name it is part of the root snapshot and dissolves with the page. */
       style={{ viewTransitionName: "site-header" }}
     >
-      <div className="mx-auto flex h-[58px] max-w-[1040px] items-center justify-between gap-4 rounded-[17px] border border-white/[0.08] bg-[#070a15]/80 pl-5 pr-2 backdrop-blur-xl shadow-[0_20px_60px_-30px_rgba(0,0,0,0.95)]">
+      <div
+        className={`mx-auto flex items-center justify-between gap-4 rounded-[17px] border pl-5 pr-2 backdrop-blur-xl transition-[max-width,height,background-color,border-color,box-shadow] duration-[620ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          condensed
+            ? "h-[58px] max-w-[1040px] border-white/[0.08] bg-[#070a15]/80 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.95)]"
+            : "h-[70px] max-w-[1280px] border-transparent bg-transparent shadow-none"
+        }`}
+      >
         <Link href="/" aria-label="District Partners home">
           <Logo />
         </Link>
