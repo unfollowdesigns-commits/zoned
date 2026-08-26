@@ -128,7 +128,7 @@ export default function ProcessScene({
                    within the set. Five items, one tab stop. */
                 tabIndex={on ? 0 : -1}
                 onClick={() => setStep(i)}
-                className="group relative flex w-full items-baseline gap-5 border-b border-[var(--v-ink)]/[0.14] py-5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+                className="group relative flex w-full items-baseline gap-5 rounded-[10px] border-b border-[var(--v-ink)]/[0.14] py-5 pl-2 text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--v-primary)]"
               >
                 {/* The progress rule. It marks the active step by filling its
                     row's underline rather than by drawing anything new. */}
@@ -199,32 +199,28 @@ function Figure({ step }: { step: number }) {
     >
       <defs>
         <radialGradient id="ps-glow">
-          <stop offset="0%" stopColor="var(--v-primary)" stopOpacity="0.32" />
+          <stop offset="0%" stopColor="var(--v-primary)" stopOpacity="0.34" />
           <stop offset="100%" stopColor="var(--v-primary)" stopOpacity="0" />
         </radialGradient>
       </defs>
 
-      {/* ---- The two grounds ---------------------------------------------
-          The reference sits its actors on soft panels, and it is doing real
-          work rather than decorating: without a ground, a scatter of marks and
-          a stack of rules are just marks on a page, and nothing tells you that
-          the left half and the right half are different PLACES. Two panels and
-          two words do that in less space than any amount of drawing. */}
-      <g className="dp-ps-ground">
-        <rect x={16} y={78} width={252} height={276} rx={14} />
-        <rect x={300} y={78} width={244} height={276} rx={14} />
-      </g>
-      <g className="dp-ps-groundlabel">
-        <text x={32} y={104}>The market</text>
-        <text x={316} y={104}>Your organisation</text>
-      </g>
+      {/* ONE GROUND, NOT TWO PANELS.
+
+          The first version boxed the market and the organisation separately,
+          and two boxes side by side are two cards: nothing said they were the
+          same picture, and at the first step one of them sat empty with a
+          single stray mark in it. A search is a relationship BETWEEN those two
+          places, so they share one space and are told apart by where they sit
+          in it and by a caption, the way the reference names its actors rather
+          than framing them. */}
+      <rect className="dp-ps-ground" x={14} y={58} width={532} height={272} rx={18} />
 
       {/* ---- The structure. Present from the first step. ------------------ */}
       <g className="dp-ps-struct">
-        <path d="M396 138h64M362 216h136M330 294h200" />
+        <path d="M398 130h64M364 208h136M332 286h200" />
       </g>
       <g className="dp-ps-seats">
-        {[[396, 216], [430, 216], [464, 216], [352, 294], [404, 294], [456, 294], [508, 294]].map(
+        {[[398, 208], [432, 208], [466, 208], [354, 286], [406, 286], [458, 286], [510, 286]].map(
           ([x, y]) => (
             <rect key={`${x}-${y}`} x={x - 6} y={y - 6} width={12} height={12} rx={2.5} />
           ),
@@ -240,6 +236,19 @@ function Figure({ step }: { step: number }) {
         height={22}
         rx={4}
         data-filled={seated ? "true" : undefined}
+      />
+
+      {/* THE GAP, PRESENT FROM THE FIRST FRAME.
+
+          The reference opens with a dotted arc and the words "cold outreach
+          can't close the gap": the connection exists as a PROBLEM before it
+          exists as a solution, which is what makes the two halves one picture
+          from the start rather than two things that meet later. This is the
+          same move. It fades out as the real line takes over. */}
+      <path
+        className="dp-ps-gap"
+        data-off={linked ? "true" : undefined}
+        d={`M150 196 C 230 128, 330 106, ${SEAT.x - 16} ${SEAT.y}`}
       />
 
       {/* ---- The market -------------------------------------------------- */}
@@ -265,28 +274,49 @@ function Figure({ step }: { step: number }) {
       {/* ---- The line from the chosen candidate to the seat --------------- */}
       <path
         className="dp-ps-link"
+        /* AN ATTRIBUTE, NOT A CSS PROPERTY. `pathLength` cannot be set from a
+           stylesheet, and setting it there fails silently: the dash rule then
+           runs against this curve's real length of 274 units, so the line drew
+           from 0 to 100, vanished from 100 to 200, and reappeared for the last
+           74. A visible hole in the middle of the one line the section is
+           about. The marks and the stat gauges set it as an attribute; this
+           did not, and that was the whole difference. */
+        pathLength={100}
         data-on={linked ? "true" : undefined}
-        d={`M${chosen[0]} ${chosen[1]} C ${chosen[0] + 120} ${chosen[1] - 60}, ${SEAT.x - 110} ${SEAT.y + 40}, ${SEAT.x} ${SEAT.y}`}
+        d={`M${chosen[0]} ${chosen[1]} C ${chosen[0] + 120} ${chosen[1] - 70}, ${SEAT.x - 120} ${SEAT.y + 40}, ${SEAT.x} ${SEAT.y}`}
       />
 
-      {/* ---- The candidate who is placed ---------------------------------- */}
-      <circle
-        className="dp-ps-halo"
-        cx={cx}
-        cy={cy}
-        r={40}
-        fill="url(#ps-glow)"
-        data-on={seated ? "true" : undefined}
-      />
-      <rect
-        className="dp-ps-chosen"
-        x={cx - 9}
-        y={cy - 9}
-        width={18}
-        height={18}
-        rx={3.5}
-        data-picked={shortlisted ? "true" : undefined}
-      />
+      {/* ---- The candidate who is placed ----------------------------------
+          HIDDEN UNTIL THE MARKET EXISTS. It used to render from the first
+          frame, which put one unexplained grey square alone inside an empty
+          box: the single most broken-looking thing in the section, and the
+          first thing anyone saw. A figure cannot show its subject before it
+          has shown the subject's context. */}
+      <g className="dp-ps-pick" data-on={marketOn ? "true" : undefined}>
+        <circle
+          className="dp-ps-halo"
+          cx={cx}
+          cy={cy}
+          r={40}
+          fill="url(#ps-glow)"
+          data-on={seated ? "true" : undefined}
+        />
+        <rect
+          className="dp-ps-chosen"
+          x={cx - 9}
+          y={cy - 9}
+          width={18}
+          height={18}
+          rx={3.5}
+          data-picked={shortlisted ? "true" : undefined}
+        />
+      </g>
+
+      {/* Captions on the actors, not frames around them. */}
+      <g className="dp-ps-caption">
+        <text x={150} y={324} textAnchor="middle">The market</text>
+        <text x={432} y={324} textAnchor="middle">Your organisation</text>
+      </g>
     </svg>
   );
 }

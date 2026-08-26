@@ -1686,26 +1686,41 @@ html[data-loaded] .dp-scale-in {
 
 /* ---- Process scene ---------------------------------------------------------
    See components/ui/ProcessScene.tsx. Every rule below is a STATE of one
-   figure, never a separate figure: elements transition between stages rather
-   than being swapped, which is what makes the sequence read as one process.
+   figure, never a separate figure.
 
-   The transitions are long and on a single curve, because the whole point is
-   that a viewer can watch a thing change. A short transition here would make
-   each step arrive already finished, which is the same as swapping images. */
+   NO BLANKET TRANSITION. The first version put one 620ms curve on `.dp-ps *`,
+   which is why the section read as a slideshow: a decision, a pen drawing a
+   line and a person taking a job all moved with identical weight, so nothing
+   in the picture had any character of its own. Each element now moves the way
+   the thing it represents would move, and the differences are the point:
+
+     the market arriving   slow and soft, staggered. People do not appear at
+                           once, and a field that lands in unison reads as a
+                           slide changing.
+     the short list        fast and decisive. Choosing is the one moment here
+                           that is a judgement rather than a process.
+     the gap closing       slowest of all. It has been there the whole time.
+     the line drawing      long and near constant speed, because that is how a
+                           pen moves; easing it makes it look sprayed on.
+     the candidate moving  the only thing that overshoots. It has mass, it is a
+                           person changing jobs, and it settles rather than
+                           stopping dead.
+     the seat filling      quick. It either happened or it did not. */
 .dp-ps {
   overflow: visible;
 }
-.dp-ps * {
-  transition:
-    opacity 620ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 780ms cubic-bezier(0.22, 1, 0.36, 1),
-    fill 620ms cubic-bezier(0.22, 1, 0.36, 1),
-    stroke 620ms cubic-bezier(0.22, 1, 0.36, 1),
-    stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1),
-    x 900ms cubic-bezier(0.22, 1, 0.36, 1),
-    y 900ms cubic-bezier(0.22, 1, 0.36, 1),
-    cx 900ms cubic-bezier(0.22, 1, 0.36, 1),
-    cy 900ms cubic-bezier(0.22, 1, 0.36, 1);
+
+.dp-ps-ground {
+  fill: var(--v-ink);
+  fill-opacity: 0.03;
+}
+.dp-ps-caption text {
+  fill: var(--v-muted);
+  font-family: var(--font-body);
+  font-size: var(--t-label);
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
 }
 
 .dp-ps-struct path {
@@ -1723,32 +1738,56 @@ html[data-loaded] .dp-scale-in {
   stroke-width: 1.2;
 }
 
-/* The vacancy: dashed while empty, solid and filled once seated. */
+/* The vacancy: dashed while empty, gone once the seat is taken. */
 .dp-ps-vacancy {
   fill: none;
   stroke: var(--v-primary);
   stroke-width: 1.6;
   stroke-dasharray: 4 4;
+  transition: stroke-opacity 300ms ease-out;
 }
 .dp-ps-vacancy[data-filled] {
-  stroke-dasharray: 0 0;
   stroke-opacity: 0;
 }
 
-/* The market. Absent at step 0, then every candidate, then only the short
-   list: the dropped ones recede rather than vanishing, because they are still
-   in the market, just no longer in the search. */
+/* The gap. Slowest thing in the figure: it has been there the whole time. */
+.dp-ps-gap {
+  fill: none;
+  stroke: var(--v-ink);
+  stroke-opacity: 0.28;
+  stroke-width: 1.4;
+  stroke-dasharray: 3 5;
+  transition: opacity 900ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dp-ps-gap[data-off] {
+  opacity: 0;
+}
+
+/* The market. Slow and soft: people do not appear all at once. */
 .dp-ps-market rect {
   fill: var(--v-ink);
   fill-opacity: 0.3;
   opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.4);
+  transition:
+    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 760ms cubic-bezier(0.16, 1, 0.3, 1),
+    fill 340ms ease-out,
+    fill-opacity 340ms ease-out;
 }
 .dp-ps-market[data-on] rect {
   opacity: 1;
+  transform: scale(1);
 }
+/* Choosing is a judgement, so it is the fastest move in the figure. */
 .dp-ps-market[data-on] rect.is-dropped {
   opacity: 0.22;
   fill-opacity: 0.16;
+  transition:
+    opacity 340ms ease-out,
+    fill-opacity 340ms ease-out;
 }
 .dp-ps-market[data-on] rect.is-kept {
   fill: var(--v-primary);
@@ -1757,26 +1796,43 @@ html[data-loaded] .dp-scale-in {
 
 /* The line, DRAWN rather than faded in. pathLength normalises it to 100 units
    so one dash rule works whatever the curve's real length, the same trick the
-   marks and the gauges use. */
+   marks and the gauges use. Near constant speed: that is how a pen moves. */
 .dp-ps-link {
   fill: none;
   stroke: var(--v-primary);
   stroke-width: 1.8;
   stroke-linecap: round;
-  pathLength: 100;
+  /* pathLength is set as an ATTRIBUTE on the element, not here: it is not a CSS
+     property and is ignored in a stylesheet. With it applied, the path is 100
+     units long whatever its real geometry, so this dash covers it exactly. */
   stroke-dasharray: 100;
   stroke-dashoffset: 100;
   opacity: 0;
+  transition:
+    stroke-dashoffset 1200ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 260ms linear;
 }
 .dp-ps-link[data-on] {
   stroke-dashoffset: 0;
   opacity: 1;
 }
 
+/* The candidate. The only thing that overshoots: it has mass. */
+.dp-ps-pick {
+  opacity: 0;
+  transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dp-ps-pick[data-on] {
+  opacity: 1;
+}
 .dp-ps-chosen {
   fill: var(--v-ink);
   fill-opacity: 0.3;
-  stroke: none;
+  transition:
+    x 1000ms cubic-bezier(0.34, 1.26, 0.5, 1),
+    y 1000ms cubic-bezier(0.34, 1.26, 0.5, 1),
+    fill 380ms ease-out,
+    fill-opacity 380ms ease-out;
 }
 .dp-ps-chosen[data-picked] {
   fill: var(--v-primary);
@@ -1784,6 +1840,10 @@ html[data-loaded] .dp-scale-in {
 }
 .dp-ps-halo {
   opacity: 0;
+  transition:
+    cx 1000ms cubic-bezier(0.34, 1.26, 0.5, 1),
+    cy 1000ms cubic-bezier(0.34, 1.26, 0.5, 1),
+    opacity 300ms ease-out;
 }
 .dp-ps-halo[data-on] {
   opacity: 1;
@@ -1808,20 +1868,7 @@ html[data-loaded] .dp-scale-in {
   /* The line is drawn by a dash offset, so with the transition gone it has to
      be given its finished value or it never appears at all. */
   .dp-ps-link[data-on] { stroke-dashoffset: 0; }
+  .dp-ps-market rect { transform: none; }
 }
 
-/* Grounds for the process figure. See the note in ProcessScene: two panels and
-   two words are what tell you the left half and the right half are different
-   places. */
-.dp-ps-ground rect {
-  fill: var(--v-ink);
-  fill-opacity: 0.035;
-}
-.dp-ps-groundlabel text {
-  fill: var(--v-muted);
-  font-family: var(--font-body);
-  font-size: var(--t-label);
-  font-weight: 500;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
+
