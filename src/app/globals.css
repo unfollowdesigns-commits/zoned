@@ -1683,3 +1683,145 @@ html[data-loaded] .dp-scale-in {
   .dp-mv-sheet { transform: none; opacity: 1; }
   .dp-mv-spoke i { opacity: 0; }
 }
+
+/* ---- Process scene ---------------------------------------------------------
+   See components/ui/ProcessScene.tsx. Every rule below is a STATE of one
+   figure, never a separate figure: elements transition between stages rather
+   than being swapped, which is what makes the sequence read as one process.
+
+   The transitions are long and on a single curve, because the whole point is
+   that a viewer can watch a thing change. A short transition here would make
+   each step arrive already finished, which is the same as swapping images. */
+.dp-ps {
+  overflow: visible;
+}
+.dp-ps * {
+  transition:
+    opacity 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 780ms cubic-bezier(0.22, 1, 0.36, 1),
+    fill 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    stroke 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    x 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    y 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    cx 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    cy 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dp-ps-struct path {
+  fill: none;
+  stroke: var(--v-ink);
+  stroke-opacity: 0.22;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.dp-ps-seats rect {
+  fill: var(--v-ink);
+  fill-opacity: 0.14;
+  stroke: var(--v-ink);
+  stroke-opacity: 0.3;
+  stroke-width: 1.2;
+}
+
+/* The vacancy: dashed while empty, solid and filled once seated. */
+.dp-ps-vacancy {
+  fill: none;
+  stroke: var(--v-primary);
+  stroke-width: 1.6;
+  stroke-dasharray: 4 4;
+}
+.dp-ps-vacancy[data-filled] {
+  stroke-dasharray: 0 0;
+  stroke-opacity: 0;
+}
+
+/* The market. Absent at step 0, then every candidate, then only the short
+   list: the dropped ones recede rather than vanishing, because they are still
+   in the market, just no longer in the search. */
+.dp-ps-market rect {
+  fill: var(--v-ink);
+  fill-opacity: 0.3;
+  opacity: 0;
+}
+.dp-ps-market[data-on] rect {
+  opacity: 1;
+}
+.dp-ps-market[data-on] rect.is-dropped {
+  opacity: 0.22;
+  fill-opacity: 0.16;
+}
+.dp-ps-market[data-on] rect.is-kept {
+  fill: var(--v-primary);
+  fill-opacity: 0.55;
+}
+
+/* The line, DRAWN rather than faded in. pathLength normalises it to 100 units
+   so one dash rule works whatever the curve's real length, the same trick the
+   marks and the gauges use. */
+.dp-ps-link {
+  fill: none;
+  stroke: var(--v-primary);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  pathLength: 100;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  opacity: 0;
+}
+.dp-ps-link[data-on] {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+.dp-ps-chosen {
+  fill: var(--v-ink);
+  fill-opacity: 0.3;
+  stroke: none;
+}
+.dp-ps-chosen[data-picked] {
+  fill: var(--v-primary);
+  fill-opacity: 1;
+}
+.dp-ps-halo {
+  opacity: 0;
+}
+.dp-ps-halo[data-on] {
+  opacity: 1;
+}
+
+/* The copy re-enters with the figure, so the words and the picture read as one
+   change rather than two. */
+@keyframes dp-ps-in {
+  from { opacity: 0; transform: translateY(9px); }
+  to   { opacity: 1; transform: none; }
+}
+.dp-ps-in {
+  animation: dp-ps-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-ps *,
+  .dp-ps-in {
+    transition: none;
+    animation: none;
+  }
+  /* The line is drawn by a dash offset, so with the transition gone it has to
+     be given its finished value or it never appears at all. */
+  .dp-ps-link[data-on] { stroke-dashoffset: 0; }
+}
+
+/* Grounds for the process figure. See the note in ProcessScene: two panels and
+   two words are what tell you the left half and the right half are different
+   places. */
+.dp-ps-ground rect {
+  fill: var(--v-ink);
+  fill-opacity: 0.035;
+}
+.dp-ps-groundlabel text {
+  fill: var(--v-muted);
+  font-family: var(--font-body);
+  font-size: var(--t-label);
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}

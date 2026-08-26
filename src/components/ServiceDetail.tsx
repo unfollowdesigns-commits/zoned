@@ -4,6 +4,7 @@ import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
 import DrawIcon from "@/components/ui/DrawIcon";
 import { hasMark } from "@/components/ui/Mark";
+import ProcessScene from "@/components/ui/ProcessScene";
 import PointerLight from "@/components/ui/PointerLight";
 import LightBand from "@/components/ui/LightBand";
 import NavLedger from "@/components/ui/NavLedger";
@@ -222,41 +223,17 @@ export default function ServiceDetail({
       )}
 
       {/* ---- Process -------------------------------------------------------
-          A RAIL, NOT FIVE CARDS. The five steps are a sequence, and cards in a
-          row say "five options" rather than "one after another". The connecting
-          line is what carries the order, so it is drawn rather than implied. */}
+          ONE FIGURE THAT ACCUMULATES, NOT FIVE CARDS OR A RAIL. The steps were
+          a numbered row, which says "five things happen" and stops there. A
+          single diagram that changes state at each step says what actually
+          happens to a search, and every stage visibly builds on the one before
+          it. See ui/ProcessScene. */}
       {content.process && content.process.length > 0 && (
         <LightBand>
-          <div className="mx-auto max-w-[1280px] px-6 py-20 sm:py-28">
-            <SectionHeading title={content.processHeading ?? "How it works"} />
-            <ol className="relative mt-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-5 lg:gap-6">
-              {/* The rail. Sits behind the numbers, only on the wide layout
-                  where the steps actually run in a row. */}
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute left-0 right-0 top-[19px] hidden h-px bg-[var(--v-ink)]/[0.14] lg:block"
-              />
-              {content.process.map((step, i) => (
-                <li key={step.title} className="relative">
-                  <Reveal delay={Math.min(i * 0.08, 0.36)}>
-                    <div>
-                      <span className="relative z-[1] grid h-10 w-10 place-items-center rounded-full bg-[var(--v-primary)] text-[length:var(--t-small)] font-semibold tabular-nums text-white">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <h3 className="v-display mt-5 max-w-[16ch] text-[length:var(--t-heading)] leading-[1.25] text-[var(--v-ink)]">
-                        {step.title}
-                      </h3>
-                      {step.body && (
-                        <p className="v-serif mt-3 text-[length:var(--t-small)] leading-[1.7] text-[var(--v-muted)]">
-                          {step.body}
-                        </p>
-                      )}
-                    </div>
-                  </Reveal>
-                </li>
-              ))}
-            </ol>
-          </div>
+          <ProcessScene
+            heading={content.processHeading ?? "How it works"}
+            steps={content.process}
+          />
         </LightBand>
       )}
 
