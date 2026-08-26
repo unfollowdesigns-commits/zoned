@@ -13,7 +13,6 @@ import {
 import { ArrowRight } from "lucide-react";
 import { useReducedMotion } from "@/lib/motion";
 import ParticleWave, { type WaveSearchApi } from "@/components/ParticleWave";
-import SearchPanel from "@/components/SearchPanel";
 import { SERVICES } from "@/lib/site";
 
 /**
@@ -167,14 +166,6 @@ export default function CinematicHero() {
      monotonic past b, so a value that has finished stays finished. */
   const ledeAOpacity = useTransform(scrollYProgress, [0.24, 0.44, 1], [1, 0, 0], { ease: SCRUB });
   const ledeBOpacity = useTransform(scrollYProgress, [0.42, 0.62, 1], [0, 1, 1], { ease: SCRUB });
-  /* The panel belongs to the top of the page: it is what you read while the
-     headline is at full size, and it hands the frame over to the descent
-     rather than travelling into it. Ends on a hold point at 1 for the reason
-     documented on the lede cross-fade. */
-  const panelOpacity = useTransform(scrollYProgress, [0.06, 0.34, 1], [1, 0, 0], { ease: SCRUB });
-  const panelY = useTransform(scrollYProgress, [0, 0.34, 1], ["0px", "-46px", "-46px"], {
-    ease: SCRUB,
-  });
   const tailOpacity = useTransform(scrollYProgress, [0.7, 0.94, 1], [0, 1, 1], { ease: SCRUB });
   const tailY = useTransform(scrollYProgress, [0.7, 0.94, 1], [24, 0, 0], { ease: SCRUB });
 
@@ -186,12 +177,7 @@ export default function CinematicHero() {
         <ParticleWave opacity={0.9} searchApi={waveApi} />
         <Shade />
         <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[13vh]">
-          <div className="grid items-start gap-10 lg:grid-cols-[1.02fr_0.98fr]">
-            <Copy reduced waveApi={waveApi} />
-            <div className="hidden justify-self-end lg:block">
-              <SearchPanel />
-            </div>
-          </div>
+          <Copy reduced waveApi={waveApi} />
           <div className="mt-auto pb-14 sm:pb-12">
             <Tail />
           </div>
@@ -213,27 +199,14 @@ export default function CinematicHero() {
         <Shade />
 
         <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[12vh]">
-          {/* Type left, instrument right. The panel is lg-only: below that the
-              column is too narrow to read a five-stage figure in, and the
-              hero already has to fit a headline and four services into one
-              pinned screen. */}
-          <div className="grid items-start gap-10 lg:grid-cols-[1.02fr_0.98fr]">
-            <motion.div style={{ y: typeY, scale: typeScale, transformOrigin: "0% 0%" }}>
-              <Copy
-                reduced={false}
-                waveApi={waveApi}
-                ledeAOpacity={ledeAOpacity}
-                ledeBOpacity={ledeBOpacity}
-              />
-            </motion.div>
-
-            <motion.div
-              style={{ opacity: panelOpacity, y: panelY }}
-              className="hidden justify-self-end lg:block"
-            >
-              <SearchPanel />
-            </motion.div>
-          </div>
+          <motion.div style={{ y: typeY, scale: typeScale, transformOrigin: "0% 0%" }}>
+            <Copy
+              reduced={false}
+              waveApi={waveApi}
+              ledeAOpacity={ledeAOpacity}
+              ledeBOpacity={ledeBOpacity}
+            />
+          </motion.div>
 
           {/* The payoff row: arrives once the camera is down among the
               crests, taking the place the type left. The frame is never
