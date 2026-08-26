@@ -1,16 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-  motion,
-  useAnimationFrame,
-  useMotionValue,
-  useScroll,
-  useSpring,
-  useTransform,
-  useVelocity,
-} from "framer-motion";
 import { PLACED_POSITIONS } from "@/lib/site";
+import Rail from "@/components/ui/Rail";
 import { useReducedMotion } from "@/lib/motion";
 
 /**
@@ -34,96 +26,9 @@ import { useReducedMotion } from "@/lib/motion";
  * Two rows in opposite directions, because one row travelling alone reads as
  * the page sliding. Two in opposition read as machinery.
  *
- * The loop is seamless because the content is rendered four times and the
- * offset wraps at 25 percent; there is no reset frame to catch.
+ * The belt physics live in ui/Rail.tsx now, shared with the client stripe:
+ * one implementation, or the two would drift apart in feel.
  */
-
-/** Keeps a value inside a range, so the rail can loop without a jump. */
-function wrap(min: number, max: number, v: number) {
-  const range = max - min;
-  return ((((v - min) % range) + range) % range) + min;
-}
-
-function Rail({
-  direction,
-  baseSpeed,
-  children,
-}: {
-  /** 1 runs left to right, -1 right to left. */
-  direction: 1 | -1;
-  baseSpeed: number;
-  children: React.ReactNode;
-}) {
-  const x = useMotionValue(0);
-  const { scrollY } = useScroll();
-  const scrollVelocity = useVelocity(scrollY);
-
-  /* Softened, or every wheel tick jolts the rail. The spring is on the INPUT
-     here, not on the position, which is the difference between a belt with
-     inertia and a rubber band. */
-  const smooth = useSpring(scrollVelocity, {
-    damping: 48,
-    stiffness: 380,
-    mass: 0.6,
-  });
-  /* Clamped: a trackpad flick can produce velocities that would otherwise blur
-     the type into an unreadable smear. Held to 2.5 rather than 4, because the
-     coupling should be felt as the rail responding, not seen as it lurching:
-     past about this much the row stops being readable during a fast scroll and
-     the effect reads as a glitch. */
-  const factor = useTransform(smooth, [-2200, 0, 2200], [-2.5, 0, 2.5], {
-    clamp: true,
-  });
-
-  const previous = React.useRef(0);
-
-  useAnimationFrame((t) => {
-    const dt = previous.current ? (t - previous.current) / 1000 : 0;
-    previous.current = t;
-
-    /* Base drift plus whatever the scroll is contributing. Direction flips with
-       the sign of the velocity, so scrolling back up runs the rail backwards. */
-    const v = factor.get();
-    const moved = direction * baseSpeed * dt + direction * baseSpeed * v * dt;
-    x.set(wrap(-25, 0, x.get() + (moved / 10)));
-  });
-
-  const percent = useTransform(x, (v) => `${v}%`);
-
-  return (
-    <div
-      className="flex overflow-hidden"
-      /* THE RAILS DISSOLVE AT THE EDGES INSTEAD OF BEING CUT.
-
-         Without this the viewport edge guillotines whatever word happens to be
-         crossing it, so the row begins and ends on half a letter. At small
-         sizes you might forgive it; at any size it is the single thing that
-         makes a marquee read as broken rather than as continuous. The mask
-         means type arrives and leaves rather than starting and stopping, and
-         it costs one composited layer.
-
-         12 percent is enough to fade a whole word at this size. */
-      style={{
-        maskImage:
-          "linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%)",
-        WebkitMaskImage:
-          "linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%)",
-      }}
-    >
-      <motion.div
-        className="flex shrink-0 whitespace-nowrap"
-        style={{ x: percent }}
-        aria-hidden="true"
-      >
-        {[0, 1, 2, 3].map((i) => (
-          <span key={i} className="flex shrink-0">
-            {children}
-          </span>
-        ))}
-      </motion.div>
-    </div>
-  );
-}
 
 /**
  * PILLS, BY DECISION. The bare-text version of these rails is on record above;

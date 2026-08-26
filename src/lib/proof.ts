@@ -44,6 +44,12 @@ export const CLIENT_LOGOS: ClientLogo[] = [
   { name: "Washington Commanders" },
   { name: "ChamberOfCommerce.com" },
   { name: "MAI Capital Management" },
+  /* From the same strip on the firm's own homepage. Names only until the
+     files arrive; nothing here that dpadvisory.com does not itself claim. */
+  { name: "AGNC Investment Corp" },
+  { name: "Northspring Partners" },
+  { name: "Mapbox" },
+  { name: "Kolmac" },
 ];
 
 /** True once at least one real logo file exists, which is what the logo wall waits for. */

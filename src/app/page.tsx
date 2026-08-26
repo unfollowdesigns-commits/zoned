@@ -1,4 +1,5 @@
 import CinematicHero from "@/components/CinematicHero";
+import ClientStripe from "@/components/ClientStripe";
 import Stats from "@/components/Stats";
 import StickyServices from "@/components/StickyServices";
 import Specializations from "@/components/Specializations";
@@ -84,6 +85,15 @@ export default function Home() {
               </p>
             </Reveal>
           </div>
+
+          {/* The names behind the copy above, on the first scroll. Ambient
+              here, the readable record in the proof band below: see the note
+              in ClientStripe. */}
+          <Reveal delay={0.22}>
+            <div className="mt-20">
+              <ClientStripe />
+            </div>
+          </Reveal>
         </div>
       </LightBand>
 

@@ -2073,3 +2073,33 @@ html[data-loaded] .dp-scale-in {
   from { opacity: 1; }
   to   { opacity: 0; }
 }
+
+/* ---- Client stripe ---------------------------------------------------------
+   See components/ClientStripe.tsx. Each mark is a face and its reflection:
+   the mirror is flipped, faded through a mask so it dies before it reaches
+   the shelf edge, and very slightly blurred, because a polished surface
+   softens what it reflects. The pair is one inline-block so the belt moves
+   them as one object. */
+.dp-cs-mark {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 34px;
+}
+.dp-cs-face {
+  display: flex;
+  height: 34px;
+  align-items: center;
+}
+.dp-cs-mirror {
+  display: flex;
+  height: 34px;
+  align-items: center;
+  transform: scaleY(-1);
+  margin-top: 3px;
+  opacity: 0.35;
+  filter: blur(0.6px);
+  mask-image: linear-gradient(180deg, transparent 18%, #000 95%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 18%, #000 95%);
+  pointer-events: none;
+}
