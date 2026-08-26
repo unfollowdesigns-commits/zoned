@@ -96,6 +96,9 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   /* False over the hero, true once past it, and it stays true. See the effect. */
   const [condensed, setCondensed] = React.useState(false);
+  /* The open panel's content height, so the box can be animated to it. */
+  const panelInner = React.useRef<HTMLDivElement>(null);
+  const [panelH, setPanelH] = React.useState<number | null>(null);
   const closeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = React.useRef<HTMLElement>(null);
   const pathname = usePathname();
@@ -161,6 +164,34 @@ export default function Header() {
       window.removeEventListener("resize", onScroll);
     };
   }, []);
+
+  /**
+   * Measures the open panel so its box can be animated between menus.
+   *
+   * WHY THIS IS MEASURED RATHER THAN framer's `layout`. `layout` was tried
+   * first and did nothing: the panel still went 367px to 422px in a single
+   * frame. The wrapper above animates `filter: blur()`, and a filter on an
+   * ancestor creates a containing block, which breaks the layout projection
+   * framer relies on to measure an element before and after. Rather than
+   * unpick which ancestor property is safe, the height is a number this
+   * component owns and animates, which cannot be defeated from outside.
+   *
+   * A ResizeObserver rather than a measurement on open, because the panels
+   * contain a visual whose aspect ratio resolves after first paint and the
+   * height would otherwise be captured a few pixels short.
+   */
+  React.useEffect(() => {
+    const el = panelInner.current;
+    if (!el) {
+      setPanelH(null);
+      return;
+    }
+    const measure = () => setPanelH(el.offsetHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open]);
 
   React.useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -289,7 +320,44 @@ export default function Header() {
               transition={{ duration: 0.22, ease: EASE }}
               className="absolute left-0 right-0 top-full flex justify-center px-4"
             >
-              <div className="g-glass mt-2 w-full max-w-[880px] overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#070a15]/92 p-5 backdrop-blur-xl shadow-[0_30px_80px_-40px_rgba(0,0,0,0.95)]">
+              {/* THE PANEL MORPHS BETWEEN MENUS INSTEAD OF SNAPPING.
+              
+                  Measured before this: moving from What We Do to About took the
+                  panel from 367px to 422px in a single frame, with no
+                  intermediate sizes at all. That hard cut is the difference
+                  between a menu that feels built and one that feels assembled,
+                  and it is the most visible moment in the whole navigation
+                  because it happens every time anyone browses the menus.
+              
+                  `layout` lets framer measure before and after and interpolate
+                  the box; the contents cross-fade inside it on a shorter clock
+                  than the box takes to resize, so the new panel has arrived by
+                  the time the box stops moving rather than sliding around after
+                  it. A spring rather than a duration, because the panel is an
+                  object changing size and springs are what give that weight. */}
+              <motion.div
+                /* The box springs to the new content's height. A spring rather
+                   than a duration because this is an object changing size, and
+                   the weight is what stops it reading as a swap. */
+                animate={{ height: panelH ?? "auto" }}
+                transition={SPRING_SOFT}
+                className="g-glass mt-2 w-full max-w-[880px] overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#070a15]/92 backdrop-blur-xl shadow-[0_30px_80px_-40px_rgba(0,0,0,0.95)]"
+              >
+              {/* Padding lives on the measured element, not on the animated box:
+                  the height being animated has to be the height being measured
+                  or the two disagree by exactly the padding. */}
+              <div ref={panelInner} className="p-5">
+              <motion.div
+                key={open}
+                /* No exit. The outgoing panel leaving while the box is still
+                   resizing puts two sets of content in a box that fits
+                   neither; the new one fading in over the resize reads as one
+                   move. The small delay lets the box commit to its new size
+                   first. */
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.22, ease: EASE, delay: 0.04 }}
+              >
                 {open === "What We Do" && (
                   /* Links left, picture right, which is the reference's shape.
                      The panel is wider than the others because it is carrying a
@@ -459,7 +527,9 @@ export default function Header() {
                     </a>
                   </div>
                 )}
+              </motion.div>
               </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
