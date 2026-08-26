@@ -6,17 +6,38 @@
  * organisation, NODES are seats in it, and a filled node is the seat this firm
  * is hired to fill. The icon set and this art are one system.
  *
- * WHAT EACH ONE SAYS:
+ * EVERY SCENE HAS A CAUSE AND AN EFFECT, AND THAT IS THE WHOLE REVISION. The
+ * previous version failed for one reason, and it failed in all four: a single
+ * element moved and nothing else in the picture responded to it. A seat dropped
+ * into a gap and the structure around it was unchanged; five cells rose off a
+ * field and the field was unchanged. A viewer reads that as decoration, because
+ * decoration is exactly what it is. Something that MEANS something has a before
+ * and an after, and the after is visible in the rest of the figure.
  *
- *   services   A structure receding into depth with one seat empty, and a seat
- *              flying in from behind and above to land in it.
- *   markets    A field of candidates laid out on a tilted plane, with a few
- *              lifting off it toward the viewer. The short list, literally
- *              rising out of the market.
+ * WHAT EACH ONE SAYS NOW:
+ *
+ *   services   An organisation drawn as a real chart, connected by elbows, dark
+ *              and inert, with the seat at the top of it empty. A seat arrives
+ *              and lands, and the charge runs down the stems: buses, then the
+ *              tier below, then the tier below that. One hire, and the thing
+ *              underneath it comes alive. That is the claim the business makes.
+ *   markets    A field of candidates on a plane. A few lift off it AND travel
+ *              into an ordered column at the side, so a scatter visibly becomes
+ *              a shortlist. Rising alone said "some of these are highlighted";
+ *              rising and ranking says what the work actually produces.
  *   resources  Sheets stacked in real depth, the top one lifting away and the
  *              stack stepping forward behind it.
- *   about      A disc of seats around one centre, seen at an angle, with the
- *              signal travelling outward from the middle. Partner led.
+ *   about      Coverage building. The signal leaves the centre, and each seat it
+ *              reaches STAYS lit rather than blinking, so the ring completes
+ *              over the loop instead of twinkling forever. Partner led, and led
+ *              somewhere.
+ *
+ * THE STRUCTURE IS ONE OBJECT, NOT SEVERAL. The tiers used to be three
+ * separately floating rules at three depths. Nothing joined them, so nothing
+ * read as a hierarchy, and the depth was invisible because there was no
+ * connector crossing it to be foreshortened. They are now one standing plane,
+ * tilted in space, with elbow connectors drawn in it. A structure that holds
+ * together when it moves is the minimum for reading as a structure at all.
  *
  * WHY CSS 3D AND NOT SVG, WHICH IS WHAT THIS WAS. An SVG is one flat plane. It
  * can be drawn to LOOK like perspective, but nothing in it actually has a Z, so
@@ -61,103 +82,166 @@ function Frame({
   );
 }
 
-/** A rule with seats on it, at a given depth. */
-function Tier({
-  z,
-  top,
-  width,
-  seats,
-  vacantAt,
-  float,
-  dur,
-  delay = 0,
-}: {
-  z: number;
-  top: number;
-  width: number;
-  seats: number;
-  /**
-   * Index of the empty seat. The arriving seat is rendered INSIDE this tier
-   * rather than beside it, which is not a tidiness preference: it inherits the
-   * tier's float and therefore cannot drift out of phase with the gap it is
-   * supposed to land in. Measured before the change, the seat sat 7 to 10px
-   * below the vacancy for the whole of the hold and the offset oscillated,
-   * because the two were on the same 15s curve nine seconds apart. The one
-   * moment the entire figure exists to show was the one moment it got wrong.
-   */
-  vacantAt?: number;
-  /** Which float curve, and how slow. Different per tier so the structure
-      breathes rather than moving as one rigid object. */
-  float: "a" | "b" | "c";
-  dur: number;
-  delay?: number;
-}) {
+/* ---- services: one seat, and the organisation under it -------------------- */
+
+/*
+ * The chart, in the plane's own 0 to 100 coordinates. Three rows joined by
+ * ordinary elbow connectors, which is how every org chart anyone has ever read
+ * is drawn: a stem down from the parent, a horizontal bus, a stem down to each
+ * child. Drawing the real convention is what buys instant legibility here. The
+ * previous figure invented its own and got nothing for it.
+ */
+const ROW = { top: 14, mid: 50, base: 86 };
+const BUS = { upper: 32, lower: 68 };
+const MID_X = [26, 50, 74];
+const BASE_X = [12, 31, 50, 69, 88];
+
+/**
+ * When each part lights, in seconds into the 12s loop.
+ *
+ * These are `animation-delay` values, not keyframe offsets, which is the only
+ * way to give one shared keyframe a per-element phase. A positive delay shifts
+ * the whole cycle, so an element with 3.6s is permanently 3.6s behind the loop
+ * rather than merely starting late. The seat lands at 2.4s and the charge
+ * follows it down: nothing lights before the seat is in it, which is the point
+ * of the picture.
+ */
+const CHARGE = {
+  seat: 2.4,
+  stemTop: 2.55,
+  busUpper: 2.75,
+  stemMid: 2.95,
+  nodeMid: 3.2,
+  stemLower: 3.5,
+  busLower: 3.7,
+  stemBase: 3.95,
+  nodeBase: 4.2,
+};
+
+function V({ x, y, h, d }: { x: number; y: number; h: number; d: number }) {
   return (
-    <div
-      className="dp-mv-tier"
-      style={{
-        ["--z" as string]: `${z}px`,
-        ["--float" as string]: `dp-float-${float}`,
-        ["--fd" as string]: `${dur}s`,
-        ["--fdel" as string]: `${delay}s`,
-        top: `${top}%`,
-        width: `${width}%`,
-      }}
-    >
-      <span className="dp-mv-rule" />
-      {Array.from({ length: seats }, (_, i) => (
-        <span
-          key={i}
-          className={i === vacantAt ? "dp-mv-node is-vacant" : "dp-mv-node"}
-          style={{ left: `${((i + 0.5) / seats) * 100}%` }}
-        />
-      ))}
-      {vacantAt !== undefined && (
-        <span
-          className="dp-mv-arriving"
-          style={{ left: `${((vacantAt + 0.5) / seats) * 100}%` }}
-        />
-      )}
-    </div>
+    <span
+      className="dp-mv-stem is-v"
+      style={{ left: `${x}%`, top: `${y}%`, height: `${h}%`, ["--d" as string]: `${d}s` }}
+    />
   );
 }
 
-/* ---- services: the seat arrives ------------------------------------------ */
+function H({ x, y, w, d }: { x: number; y: number; w: number; d: number }) {
+  return (
+    <span
+      className="dp-mv-stem is-h"
+      style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, ["--d" as string]: `${d}s` }}
+    />
+  );
+}
+
 function Services() {
   return (
     <Frame kind="services">
-      {/* Widest and nearest at the bottom, narrowest and furthest at the top:
-          an organisation seen from below, which is the right angle for a
-          picture about the seat at the top of one. */}
-      <Tier z={0} top={68} width={84} seats={4} float="b" dur={21} />
-      <Tier z={34} top={46} width={58} seats={3} float="c" dur={17} delay={-4} />
-      {/* The seat that arrives lives inside this tier: see the note on Tier. */}
-      <Tier z={68} top={24} width={30} seats={1} vacantAt={0} float="a" dur={15} delay={-9} />
+      {/* One standing plane, tilted. Everything below lives IN it, so the whole
+          chart foreshortens together and the connectors carry the depth. */}
+      <div className="dp-mv-org">
+        {/* Top seat down to the upper bus, the bus, and down to each of three. */}
+        <V x={50} y={ROW.top} h={BUS.upper - ROW.top} d={CHARGE.stemTop} />
+        <H x={MID_X[0]} y={BUS.upper} w={MID_X[2] - MID_X[0]} d={CHARGE.busUpper} />
+        {MID_X.map((x) => (
+          <V key={`a${x}`} x={x} y={BUS.upper} h={ROW.mid - BUS.upper} d={CHARGE.stemMid} />
+        ))}
+
+        {/* The middle tier down to the lower bus, and out to five. */}
+        {MID_X.map((x) => (
+          <V key={`b${x}`} x={x} y={ROW.mid} h={BUS.lower - ROW.mid} d={CHARGE.stemLower} />
+        ))}
+        <H x={BASE_X[0]} y={BUS.lower} w={BASE_X[4] - BASE_X[0]} d={CHARGE.busLower} />
+        {BASE_X.map((x) => (
+          <V key={`c${x}`} x={x} y={BUS.lower} h={ROW.base - BUS.lower} d={CHARGE.stemBase} />
+        ))}
+
+        {MID_X.map((x, i) => (
+          <span
+            key={`m${x}`}
+            className="dp-mv-node"
+            style={{ left: `${x}%`, top: `${ROW.mid}%`, ["--d" as string]: `${CHARGE.nodeMid + i * 0.08}s` }}
+          />
+        ))}
+        {BASE_X.map((x, i) => (
+          <span
+            key={`n${x}`}
+            className="dp-mv-node"
+            style={{ left: `${x}%`, top: `${ROW.base}%`, ["--d" as string]: `${CHARGE.nodeBase + i * 0.07}s` }}
+          />
+        ))}
+
+        {/* The gap. It stays drawn under the seat for the whole loop, so the
+            picture never loses the evidence of what was filled. */}
+        <span className="dp-mv-vacancy" style={{ left: "50%", top: `${ROW.top}%` }} />
+        <span
+          className="dp-mv-arriving"
+          style={{ left: "50%", top: `${ROW.top}%`, ["--d" as string]: `${CHARGE.seat}s` }}
+        />
+      </div>
     </Frame>
   );
 }
 
-/* ---- markets: the short list rises --------------------------------------- */
+/* ---- markets: a scatter becomes a shortlist -------------------------------- */
+
+const COLS = 8;
+const ROWS = 6;
+/* Fixed, never random: a figure that reshuffles on every render flickers
+   through hydration and cannot be art directed. Ordered by row, so the four
+   travel to their places without crossing each other's paths. */
+const PICKED = [10, 21, 27, 44];
+/** Where the shortlist ends up, in the plane's own coordinates. */
+const LIST_X = 88;
+const LIST_Y = (rank: number) => 34 + rank * 20;
+
 function Markets() {
-  const cols = 8;
-  const rows = 6;
-  /* Fixed, never random: a figure that reshuffles on every render flickers
-     through hydration and cannot be art directed. */
-  const picked = new Set([11, 20, 26, 35, 42]);
   return (
     <Frame kind="markets">
       <div className="dp-mv-plane">
-        {Array.from({ length: cols * rows }, (_, i) => (
-          <span
-            key={i}
-            className={picked.has(i) ? "dp-mv-cell is-on" : "dp-mv-cell"}
-            style={{
-              left: `${((i % cols) + 0.5) * (100 / cols)}%`,
-              top: `${(Math.floor(i / cols) + 0.5) * (100 / rows)}%`,
-              ["--d" as string]: `${(i % 5) * 0.85}s`,
-            }}
-          />
-        ))}
+        {Array.from({ length: COLS * ROWS }, (_, i) => {
+          const x = ((i % COLS) + 0.5) * (100 / COLS);
+          const y = (Math.floor(i / COLS) + 0.5) * (100 / ROWS);
+          const rank = PICKED.indexOf(i);
+
+          if (rank === -1) {
+            return (
+              <span
+                key={i}
+                className="dp-mv-cell"
+                style={{ left: `${x}%`, top: `${y}%`, ["--d" as string]: `${(i % 5) * 0.85}s` }}
+              />
+            );
+          }
+
+          /* The travel is on a WRAPPER that spans the whole plane, not on the
+             dot. A percentage translate resolves against the element's own box,
+             so a 6px dot can only move 6px worth; a wrapper the size of the
+             plane can move a share of the plane, which is the only way to aim
+             at a target expressed in the same units as the grid. */
+          return (
+            <span
+              key={i}
+              className="dp-mv-pick"
+              style={{
+                ["--dx" as string]: `${LIST_X - x}%`,
+                ["--dy" as string]: `${LIST_Y(rank) - y}%`,
+                ["--d" as string]: `${rank * 0.5}s`,
+              }}
+            >
+              <i style={{ left: `${x}%`, top: `${y}%` }} />
+            </span>
+          );
+        })}
+        {/* The rule the shortlist lands against. Without something to line up
+            ON, four bright dots in a row are four bright dots; with it they are
+            a list. */}
+        <span
+          className="dp-mv-listline"
+          style={{ left: `${LIST_X}%`, top: `${LIST_Y(0)}%`, height: `${LIST_Y(3) - LIST_Y(0)}%` }}
+        />
       </div>
     </Frame>
   );
@@ -183,7 +267,12 @@ function Resources() {
   );
 }
 
-/* ---- about: partner led --------------------------------------------------- */
+/* ---- about: coverage building ---------------------------------------------
+   The seats used to blink as the signal reached them, which is the single most
+   generic thing a diagram can do: a blink has no memory, so after five of them
+   the picture is exactly where it started and the loop has said nothing. Each
+   seat now STAYS lit once it is reached, the ring completes, and only then does
+   the whole thing reset. Same elements, and now there is a story in it. */
 function About() {
   const spokes = [0, 72, 144, 216, 288];
   return (
@@ -195,7 +284,11 @@ function About() {
             className="dp-mv-spoke"
             style={{
               ["--rot" as string]: `${deg}deg`,
-              ["--d" as string]: `${i * 0.5}s`,
+              /* Tight enough that all five overlap for a beat at the end of the
+                 loop. A delay shifts the whole cycle, so a wide stagger means
+                 the first seat is already draining before the last one lights
+                 and the ring is never once complete. */
+              ["--d" as string]: `${i * 0.35}s`,
             }}
           >
             {/* The signal, travelling out along the spoke. */}

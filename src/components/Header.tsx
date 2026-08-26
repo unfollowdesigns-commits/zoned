@@ -99,6 +99,28 @@ export default function Header() {
   /* The open panel's content height, so the box can be animated to it. */
   const panelInner = React.useRef<HTMLDivElement>(null);
   const [panelH, setPanelH] = React.useState<number | null>(null);
+  /**
+   * Where the panel should grow FROM, as a percentage across its own width.
+   *
+   * A panel that scales from its centre appears to arrive from nowhere in
+   * particular. Growing it from the item that was actually hovered is the
+   * difference between a box appearing below the nav and THAT item opening,
+   * and it costs one measurement taken at the moment of opening.
+   */
+  const [originPct, setOriginPct] = React.useState(50);
+
+  const openFrom = React.useCallback((name: NavName, el: HTMLElement | null) => {
+    if (el) {
+      const r = el.getBoundingClientRect();
+      /* The panel is centred and capped at 880, so its left edge is derivable
+         without waiting for it to exist: measuring the panel itself would mean
+         measuring a thing that has not rendered yet on the first open. */
+      const w = Math.min(880, window.innerWidth - 32);
+      const left = (window.innerWidth - w) / 2;
+      setOriginPct(Math.max(4, Math.min(96, ((r.left + r.width / 2 - left) / w) * 100)));
+    }
+    setOpen(name);
+  }, []);
   const closeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = React.useRef<HTMLElement>(null);
   const pathname = usePathname();
@@ -257,13 +279,13 @@ export default function Header() {
                 className="relative rounded-full px-4 py-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)] transition-colors hover:text-white"
                 aria-expanded={open === name}
                 aria-current={active ? "true" : undefined}
-                onMouseEnter={() => {
+                onMouseEnter={(e) => {
                   cancelClose();
-                  setOpen(name);
+                  openFrom(name, e.currentTarget);
                 }}
-                onFocus={() => {
+                onFocus={(e) => {
                   cancelClose();
-                  setOpen(name);
+                  openFrom(name, e.currentTarget);
                 }}
                 onClick={() => setOpen(open === name ? null : name)}
               >
@@ -313,11 +335,29 @@ export default function Header() {
       <div className="hidden lg:block" onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
         <AnimatePresence>
           {open && (
+            /* THE PANEL UNFOLDS FROM THE ITEM YOU HOVERED.
+            
+               It used to fade, slide down six pixels and unblur, which is the
+               entrance every generated dropdown ships with: it says a box has
+               arrived, and says nothing about where it came from or what
+               opened it. Scaling up from the trigger's own x position says
+               THIS item opened, and the vertical scale makes it unfold rather
+               than slide, which is what a panel attached to a bar should do.
+            
+               The blur is gone. A backdrop-blurred panel that also animates a
+               `filter: blur()` is asking the compositor to blur a blur for a
+               fifth of a second, and it was the one thing here that could drop
+               frames on a laptop.
+            
+               In on a spring, out on a short curve. Opening is the moment worth
+               shaping; closing should get out of the way, and a symmetric exit
+               is what makes a menu feel slow to browse. */
             <motion.div
-              initial={{ opacity: 0, y: -6, filter: "blur(6px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -6, filter: "blur(6px)" }}
-              transition={{ duration: 0.22, ease: EASE }}
+              style={{ transformOrigin: `${originPct}% top` }}
+              initial={{ opacity: 0, scaleY: 0.86, scaleX: 0.97, y: -4 }}
+              animate={{ opacity: 1, scaleY: 1, scaleX: 1, y: 0 }}
+              exit={{ opacity: 0, scaleY: 0.94, y: -4, transition: { duration: 0.13, ease: EASE } }}
+              transition={SPRING_SOFT}
               className="absolute left-0 right-0 top-full flex justify-center px-4"
             >
               {/* THE PANEL MORPHS BETWEEN MENUS INSTEAD OF SNAPPING.
@@ -357,6 +397,11 @@ export default function Header() {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.22, ease: EASE, delay: 0.04 }}
+                /* Rows arrive in sequence rather than as one block. See the
+                   dp-menu-stagger rules: the delay is per row within its
+                   column, so the columns cascade together and the whole panel
+                   fills in about a quarter of a second. */
+                className="dp-menu-stagger"
               >
                 {open === "What We Do" && (
                   /* Links left, picture right, which is the reference's shape.

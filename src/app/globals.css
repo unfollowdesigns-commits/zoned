@@ -1411,58 +1411,86 @@ html[data-loaded] .dp-scale-in {
   pointer-events: none;
 }
 
-/* ---- shared parts: rules and nodes --------------------------------------- */
-.dp-mv-tier {
+/* ---- services: one seat, and the organisation under it ---------------------
+   ONE STANDING PLANE, NOT THREE FLOATING RULES. The previous figure put each
+   tier at its own translateZ with nothing joining them, and the result read as
+   three unrelated rows of dots: a hierarchy is defined by the lines BETWEEN its
+   levels, and there were none. Worse, the depth it paid for was invisible,
+   because nothing crossed from one tier to the next to be foreshortened. The
+   chart is now one object standing in space at an angle, and the elbow
+   connectors are what make the angle legible.
+
+   EVERYTHING IS DARK UNTIL THE SEAT LANDS. That is the whole picture. An empty
+   chair at the top and an organisation below it waiting on the appointment;
+   then the seat arrives and the charge runs down the stems, bus by bus, tier by
+   tier. The old version dropped a seat into a gap and left the rest of the
+   figure exactly as it was, so the event had no consequence and the loop said
+   nothing. */
+.dp-mv-org {
   position: absolute;
-  left: 50%;
-  height: 0;
-  transform: translateX(-50%) translateZ(var(--z));
+  inset: 9% 12% 11%;
+  transform: rotateY(-15deg) rotateX(5deg);
   transform-style: preserve-3d;
-  animation: var(--float, dp-float-a) var(--fd, 15s) ease-in-out infinite;
-  animation-delay: var(--fdel, 0s);
+  animation: dp-float-b 19s ease-in-out infinite;
 }
-.dp-mv-rule {
+
+/* A connector. `is-v` and `is-h` differ only in which axis gets the hairline;
+   both take their lit timing from the same --d, so the cascade is one shared
+   animation with a per-element phase rather than nine choreographies. */
+.dp-mv-stem {
   position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(143, 180, 255, 0.5) 18%,
-    rgba(143, 180, 255, 0.5) 82%,
-    transparent
-  );
+  background: rgba(143, 180, 255, 0.16);
+  animation: dp-mv-charge 12s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
+.dp-mv-stem.is-v {
+  width: 1px;
+  margin-left: -0.5px;
+}
+.dp-mv-stem.is-h {
+  height: 1px;
+  margin-top: -0.5px;
+}
+
 .dp-mv-node {
   position: absolute;
-  top: 0;
   width: 9px;
   height: 9px;
   margin: -4.5px 0 0 -4.5px;
   border-radius: 2px;
-  background: rgba(143, 180, 255, 0.22);
-  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.45);
-}
-/* A gap has to read as a gap, not as a missing shape. */
-.dp-mv-node.is-vacant {
-  background: none;
-  box-shadow: none;
-  border: 1px dashed rgba(143, 180, 255, 0.5);
-  width: 14px;
-  height: 14px;
-  margin: -7px 0 0 -7px;
-  border-radius: 3px;
+  background: rgba(143, 180, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.22);
+  animation: dp-mv-charge 12s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-/* ---- services: the seat arrives ------------------------------------------
-   It comes from BEHIND the structure as well as above it, which is the whole
+/* THE CASCADE. These are `animation-delay` values on a shared 12s keyframe, not
+   offsets inside it: a positive delay holds an element permanently that far
+   behind the loop, which is the only way to give one set of keyframes a
+   per-element phase without writing one set per element. The seat lands at
+   2.4s and every --d in components/ui/MenuVisual.tsx is later than that, so
+   nothing in the structure can light before the seat is in it. */
+@keyframes dp-mv-charge {
+  0%, 2%   { opacity: 0.5; filter: none; }
+  9%       { opacity: 1; filter: brightness(2.6); }
+  62%      { opacity: 1; filter: brightness(2.6); }
+  80%, 100% { opacity: 0.5; filter: none; }
+}
+
+/* The gap, drawn for the whole loop. It sits UNDER the seat rather than being
+   replaced by it, so the picture keeps the evidence of what was filled. */
+.dp-mv-vacancy {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 3px;
+  border: 1px dashed rgba(143, 180, 255, 0.45);
+}
+
+/* It comes from BEHIND the structure as well as above it, which is the whole
    reason this is in 3D: an arrival that only moves in Y is a drop, and an
    arrival that also comes forward through 200px of depth is a placement. */
 .dp-mv-arriving {
   position: absolute;
-  /* `left` comes from the tier, `top` is the tier's own rule line. */
-  top: 0;
   width: 14px;
   height: 14px;
   margin: -7px 0 0 -7px;
@@ -1471,21 +1499,19 @@ html[data-loaded] .dp-scale-in {
   box-shadow:
     0 0 0 1px rgba(226, 240, 255, 0.6),
     0 0 18px 3px rgba(120, 180, 255, 0.55);
-  /* No float of its own. It is inside the tier and inherits that one, which is
+  /* No float of its own. It is inside the chart and inherits that one, which is
      what guarantees it lands exactly in the gap rather than near it. */
   animation: dp-mv-arrive 12s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 @keyframes dp-mv-arrive {
-  /* In px, and no Z of its own: the tier already sits at its depth, so the
-     seat only has to travel the distance from behind and above it. */
-  0%   { transform: translate3d(0, -96px, -190px) scale(0.6); opacity: 0; }
-  8%   { opacity: 1; }
-  /* Long, and eased almost to a stop rather than snapping into place. */
-  30%  { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  /* Lands at 20%, which is the 2.4s every --d in the cascade is measured from. */
+  0%   { transform: translate3d(0, -86px, -200px) scale(0.6); opacity: 0; }
+  6%   { opacity: 1; }
+  20%  { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
   /* The hold is most of the loop. The subject is the seat being FILLED, so the
      filled state is what the picture spends its time showing. */
-  88%  { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
-  100% { transform: translate3d(0, -96px, -190px) scale(0.6); opacity: 0; }
+  80%  { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  100% { transform: translate3d(0, -86px, -200px) scale(0.6); opacity: 0; }
 }
 
 /* ---- markets: the short list rises ---------------------------------------
@@ -1504,7 +1530,9 @@ html[data-loaded] .dp-scale-in {
   height: 6px;
   margin: -3px 0 0 -3px;
   border-radius: 1.5px;
-  background: rgba(143, 180, 255, 0.2);
+  /* Bright enough to read as a field at rest. The picks only mean something
+     against a visible market to be picked FROM. */
+  background: rgba(143, 180, 255, 0.34);
   /* Even the quiet cells breathe, so the field is a living surface rather than
      a static grid with five animated dots on it. */
   animation: dp-mv-breathe 11s var(--d, 0s) ease-in-out infinite;
@@ -1513,19 +1541,48 @@ html[data-loaded] .dp-scale-in {
   0%, 100% { opacity: 0.55; }
   50%      { opacity: 1; }
 }
-.dp-mv-cell.is-on {
+/* A picked candidate. The old version lifted five cells off the plane and put
+   them back, which says only "some of these are highlighted": nothing was
+   PRODUCED. Each pick now lifts AND travels to a rank on a rule at the side of
+   the plane, holds there in order, and returns, so the loop shows a scatter
+   becoming a shortlist and dissolving back into the market.
+
+   The travel lives on this wrapper, which spans the whole plane. A percentage
+   translate resolves against the element's own box, so a 9px dot can only move
+   9px worth; a wrapper the size of the plane moves in the same units the grid
+   positions are written in, which is what lets --dx/--dy aim at an exact cell
+   of the target rule. */
+.dp-mv-pick {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: dp-mv-recruit 9.5s var(--d, 0s) cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  pointer-events: none;
+}
+.dp-mv-pick i {
+  position: absolute;
   width: 9px;
   height: 9px;
   margin: -4.5px 0 0 -4.5px;
+  border-radius: 2px;
   background: rgba(226, 240, 255, 0.95);
   box-shadow: 0 0 14px 2px rgba(120, 180, 255, 0.6);
-  animation:
-    dp-mv-rise 9.5s var(--d, 0s) cubic-bezier(0.16, 1, 0.3, 1) infinite,
-    dp-float-b 19s ease-in-out infinite;
 }
-@keyframes dp-mv-rise {
-  0%, 100% { transform: translateZ(0) scale(0.5); opacity: 0.25; }
-  22%, 74% { transform: translateZ(46px) scale(1); opacity: 1; }
+@keyframes dp-mv-recruit {
+  0%       { transform: translate3d(0, 0, 0) scale(0.5); opacity: 0.25; }
+  /* Off the plane first, THEN across it: a dot that slides while flat reads as
+     moving over the surface; one that rises and then travels reads as taken
+     out of the field. */
+  14%      { transform: translate3d(0, 0, 34px) scale(1); opacity: 1; }
+  34%, 72% { transform: translate3d(var(--dx), var(--dy), 34px) scale(1); opacity: 1; }
+  88%, 100% { transform: translate3d(0, 0, 0) scale(0.5); opacity: 0.25; }
+}
+/* The rule the shortlist lands against. */
+.dp-mv-listline {
+  position: absolute;
+  width: 1px;
+  margin-left: 7px;
+  background: linear-gradient(180deg, transparent, rgba(143, 180, 255, 0.5) 12%, rgba(143, 180, 255, 0.5) 88%, transparent);
 }
 
 /* ---- resources: the record ------------------------------------------------
@@ -1612,11 +1669,14 @@ html[data-loaded] .dp-scale-in {
   background: linear-gradient(90deg, transparent, rgba(226, 240, 255, 0.95));
   animation: dp-mv-signal 6.5s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
+/* The signal spends a sixth of the loop travelling, not two thirds. It exists
+   to deliver the light to the seat; once the seats HOLD their light (below),
+   a signal still crawling outward mid-loop reads as a second, unrelated event. */
 @keyframes dp-mv-signal {
   0%   { transform: translateX(0); opacity: 0; }
-  12%  { opacity: 1; }
-  70%  { transform: translateX(62px); opacity: 1; }
-  86%, 100% { transform: translateX(62px); opacity: 0; }
+  4%   { opacity: 1; }
+  16%  { transform: translateX(62px); opacity: 1; }
+  22%, 100% { transform: translateX(62px); opacity: 0; }
 }
 /* The seat it arrives at. */
 .dp-mv-spoke b {
@@ -1633,10 +1693,16 @@ html[data-loaded] .dp-scale-in {
     dp-mv-land 6.5s var(--d, 0s) ease-out infinite,
     dp-float-c 17s ease-in-out infinite;
 }
+/* THE SEAT STAYS LIT. The old rule blinked it for a tenth of the loop, and a
+   blink has no memory: after five blinks the figure was exactly where it began
+   and the animation had said nothing. Lit from when the signal arrives until
+   nearly the end means the staggered five are all on together late in the
+   loop, the ring visibly COMPLETES, and only then does it let go. Coverage
+   builds; it does not twinkle. */
 @keyframes dp-mv-land {
-  0%, 62% { background: rgba(143, 180, 255, 0.25); box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.5); }
-  72% { background: rgba(226, 240, 255, 0.95); box-shadow: 0 0 14px 2px rgba(120, 180, 255, 0.6); }
-  100% { background: rgba(143, 180, 255, 0.25); box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.5); }
+  0%, 14% { background: rgba(143, 180, 255, 0.25); box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.5); }
+  20%, 84% { background: rgba(226, 240, 255, 0.95); box-shadow: 0 0 14px 2px rgba(120, 180, 255, 0.6); }
+  96%, 100% { background: rgba(143, 180, 255, 0.25); box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.5); }
 }
 .dp-mv-core {
   position: absolute;
@@ -1658,11 +1724,13 @@ html[data-loaded] .dp-scale-in {
 
 @media (prefers-reduced-motion: reduce) {
   .dp-mv-scene,
-  .dp-mv-tier,
+  .dp-mv-org,
+  .dp-mv-stem,
+  .dp-mv-node,
   .dp-mv-arriving,
   .dp-mv-plane,
   .dp-mv-cell,
-  .dp-mv-cell.is-on,
+  .dp-mv-pick,
   .dp-mv-sheet,
   .dp-mv-disc,
   .dp-mv-core,
@@ -1674,14 +1742,19 @@ html[data-loaded] .dp-scale-in {
     translate: none;
   }
   /* Resting states must be the MEANINGFUL frame, not frame zero. Frame zero of
-     the arriving seat is 140px behind the scene and fully transparent, so a
+     the arriving seat is 200px behind the scene and fully transparent, so a
      bare animation:none leaves this visitor a picture with its subject
-     missing. */
+     missing. Likewise the shortlist: at frame zero the picks are still in the
+     field, so the figure would rest showing no shortlist at all. */
   .dp-mv-scene { transform: rotateX(1deg) rotateY(-6deg); }
   .dp-mv-arriving { transform: none; opacity: 1; }
-  .dp-mv-cell.is-on { transform: translateZ(42px); opacity: 1; }
+  .dp-mv-pick { transform: translate3d(var(--dx), var(--dy), 34px); opacity: 1; }
   .dp-mv-sheet { transform: none; opacity: 1; }
   .dp-mv-spoke i { opacity: 0; }
+  .dp-mv-spoke b {
+    background: rgba(226, 240, 255, 0.95);
+    box-shadow: 0 0 14px 2px rgba(120, 180, 255, 0.6);
+  }
 }
 
 /* ---- Process scene ---------------------------------------------------------
@@ -1872,3 +1945,43 @@ html[data-loaded] .dp-scale-in {
 }
 
 
+
+/* ---- Menu entrance: rows arrive in order -----------------------------------
+   See components/Header.tsx. The panel unfolds from the trigger; these rules
+   are the second half of that entrance: the rows inside land in sequence, each
+   one a small rise and fade, so the panel fills in rather than appearing
+   filled. The delay is per row WITHIN ITS COLUMN, so the columns cascade
+   together and the whole thing is done in about a quarter of a second: a
+   stagger any longer than that stops being texture and starts being a wait.
+
+   The wrapper is keyed by menu name, so switching menus remounts it and the
+   cascade replays: browsing across the bar gets the same entrance as opening,
+   which is most of the times anyone sees this. */
+.dp-menu-stagger a {
+  animation: dp-menu-row 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(0.03s + var(--row) * 0.035s);
+  --row: 0;
+}
+.dp-menu-stagger a:nth-child(2) { --row: 1; }
+.dp-menu-stagger a:nth-child(3) { --row: 2; }
+.dp-menu-stagger a:nth-child(4) { --row: 3; }
+.dp-menu-stagger a:nth-child(5) { --row: 4; }
+.dp-menu-stagger a:nth-child(6) { --row: 5; }
+.dp-menu-stagger a:nth-child(7) { --row: 6; }
+.dp-menu-stagger a:nth-child(8) { --row: 7; }
+/* The picture arrives last, after the words: it is the illustration OF them. */
+.dp-menu-stagger .dp-mv-frame {
+  animation: dp-menu-row 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.12s;
+}
+@keyframes dp-menu-row {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-menu-stagger a,
+  .dp-menu-stagger .dp-mv-frame {
+    animation: none;
+  }
+}
