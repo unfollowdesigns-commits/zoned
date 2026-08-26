@@ -1336,84 +1336,131 @@ html[data-loaded] .dp-scale-in {
   }
 }
 
-/* ---- Glass plane cluster ---------------------------------------------------
-   See components/ui/GlassStack.tsx for why each part is here. In short: the
-   glass is made of EDGES, not of fill. */
-.dp-glass-stack {
-  /* Perspective on the container rather than on each plane, so all five share
-     one vanishing point and read as being in the same space. Per-plane
-     perspective gives five separate little scenes. */
-  perspective: 900px;
-  perspective-origin: 50% 42%;
+/* ---- Menu visuals ----------------------------------------------------------
+   See components/ui/MenuVisual.tsx for what each one MEANS. This file holds the
+   material and the motion. The vocabulary is the same two parts used by the
+   house marks: rules are structure, nodes are seats, a filled node is the seat
+   being placed. */
+.dp-mv-frame {
+  isolation: isolate;
 }
-.dp-glass-scene {
-  position: absolute;
-  inset: 0;
-  transform-style: preserve-3d;
+.dp-mv {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-/* The light the planes are lit BY. Without it they glow on their own, which is
-   the tell that nothing in the picture is a real surface. */
-.dp-glass-lamp {
-  position: absolute;
-  left: 50%;
-  top: 24%;
-  height: 62%;
-  width: 78%;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  background: radial-gradient(
-    closest-side,
-    rgba(96, 148, 255, 0.30),
-    rgba(56, 120, 235, 0.10) 55%,
-    transparent 78%
-  );
-  filter: blur(26px);
+/* Structure. Quiet: it is the thing the seats sit ON, not the subject. */
+.dp-mv-rules path {
+  fill: none;
+  stroke: rgba(143, 180, 255, 0.30);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+/* Seats already filled. */
+.dp-mv-seats rect {
+  fill: rgba(143, 180, 255, 0.20);
+  stroke: rgba(196, 218, 255, 0.42);
+  stroke-width: 1.2;
 }
 
-.dp-glass-plane {
-  position: absolute;
-  border-radius: 13px;
-  transform-style: preserve-3d;
-  /* 1. A gradient fill, never flat: a flat translucent fill reads as film. */
-  background: linear-gradient(
-    142deg,
-    rgba(214, 230, 255, 0.20) 0%,
-    rgba(150, 185, 255, 0.09) 42%,
-    rgba(90, 130, 220, 0.05) 100%
-  );
-  /* 2. The lit edge. Bright top-left, dim bottom-right: one source, above and
-        to the left, which is what gives a rectangle thickness.
-     3. The refraction: a saturated line down ONE side only. This does more
-        than any amount of fill, and doing it on all four sides turns the plane
-        into a neon outline instead. */
-  box-shadow:
-    inset 1px 1px 0 rgba(226, 238, 255, 0.55),
-    inset -1px -1px 0 rgba(120, 150, 210, 0.16),
-    inset -3px 0 6px -3px rgba(120, 200, 255, 0.85),
-    0 18px 40px -22px rgba(0, 0, 0, 0.9);
-  animation: dp-glass-drift var(--dur, 14s) var(--delay, 0s) ease-in-out infinite;
-  will-change: transform;
+/* ---- services: the seat arrives -----------------------------------------
+   The vacancy is a dashed outline, so the gap reads as a gap rather than as a
+   missing shape, and the arriving seat descends into it and settles. The two
+   clocks are the same length and offset so the vacancy is only visible while
+   the seat is genuinely away from it. */
+.dp-mv-vacancy {
+  fill: none;
+  stroke: rgba(143, 180, 255, 0.45);
+  stroke-width: 1.3;
+  stroke-dasharray: 3 3;
+}
+.dp-mv-arriving {
+  stroke-width: 1.3;
+  animation: dp-mv-arrive 5.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+@keyframes dp-mv-arrive {
+  0%   { transform: translateY(-46px) scale(0.82); opacity: 0; }
+  26%  { transform: translateY(0) scale(1); opacity: 1; }
+  /* The hold is most of the loop. The point is the seat being FILLED, so the
+     filled state is what the picture spends its time showing. */
+  82%  { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-46px) scale(0.82); opacity: 0; }
 }
 
-/* The pose is carried in the keyframes rather than in a base transform, because
-   a transform on the element and an animated transform on the same element do
-   not compose: the animation simply wins and the pose is discarded. */
-@keyframes dp-glass-drift {
-  0%,
-  100% {
-    transform: rotateX(var(--rx)) rotateY(var(--ry)) translateZ(var(--tz))
-      translateY(-4px);
-  }
-  50% {
-    transform: rotateX(calc(var(--rx) * 0.45)) rotateY(calc(var(--ry) * 1.25))
-      translateZ(calc(var(--tz) + 26px)) translateY(6px);
-  }
+/* ---- markets: the short list resolves ------------------------------------ */
+.dp-mv-field rect {
+  fill: rgba(143, 180, 255, 0.16);
+}
+.dp-mv-field rect.is-on {
+  fill: rgba(214, 232, 255, 0.9);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dp-mv-resolve 4.6s ease-in-out infinite;
+}
+@keyframes dp-mv-resolve {
+  0%, 100% { opacity: 0.18; transform: scale(0.6); }
+  22%, 62% { opacity: 1; transform: scale(1); }
+}
+
+/* ---- resources: the record ----------------------------------------------
+   Three sheets on one keyframe at staggered NEGATIVE delays, so the cycle is
+   already in progress on the first frame and the stack never starts empty. */
+.dp-mv-sheet {
+  transform-box: view-box;
+  transform-origin: 100px 75px;
+  animation: dp-mv-leaf 7.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.dp-mv-lines {
+  fill: none;
+  stroke: rgba(180, 208, 255, 0.42);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+@keyframes dp-mv-leaf {
+  0%   { transform: translateY(16px) scale(0.94); opacity: 0; }
+  14%  { transform: translateY(8px) scale(0.97); opacity: 1; }
+  62%  { transform: translateY(0) scale(1); opacity: 1; }
+  86%  { transform: translateY(-30px) scale(1.02); opacity: 0; }
+  100% { transform: translateY(-30px) scale(1.02); opacity: 0; }
+}
+
+/* ---- about: partner led --------------------------------------------------
+   pathLength normalises every spoke to 100 units whatever its real length, so
+   one dash rule sends an identical pulse down all five regardless of how far
+   each one reaches. Same trick as the house marks and the stat gauges. */
+.dp-mv-spokes path {
+  fill: none;
+  stroke: rgba(143, 180, 255, 0.28);
+  stroke-width: 1.4;
+}
+.dp-mv-spokes path {
+  stroke-dasharray: 18 100;
+  animation: dp-mv-pulse 3.4s linear infinite;
+}
+@keyframes dp-mv-pulse {
+  0%   { stroke-dashoffset: 18; stroke: rgba(196, 224, 255, 0.85); }
+  70%  { stroke-dashoffset: -100; stroke: rgba(143, 180, 255, 0.18); }
+  100% { stroke-dashoffset: -100; stroke: rgba(143, 180, 255, 0.18); }
+}
+.dp-mv-core {
+  fill: rgba(214, 232, 255, 0.92);
+  stroke: rgba(230, 242, 255, 0.6);
+  stroke-width: 1.4;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dp-glass-plane {
+  .dp-mv-arriving,
+  .dp-mv-field rect.is-on,
+  .dp-mv-sheet,
+  .dp-mv-spokes path {
     animation: none;
-    transform: rotateX(var(--rx)) rotateY(var(--ry)) translateZ(var(--tz));
   }
+  /* Resting states have to be the MEANINGFUL frame, not frame zero. Frame zero
+     of the arriving seat is off screen and fully transparent, so without this
+     the reduced-motion visitor gets a picture with the subject missing. */
+  .dp-mv-arriving { opacity: 1; transform: none; }
+  .dp-mv-field rect.is-on { opacity: 1; }
+  .dp-mv-sheet { opacity: 1; transform: none; }
+  .dp-mv-spokes path { stroke-dasharray: none; }
 }

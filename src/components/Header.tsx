@@ -8,7 +8,7 @@ import { Menu, X, ChevronRight } from "lucide-react";
 import { EASE, SPRING_SOFT } from "@/lib/motion";
 import LinkedInIcon from "./LinkedInIcon";
 import Logo from "./Logo";
-import GlassStack from "@/components/ui/GlassStack";
+import MenuVisual from "@/components/ui/MenuVisual";
 import {
   WHAT_WE_DO_MENU,
   FUNCTIONS,
@@ -295,12 +295,12 @@ export default function Header() {
                         </div>
                       ))}
                     </div>
-                    <GlassStack className="min-h-[228px]" />
+                    <MenuVisual kind="services" />
                   </div>
                 )}
 
                 {open === "Who We Serve" && (
-                  <div className="grid grid-cols-[1fr_1.6fr] gap-8">
+                  <div className="grid grid-cols-[0.62fr_1.05fr_0.82fr] gap-6">
                     <div>
                       <ColumnHeading>Functions</ColumnHeading>
                       <div className="flex flex-col gap-1">
@@ -317,33 +317,37 @@ export default function Header() {
                         ))}
                       </div>
                     </div>
+                    <MenuVisual kind="markets" />
                   </div>
                 )}
 
                 {open === "Resources" && (
-                  <div className="grid grid-cols-2 gap-8">
-                    <div>
-                      <ColumnHeading>Resources</ColumnHeading>
-                      <div className="flex flex-col gap-1">
-                        {RESOURCES.map((item) => (
-                          <MenuLink key={item.href} item={item} />
-                        ))}
+                  <div className="grid grid-cols-[1.15fr_0.85fr] gap-6">
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <ColumnHeading>Resources</ColumnHeading>
+                        <div className="flex flex-col gap-1">
+                          {RESOURCES.map((item) => (
+                            <MenuLink key={item.href} item={item} />
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <ColumnHeading>New Tools</ColumnHeading>
+                        <div className="flex flex-col gap-1">
+                          {NEW_TOOLS.map((item) => (
+                            <MenuLink key={item.href} item={item} />
+                          ))}
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <ColumnHeading>New Tools</ColumnHeading>
-                      <div className="flex flex-col gap-1">
-                        {NEW_TOOLS.map((item) => (
-                          <MenuLink key={item.href} item={item} />
-                        ))}
-                      </div>
-                    </div>
+                    <MenuVisual kind="resources" />
                   </div>
                 )}
 
                 {open === "About" && (
                   <div>
-                    <div className="grid grid-cols-[1fr_1.4fr] gap-8">
+                    <div className="grid grid-cols-[0.66fr_1.05fr_0.82fr] gap-6">
                       <div className="flex flex-col">
                         <ColumnHeading>Company</ColumnHeading>
                         <div className="flex flex-col gap-1">
@@ -387,6 +391,7 @@ export default function Header() {
                           </Link>
                         </div>
                       </div>
+                      <MenuVisual kind="about" />
                     </div>
                     <div className="v-rule mt-5" />
                     <a
