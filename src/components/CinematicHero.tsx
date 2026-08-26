@@ -167,14 +167,23 @@ export default function CinematicHero() {
      monotonic past b, so a value that has finished stays finished. */
   const ledeAOpacity = useTransform(scrollYProgress, [0.24, 0.44, 1], [1, 0, 0], { ease: SCRUB });
   const ledeBOpacity = useTransform(scrollYProgress, [0.42, 0.62, 1], [0, 1, 1], { ease: SCRUB });
-  /* THE CONSOLE BELONGS TO THE TOP OF THE DIVE. It is what there is to read
-     while the headline is at full size, and it has to be gone before the
-     services row arrives, because both want the lower half of the frame. It
-     also drifts up a little as it goes, so it recedes with the descent rather
-     than simply switching off. Ends on a hold point at 1 for the reason
-     documented on the lede cross-fade below. */
-  const consoleOpacity = useTransform(scrollYProgress, [0.05, 0.36, 1], [1, 0, 0], { ease: SCRUB });
-  const consoleY = useTransform(scrollYProgress, [0, 0.36, 1], ["0px", "-54px", "-54px"], {
+  /* THE CONSOLE BELONGS TO THE BOTTOM OF THE DIVE, WHICH IS THE OPPOSITE OF
+     WHERE IT WAS. It used to be present at full size on the first frame and
+     fade out as you descended, so the one thing on the page that shows the
+     work being done was gone by the time anyone had scrolled, and the top of
+     the hero was carrying a headline, a lede and a product UI at once.
+
+     Landing it instead makes the descent mean something. You fly down into
+     the field, the lede hands over from the problem to the firm, and the
+     instrument that runs the work resolves out of the market you just flew
+     into. It arrives after the second lede has committed and before the
+     services row does, so the frame fills in one direction rather than
+     three things appearing together.
+
+     It rises the last few pixels into place rather than simply switching on.
+     Ends on a hold point at 1 for the reason documented above. */
+  const consoleOpacity = useTransform(scrollYProgress, [0.5, 0.78, 1], [0, 1, 1], { ease: SCRUB });
+  const consoleY = useTransform(scrollYProgress, [0.5, 0.78, 1], ["34px", "0px", "0px"], {
     ease: SCRUB,
   });
   const tailOpacity = useTransform(scrollYProgress, [0.7, 0.94, 1], [0, 1, 1], { ease: SCRUB });
@@ -184,13 +193,28 @@ export default function CinematicHero() {
      with everything present. Animating nothing is correct here. */
   if (reduced) {
     return (
-      <section className="relative h-svh min-h-[560px] overflow-hidden">
+      /* `min-h-svh`, not `h-svh`. Nothing is pinned on this branch, so the
+         frame does not have to be exactly one screen, and forcing it to be one
+         is what clipped the services row: the console is a fixed multiple of
+         its own width and on a shorter viewport the three blocks simply add up
+         to more than the screen. Letting the section grow costs nothing here
+         and loses nothing, where cropping loses the last link in the row. */
+      <section className="relative min-h-svh overflow-hidden">
         <ParticleWave opacity={0.9} searchApi={waveApi} />
         <Shade />
-        <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[13vh]">
+        <div className="relative mx-auto flex min-h-svh max-w-[1280px] flex-col px-6 pt-[13vh]">
           <div className="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr]">
-            <Copy reduced waveApi={waveApi} />
-            <div className="hidden w-full max-w-[min(430px,44svh)] justify-self-end lg:block">
+            {/* THE WRAPPER IS LOAD-BEARING. Copy returns a fragment, so
+                dropping it straight into the grid made its eyebrow, headline
+                and lede three separate grid items: the headline landed in the
+                right-hand column beside its own eyebrow and the console was
+                pushed into a third row off the bottom of the frame. The
+                scrubbed branch below never showed it because its Copy is
+                already inside a motion.div. */}
+            <div>
+              <Copy reduced waveApi={waveApi} />
+            </div>
+            <div className="hidden w-full max-w-[min(430px,calc(65svh-195px))] justify-self-end [@media(min-width:1024px)_and_(min-height:780px)]:block">
               <SearchConsole />
             </div>
           </div>
@@ -230,16 +254,28 @@ export default function CinematicHero() {
               />
             </motion.div>
 
-            {/* THE WIDTH IS CAPPED BY VIEWPORT HEIGHT, NOT JUST BY THE COLUMN.
-                Everything inside the console is sized in container query units,
-                so its height is a fixed multiple of its width and a 430px cap
-                alone made it 623px tall on every screen. On a 720px laptop that
-                put its foot 74px below the fold and under the assistant button.
-                Tying the cap to `svh` makes the whole product picture shrink
-                with the screen instead of being cropped by it. */}
+            {/* THE WIDTH IS CAPPED BY VIEWPORT HEIGHT, AND THE ARITHMETIC IS
+                THE POINT. Everything inside the console is sized in container
+                query units, so its height is a fixed multiple of its width:
+                1.34, the aspect ratio it declares. A plain 430px cap made it
+                576px tall on every
+                screen, which does not fit a pinned frame that also has to hold
+                12vh of head room and a 235px services row. Solving for that
+                gives roughly 0.65H - 195, so the cap is written as exactly
+                that, and the console shrinks with the screen instead of
+                pushing the row's last link past the bottom edge.
+
+                BELOW 780px OF HEIGHT IT IS NOT SHOWN AT ALL, for the same
+                reason it is not shown below `lg`: that formula puts it under
+                290px wide, where its labels fall below eight pixels. A picture
+                of software nobody can read is worse than a hero without one,
+                and clipping the services row to keep it would be worse still.
+                The width and height conditions are one media query rather than
+                two stacked variants, so which rule wins does not depend on the
+                order Tailwind happens to emit them in. */}
             <motion.div
               style={{ opacity: consoleOpacity, y: consoleY }}
-              className="hidden w-full max-w-[min(430px,44svh)] justify-self-end lg:block"
+              className="hidden w-full max-w-[min(430px,calc(65svh-195px))] justify-self-end [@media(min-width:1024px)_and_(min-height:780px)]:block"
             >
               <SearchConsole />
             </motion.div>
@@ -474,7 +510,7 @@ function FlipWord({
  */
 function Tail() {
   return (
-    <div className="border-t border-white/15 pt-8">
+    <div data-tail className="border-t border-white/15 pt-8">
       {/* Two up and note-less on a phone. Four stacked entries with a line of
           copy each is over five hundred pixels, which does not fit inside a
           pinned one-screen frame however the type above it behaves. */}
