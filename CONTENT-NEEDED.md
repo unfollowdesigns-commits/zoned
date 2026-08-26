@@ -113,3 +113,33 @@ colour.
 Licensed commercial type. See `public/fonts/README.md` for exactly which cut to
 buy and the filenames. Until it is installed the site renders in Helvetica on
 Apple devices, Arial on Windows, and Archivo elsewhere.
+
+## 9. Service page copy (Professional Search first)
+
+`/what-we-do/professional-search` is built against the supplied design and
+renders from `src/lib/services.ts`. Section structure, the four functions, the
+eight industries and the five process steps are in place. Every section below
+renders the moment its text is added to that file, with no further design work.
+
+The wording could not be taken from the supplied image: it is legible for
+headings and not for body copy, and guessing at a services page puts claims in
+the firm's mouth. What is needed:
+
+1. **Seat titles per function.** Which roles sit under Finance & Accounting,
+   Technology/Digital/AI, Risk & Compliance, and Marketing & Revenue. Field:
+   `functions[].seats`.
+2. **"Who we place".** The list of titles shown as pills. Field: `placements`.
+3. **How we search.** One short paragraph under each of Partner-Led,
+   Network-Driven, Accountable, and the Inc. 5000 line. Field: `approach[].body`.
+4. **"When Professional Search fits".** The four qualifying criteria. Field:
+   `fit`.
+5. **Process detail.** One line under each of the five steps. Field:
+   `process[].body`.
+6. **The U.S. Chamber of Commerce case study.** Not started: a named client
+   engagement is the least inventable thing on the page.
+7. **The testimonial.** See section 4 above. Quotes attributed to real people
+   are never written here.
+8. **FAQ.** The questions and their answers. Field: `faq`.
+
+The same file drives Executive Search, Interim Solutions, Fractional and Project
+Support. Adding one is an entry in `SERVICE_CONTENT`, not a new route.
