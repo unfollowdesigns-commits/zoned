@@ -2103,3 +2103,165 @@ html[data-loaded] .dp-scale-in {
   -webkit-mask-image: linear-gradient(180deg, transparent 18%, #000 95%);
   pointer-events: none;
 }
+
+/* ---- Card art --------------------------------------------------------------
+   See components/ui/PostArt.tsx. The figure never changes: the LIGHT moves
+   over it. One band crossing beneath the marks, one very slow drift on the
+   group above, and nothing else, so a grid of six cards runs twelve composited
+   animations rather than the eight hundred that animating the marks
+   themselves would cost. Both carry the card's seeded --phase, so a grid is
+   lit in turn instead of in unison. */
+.dp-art {
+  transform-box: view-box;
+}
+.dp-art-sweep {
+  animation: dp-art-sweep 9s var(--phase, 0s) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes dp-art-sweep {
+  /* Holds off screen for the back third: a band that restarts the instant it
+     leaves reads as a repeating wipe, and the pause is what makes it a
+     passing light instead. */
+  0%        { transform: translateX(0); }
+  62%, 100% { transform: translateX(168px); }
+}
+.dp-art-body {
+  transform-origin: 62% 58%;
+  animation: dp-art-drift 26s var(--phase, 0s) ease-in-out infinite;
+}
+@keyframes dp-art-drift {
+  0%, 100% { transform: scale(1) translateX(0); }
+  50%      { transform: scale(1.035) translateX(-1.2px); }
+}
+
+/* The card lifts the light as well as itself. A hover that only moves the box
+   leaves the art inert inside it, which is what makes a card feel printed. */
+.dp-art-card:hover .dp-art-sweep,
+.dp-art-card:focus-within .dp-art-sweep {
+  animation-duration: 4.5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-art-sweep,
+  .dp-art-body {
+    animation: none;
+  }
+  /* Rest with the light ON the figure rather than parked off the left edge,
+     so the still frame is the lit one. */
+  .dp-art-sweep {
+    transform: translateX(70px);
+  }
+}
+
+/* ---- Engagement map --------------------------------------------------------
+   See components/EngagementMap.tsx. The figure builds itself when it arrives:
+   axes draw along their own length, then the zones open, then the seats land.
+   Everything is keyed off one [data-ready] on the host, so nothing here can
+   fire before the figure is on screen. */
+.dp-map-grid {
+  stroke: rgba(143, 180, 255, 0.09);
+  stroke-width: 1;
+}
+.dp-map-axis {
+  stroke: rgba(143, 180, 255, 0.42);
+  stroke-width: 1.5;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+[data-ready] .dp-map-axis {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dp-map-axis-name {
+  fill: var(--v-primary);
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+.dp-map-tick {
+  fill: var(--v-muted);
+  font-size: var(--t-small);
+}
+
+/* Each spot arrives after the axes it is plotted against, staggered by --i so
+   the three land in order rather than as one block. */
+.dp-map-spot {
+  opacity: 0;
+  transition: opacity 460ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(0.62s + var(--i) * 0.12s);
+}
+[data-ready] .dp-map-spot {
+  opacity: 1;
+}
+/* Dimming is what makes the crosshair legible: without it the other two zones
+   stay bright and the answer is buried in the figure it is meant to isolate. */
+.dp-map-spot[data-dim] {
+  opacity: 0.26;
+  transition-delay: 0s;
+}
+
+.dp-map-zone {
+  fill: color-mix(in srgb, var(--c) 16%, transparent);
+  stroke: color-mix(in srgb, var(--c) 46%, transparent);
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: center;
+  /* Never in unison: three zones breathing on one clock read as a pulse in the
+     page rather than as three separate things being alive. */
+  animation: dp-map-breathe calc(13s + var(--i) * 2.5s) calc(var(--i) * -3s) ease-in-out infinite;
+}
+@keyframes dp-map-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.045); }
+}
+.dp-map-spot[data-on] .dp-map-zone {
+  fill: color-mix(in srgb, var(--c) 26%, transparent);
+  stroke: color-mix(in srgb, var(--c) 78%, transparent);
+}
+
+.dp-map-cross {
+  stroke: var(--c);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  opacity: 0;
+  transition: opacity 260ms ease-out;
+}
+.dp-map-spot[data-on] .dp-map-cross {
+  opacity: 0.75;
+}
+
+.dp-map-node {
+  fill: var(--c);
+  stroke: #fff;
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 300ms cubic-bezier(0.34, 1.26, 0.5, 1);
+}
+.dp-map-spot[data-on] .dp-map-node {
+  transform: scale(1.3);
+}
+
+.dp-map-label {
+  fill: var(--v-ink);
+  font-size: var(--t-secondary);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-map-axis {
+    stroke-dashoffset: 0;
+    transition: none;
+  }
+  .dp-map-spot {
+    opacity: 1;
+    transition: none;
+  }
+  .dp-map-zone {
+    animation: none;
+  }
+  .dp-map-node {
+    transition: none;
+  }
+}

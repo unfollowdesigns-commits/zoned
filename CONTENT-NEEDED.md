@@ -142,3 +142,24 @@ the firm's mouth. What is needed:
 
 The same file drives Executive Search, Interim Solutions, Fractional and Project
 Support. Adding one is an entry in `SERVICE_CONTENT`, not a new route.
+
+## 10. The What We Do page
+
+Rebuilt to the supplied design (`src/app/what-we-do/page.tsx`). Everything
+legible in the mock is in verbatim. Two pieces of copy are pending:
+
+1. **The paragraph under "The work starts before the search does."** Its
+   opening line is cut off in the supplied image, and half a paragraph cannot
+   be completed by guessing. The three commitments below it are in.
+2. **FAQ answers.** The mock shows the accordions closed, so only the five
+   questions exist. They currently render as a ledger of questions routed to
+   /contact; send the answers and they become accordions.
+
+Photography for this page, all currently `MediaSlot` placeholders (grep
+`data-media-slot`):
+
+    hero image (5:4, dark)
+    brief-a-search partner headshot (1:1, light)
+    three offer card images (16:10, light)
+    Josh Fisher portrait (4:3, light)
+    who-we-are image (4:5, dark)

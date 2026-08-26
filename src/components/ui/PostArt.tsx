@@ -63,6 +63,24 @@ function rng(seed: number) {
   };
 }
 
+/**
+ * Quantise, and this is a CORRECTNESS helper rather than a tidiness one.
+ *
+ * The hashing above exists so the art is identical on the server and on the
+ * client. It is not sufficient on its own: `Math.sin` and `Math.pow` are
+ * implementation-defined in ECMAScript, so Node and the browser can disagree
+ * in the last bit, and React compares the SERIALISED attribute. Caught in the
+ * console as a real mismatch on the blog archive:
+ *
+ *     server  r="1.7080819894592358"
+ *     client  r={1.708081989459236}
+ *
+ * Three decimals is far beyond anything visible in a 100 x 56 viewBox and is
+ * identical on both sides, so every computed number that reaches an attribute
+ * goes through here.
+ */
+const q = (n: number) => Math.round(n * 1000) / 1000;
+
 type Draw = (r: () => number, c: string) => React.ReactNode;
 
 /* Every motif is drawn in a 100 x 56 box, anchored so its weight sits low and
@@ -73,7 +91,7 @@ type Draw = (r: () => number, c: string) => React.ReactNode;
 /** Contours. Nested open curves, like a section through a landform. */
 const contours: Draw = (r, c) => {
   const n = 7;
-  const lean = -14 + r() * 28;
+  const lean = q(-14 + r() * 28);
   return (
     <g transform={`rotate(${lean} 78 52)`}>
       {Array.from({ length: n }, (_, i) => {
@@ -84,7 +102,7 @@ const contours: Draw = (r, c) => {
             d={`M ${100 - k * 1.5} 60 C ${86 - k} ${44 - k * 0.3}, ${96 - k * 0.4} ${30 - k * 0.5}, ${112} ${28 - k * 0.8}`}
             fill="none"
             stroke={c}
-            strokeOpacity={0.62 - i * 0.06}
+            strokeOpacity={q(0.62 - i * 0.06)}
             strokeWidth={0.7}
             strokeLinecap="round"
           />
@@ -100,13 +118,13 @@ const halftone: Draw = (r, c) => {
   const dots = [];
   for (let col = 0; col < 16; col += 1) {
     for (let row = 0; row < 9; row += 1) {
-      const x = 34 + col * 4.6;
-      const y = 8 + row * 5.4;
+      const x = q(34 + col * 4.6);
+      const y = q(8 + row * 5.4);
       const wave = Math.sin(col * 0.45 + row * 0.28 + phase);
-      const rad = 0.45 + Math.max(0, wave) * 1.5;
+      const rad = q(0.45 + Math.max(0, wave) * 1.5);
       if (rad < 0.5) continue;
       dots.push(
-        <circle key={`${col}-${row}`} cx={x} cy={y} r={rad} fill={c} fillOpacity={0.28 + rad * 0.3} />,
+        <circle key={`${col}-${row}`} cx={x} cy={y} r={rad} fill={c} fillOpacity={q(0.28 + rad * 0.3)} />,
       );
     }
   }
@@ -116,7 +134,7 @@ const halftone: Draw = (r, c) => {
 /** Chevrons. Nested angles, thick, pointing out of the corner. */
 const chevrons: Draw = (r, c) => {
   const n = 6;
-  const gap = 5 + r() * 2;
+  const gap = q(5 + r() * 2);
   return (
     <g>
       {Array.from({ length: n }, (_, i) => {
@@ -124,10 +142,10 @@ const chevrons: Draw = (r, c) => {
         return (
           <path
             key={i}
-            d={`M ${52 + o} 60 L ${80 + o} ${26 - o * 0.25} L ${108 + o} 60`}
+            d={`M ${q(52 + o)} 60 L ${q(80 + o)} ${q(26 - o * 0.25)} L ${q(108 + o)} 60`}
             fill="none"
             stroke={c}
-            strokeOpacity={0.7 - i * 0.08}
+            strokeOpacity={q(0.7 - i * 0.08)}
             strokeWidth={2.1}
             strokeLinejoin="round"
           />
@@ -143,11 +161,11 @@ const field: Draw = (r, c) => {
   const dots = [];
   for (let i = 0; i < 130; i += 1) {
     const t = i / 130;
-    const x = 40 + Math.pow(t, 0.6) * 78 + (((i * 7919 + jitter * 1000) % 11) - 5) * 0.9;
-    const y = 4 + ((i * 37) % 56) + (((i * 6151) % 7) - 3) * 0.5;
-    const d = Math.min(1, Math.max(0, (x - 44) / 60));
-    const rad = 0.35 + d * 1.7;
-    dots.push(<circle key={i} cx={x} cy={y} r={rad} fill={c} fillOpacity={0.18 + d * 0.55} />);
+    const x = q(40 + Math.pow(t, 0.6) * 78 + (((i * 7919 + jitter * 1000) % 11) - 5) * 0.9);
+    const y = q(4 + ((i * 37) % 56) + (((i * 6151) % 7) - 3) * 0.5);
+    const d = q(Math.min(1, Math.max(0, (x - 44) / 60)));
+    const rad = q(0.35 + d * 1.7);
+    dots.push(<circle key={i} cx={x} cy={y} r={rad} fill={c} fillOpacity={q(0.18 + d * 0.55)} />);
   }
   return <g>{dots}</g>;
 };
@@ -155,18 +173,18 @@ const field: Draw = (r, c) => {
 /** Stripes. Dense diagonals, cut off square, the densest of the six. */
 const stripes: Draw = (r, c) => {
   const n = 22;
-  const angle = 28 + r() * 16;
+  const angle = q(28 + r() * 16);
   return (
     <g transform={`rotate(${angle} 82 40)`}>
       {Array.from({ length: n }, (_, i) => (
         <rect
           key={i}
-          x={40 + i * 3.4}
+          x={q(40 + i * 3.4)}
           y={-14}
           width={1.5}
           height={88}
           fill={c}
-          fillOpacity={Math.max(0.06, 0.6 - i * 0.024)}
+          fillOpacity={q(Math.max(0.06, 0.6 - i * 0.024))}
         />
       ))}
     </g>
@@ -177,9 +195,9 @@ const stripes: Draw = (r, c) => {
 const dashes: Draw = (r, c) => {
   const segs = [];
   for (let i = 0; i < 54; i += 1) {
-    const x = 42 + ((i * 29) % 62) + (r() - 0.5) * 4;
-    const y = 4 + ((i * 17) % 50) + (r() - 0.5) * 4;
-    const a = r() * 180;
+    const x = q(42 + ((i * 29) % 62) + (r() - 0.5) * 4);
+    const y = q(4 + ((i * 17) % 50) + (r() - 0.5) * 4);
+    const a = q(r() * 180);
     segs.push(
       <rect
         key={i}
@@ -189,7 +207,7 @@ const dashes: Draw = (r, c) => {
         height={0.9}
         rx={0.45}
         fill={c}
-        fillOpacity={0.25 + r() * 0.45}
+        fillOpacity={q(0.25 + r() * 0.45)}
         transform={`rotate(${a} ${x} ${y})`}
       />,
     );
@@ -204,38 +222,67 @@ const dashes: Draw = (r, c) => {
  * so they sit together as a set rather than competing: a taxonomy needs its
  * members to be distinguishable from each other and equal in weight.
  */
-const BY_CATEGORY: Record<string, { draw: Draw; colour: string }> = {
-  "Executive Search": { draw: contours, colour: "#5b93ff" },
-  "Interim & Fractional": { draw: chevrons, colour: "#35b0d8" },
-  "Market Insight": { draw: halftone, colour: "#9b7bf0" },
-  "Finance & Accounting": { draw: field, colour: "#43b98e" },
-  "Private Capital": { draw: stripes, colour: "#d9a446" },
-  "Firm News": { draw: dashes, colour: "#e0748c" },
+export const MOTIFS = { contours, halftone, chevrons, field, stripes, dashes };
+export type Motif = keyof typeof MOTIFS;
+
+const BY_CATEGORY: Record<string, { motif: Motif; colour: string }> = {
+  "Executive Search": { motif: "contours", colour: "#5b93ff" },
+  "Interim & Fractional": { motif: "chevrons", colour: "#35b0d8" },
+  "Market Insight": { motif: "halftone", colour: "#9b7bf0" },
+  "Finance & Accounting": { motif: "field", colour: "#43b98e" },
+  "Private Capital": { motif: "stripes", colour: "#d9a446" },
+  "Firm News": { motif: "dashes", colour: "#e0748c" },
 };
 
-const FALLBACK = { draw: contours, colour: "#5b93ff" };
+const FALLBACK = { motif: "contours" as Motif, colour: "#5b93ff" };
 
-export default function PostArt({
-  slug,
-  category,
+/**
+ * The art, animated, for any card that wants it.
+ *
+ * THE ANIMATION IS TWO ELEMENTS, NOT TWO HUNDRED. The obvious way to bring
+ * these to life is to animate the marks themselves, and it is the wrong way:
+ * the graduated field alone is 130 circles, so six cards in a grid would be
+ * running eight hundred animations to make a background shimmer. It would also
+ * break the brief, which is that the PATTERNS DO NOT CHANGE. A figure whose
+ * parts move is a different figure.
+ *
+ * So the figure holds its shape and the LIGHT moves over it: one slow band
+ * crossing beneath the marks, and one very slow drift on the group above it.
+ * Two animated elements per card, both composited, and the design is untouched.
+ * It is also the same idea the hero runs at full size, where a sweep crosses
+ * the market and lights what it passes: one grammar, two scales.
+ *
+ * Deterministic, server rendered, no JavaScript. The phase is seeded so a grid
+ * of cards is never in unison, which is what would make it read as a loop.
+ */
+export function CardArt({
+  seed: seedInput,
+  motif = "contours",
+  colour = "#5b93ff",
   className = "",
 }: {
-  slug: string;
-  /** Chooses the form and the colour. See BY_CATEGORY. */
-  category?: string;
+  /** Any stable string. Fixes the detail within the motif and the drift phase. */
+  seed: string;
+  motif?: Motif;
+  colour?: string;
   className?: string;
 }) {
-  const seed = hash(slug);
+  const seed = hash(seedInput);
   const random = rng(seed);
-  const { draw, colour } = (category && BY_CATEGORY[category]) || FALLBACK;
+  const draw = MOTIFS[motif] ?? contours;
   const gid = `pa-${seed.toString(36)}`;
+  /* Spread across the sweep's own cycle, so cards in a grid are lit in turn
+     rather than together. Negative, so every card is already mid-cycle on its
+     first frame and none of them starts dark. */
+  const phase = q(-((seed % 900) / 100));
 
   return (
     <svg
       viewBox="0 0 100 56"
       preserveAspectRatio="xMidYMid slice"
       aria-hidden="true"
-      className={`absolute inset-0 h-full w-full ${className}`}
+      className={`dp-art absolute inset-0 h-full w-full ${className}`}
+      style={{ ["--phase" as string]: `${phase}s` }}
     >
       <defs>
         <linearGradient id={`${gid}-bg`} x1="0" y1="0" x2="1" y2="1">
@@ -246,6 +293,13 @@ export default function PostArt({
           <stop offset="0%" stopColor={colour} stopOpacity="0.30" />
           <stop offset="100%" stopColor={colour} stopOpacity="0" />
         </radialGradient>
+        {/* The travelling band. Soft at both edges so it has no leading line:
+            a hard edge would read as a wipe rather than as light. */}
+        <linearGradient id={`${gid}-sweep`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor={colour} stopOpacity="0" />
+          <stop offset="50%" stopColor={colour} stopOpacity="0.34" />
+          <stop offset="100%" stopColor={colour} stopOpacity="0" />
+        </linearGradient>
         {/* Fades the figure out toward the top left, so the category chip and
             anything laid over the card sit on quiet ground rather than across
             a line. */}
@@ -261,7 +315,25 @@ export default function PostArt({
 
       <rect width="100" height="56" fill={`url(#${gid}-bg)`} />
       <circle cx={78} cy={44} r={40} fill={`url(#${gid}-glow)`} />
-      <g mask={`url(#${gid}-mask)`}>{draw(random, colour)}</g>
+      {/* Beneath the marks: the pattern is lit BY it, rather than washed over. */}
+      <rect className="dp-art-sweep" x={-34} y={0} width={34} height={56} fill={`url(#${gid}-sweep)`} />
+      <g className="dp-art-body" mask={`url(#${gid}-mask)`}>
+        {draw(random, colour)}
+      </g>
     </svg>
   );
+}
+
+export default function PostArt({
+  slug,
+  category,
+  className = "",
+}: {
+  slug: string;
+  /** Chooses the form and the colour. See BY_CATEGORY. */
+  category?: string;
+  className?: string;
+}) {
+  const { motif, colour } = (category && BY_CATEGORY[category]) || FALLBACK;
+  return <CardArt seed={slug} motif={motif} colour={colour} className={className} />;
 }
