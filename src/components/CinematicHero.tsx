@@ -13,6 +13,7 @@ import {
 import { ArrowRight } from "lucide-react";
 import { useReducedMotion } from "@/lib/motion";
 import ParticleWave, { type WaveSearchApi } from "@/components/ParticleWave";
+import SearchConsole from "@/components/SearchConsole";
 import { SERVICES } from "@/lib/site";
 
 /**
@@ -166,6 +167,16 @@ export default function CinematicHero() {
      monotonic past b, so a value that has finished stays finished. */
   const ledeAOpacity = useTransform(scrollYProgress, [0.24, 0.44, 1], [1, 0, 0], { ease: SCRUB });
   const ledeBOpacity = useTransform(scrollYProgress, [0.42, 0.62, 1], [0, 1, 1], { ease: SCRUB });
+  /* THE CONSOLE BELONGS TO THE TOP OF THE DIVE. It is what there is to read
+     while the headline is at full size, and it has to be gone before the
+     services row arrives, because both want the lower half of the frame. It
+     also drifts up a little as it goes, so it recedes with the descent rather
+     than simply switching off. Ends on a hold point at 1 for the reason
+     documented on the lede cross-fade below. */
+  const consoleOpacity = useTransform(scrollYProgress, [0.05, 0.36, 1], [1, 0, 0], { ease: SCRUB });
+  const consoleY = useTransform(scrollYProgress, [0, 0.36, 1], ["0px", "-54px", "-54px"], {
+    ease: SCRUB,
+  });
   const tailOpacity = useTransform(scrollYProgress, [0.7, 0.94, 1], [0, 1, 1], { ease: SCRUB });
   const tailY = useTransform(scrollYProgress, [0.7, 0.94, 1], [24, 0, 0], { ease: SCRUB });
 
@@ -177,7 +188,12 @@ export default function CinematicHero() {
         <ParticleWave opacity={0.9} searchApi={waveApi} />
         <Shade />
         <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[13vh]">
-          <Copy reduced waveApi={waveApi} />
+          <div className="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+            <Copy reduced waveApi={waveApi} />
+            <div className="hidden w-full max-w-[min(430px,44svh)] justify-self-end lg:block">
+              <SearchConsole />
+            </div>
+          </div>
           <div className="mt-auto pb-14 sm:pb-12">
             <Tail />
           </div>
@@ -199,14 +215,35 @@ export default function CinematicHero() {
         <Shade />
 
         <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[12vh]">
-          <motion.div style={{ y: typeY, scale: typeScale, transformOrigin: "0% 0%" }}>
-            <Copy
-              reduced={false}
-              waveApi={waveApi}
-              ledeAOpacity={ledeAOpacity}
-              ledeBOpacity={ledeBOpacity}
-            />
-          </motion.div>
+          {/* Type left, the console right. `lg` only, and by measurement
+              rather than taste: the console's type scales in `cqw`, so below
+              about 480px of column width its labels fall under 11px, and the
+              hero already has to fit a headline and four services into one
+              pinned screen without it. */}
+          <div className="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+            <motion.div style={{ y: typeY, scale: typeScale, transformOrigin: "0% 0%" }}>
+              <Copy
+                reduced={false}
+                waveApi={waveApi}
+                ledeAOpacity={ledeAOpacity}
+                ledeBOpacity={ledeBOpacity}
+              />
+            </motion.div>
+
+            {/* THE WIDTH IS CAPPED BY VIEWPORT HEIGHT, NOT JUST BY THE COLUMN.
+                Everything inside the console is sized in container query units,
+                so its height is a fixed multiple of its width and a 430px cap
+                alone made it 623px tall on every screen. On a 720px laptop that
+                put its foot 74px below the fold and under the assistant button.
+                Tying the cap to `svh` makes the whole product picture shrink
+                with the screen instead of being cropped by it. */}
+            <motion.div
+              style={{ opacity: consoleOpacity, y: consoleY }}
+              className="hidden w-full max-w-[min(430px,44svh)] justify-self-end lg:block"
+            >
+              <SearchConsole />
+            </motion.div>
+          </div>
 
           {/* The payoff row: arrives once the camera is down among the
               crests, taking the place the type left. The frame is never

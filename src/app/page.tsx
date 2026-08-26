@@ -1,6 +1,5 @@
 import CinematicHero from "@/components/CinematicHero";
 import ClientStripe from "@/components/ClientStripe";
-import SearchConsole from "@/components/SearchConsole";
 import Stats from "@/components/Stats";
 import StickyServices from "@/components/StickyServices";
 import Specializations from "@/components/Specializations";
@@ -59,42 +58,31 @@ export default function Home() {
             </p>
           </Reveal>
 
-          {/* COPY LEFT, THE CONSOLE RIGHT. The two paragraphs used to run as
-              equal columns across the full width, which read as a wall: the
-              section's whole job is to be read, and a hundred-character
-              measure doubled up is the layout that guarantees it is skimmed.
-              Stacked in one column beside a figure, each paragraph gets a
-              sane measure and the section gets an anchor. */}
-          <div className="mt-16 grid items-start gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:gap-20">
-            <div className="flex flex-col gap-10">
-              <Reveal delay={0.1}>
-                <p className="max-w-[54ch] text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
-                  District Partners is an independent, partner-led firm built to serve clients
-                  wherever they need us most, bringing deep expertise to solve complex business
-                  challenges. Whether you&rsquo;re scaling after an acquisition, building a new
-                  function, navigating transformation, or filling a critical leadership gap, you
-                  need more than a recruiting firm. You need a talent infrastructure partner that
-                  can adapt as your needs evolve.
-                </p>
-              </Reveal>
+          {/* Wide gutter, narrow columns. Two paragraphs 2rem apart read as one
+              block of text that happens to be broken in half; the reference
+              runs a gutter wide enough that each column is its own object. */}
+          <div className="mt-16 grid max-w-[100ch] gap-x-24 gap-y-12 md:grid-cols-2">
+            <Reveal delay={0.1}>
+              <p className="text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
+                District Partners is an independent, partner-led firm built to serve clients
+                wherever they need us most, bringing deep expertise to solve complex business
+                challenges. Whether you&rsquo;re scaling after an acquisition, building a new
+                function, navigating transformation, or filling a critical leadership gap, you
+                need more than a recruiting firm. You need a talent infrastructure partner that
+                can adapt as your needs evolve.
+              </p>
+            </Reveal>
 
-              <Reveal delay={0.17}>
-                <p className="max-w-[54ch] text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
-                  We understand that our success isn&rsquo;t measured by the people we place or the
-                  professionals we deploy, but by the outcomes and impact we help our clients
-                  achieve. We&rsquo;re proud to{" "}
-                  <strong className="font-semibold text-[var(--v-ink)]">
-                    partner with teams building something great
-                  </strong>
-                  .
-                </p>
-              </Reveal>
-            </div>
-
-            {/* The work, as an interface. See components/SearchConsole for what
-                it does and does not claim. */}
-            <Reveal delay={0.14}>
-              <SearchConsole />
+            <Reveal delay={0.17}>
+              <p className="text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
+                We understand that our success isn&rsquo;t measured by the people we place or the
+                professionals we deploy, but by the outcomes and impact we help our clients
+                achieve. We&rsquo;re proud to{" "}
+                <strong className="font-semibold text-[var(--v-ink)]">
+                  partner with teams building something great
+                </strong>
+                .
+              </p>
             </Reveal>
           </div>
 

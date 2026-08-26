@@ -9,6 +9,7 @@ import { EASE, SPRING_SOFT, useReducedMotion } from "@/lib/motion";
 import LinkedInIcon from "./LinkedInIcon";
 import Logo from "./Logo";
 import MenuVisual from "@/components/ui/MenuVisual";
+import BubbleBackground from "@/components/ui/BubbleBackground";
 import {
   WHAT_WE_DO_MENU,
   FUNCTIONS,
@@ -398,12 +399,23 @@ export default function Header() {
                    the weight is what stops it reading as a swap. */
                 animate={{ height: panelH ?? "auto" }}
                 transition={reduced ? { duration: 0 } : SPRING_SOFT}
-                className="g-glass mt-2 w-full max-w-[880px] overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#070a15]/92 backdrop-blur-xl shadow-[0_30px_80px_-40px_rgba(0,0,0,0.95)]"
+                className="g-glass relative mt-2 w-full max-w-[880px] overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#070a15]/88 backdrop-blur-xl shadow-[0_30px_80px_-40px_rgba(0,0,0,0.95)]"
               >
+              {/* THE SAME DRIFTING FIELD THAT LIGHTS THE PAGE, INSIDE THE PANEL.
+                  This was a flat near-black rectangle, the one surface on the
+                  site with no light moving across it, and it is the surface
+                  people look at most often and most directly. The contained
+                  variant fills this box instead of the viewport; see the
+                  is-contained rules for why the geometry is retuned rather
+                  than reused. It sits under the content, not over it: the
+                  rows below carry their own stacking context so nothing
+                  legible is ever compositing against a moving glow. */}
+              <BubbleBackground contained />
+
               {/* Padding lives on the measured element, not on the animated box:
                   the height being animated has to be the height being measured
                   or the two disagree by exactly the padding. */}
-              <div ref={panelInner} className="p-5">
+              <div ref={panelInner} className="relative z-10 p-5">
               <motion.div
                 key={open}
                 /* No exit. The outgoing panel leaving while the box is still

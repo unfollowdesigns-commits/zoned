@@ -1240,6 +1240,12 @@ html[data-loaded] .dp-scale-in {
   /* Atmosphere, not decoration. At full strength this reads as a screensaver
      behind the copy. */
   opacity: 0.5;
+  --dp-goo-blur: 44px;
+}
+.dp-bubbles-goo {
+  position: absolute;
+  inset: 0;
+  /* The filter itself is set inline, because its id is per instance. */
 }
 /* The filter definitions must be in the document but must never take space. */
 .dp-bubbles-defs {
@@ -1247,12 +1253,6 @@ html[data-loaded] .dp-scale-in {
   width: 0;
   height: 0;
 }
-.dp-bubbles-goo {
-  position: absolute;
-  inset: 0;
-  filter: url(#dp-goo) blur(44px);
-}
-
 .dp-bubble {
   position: absolute;
   top: 10%;
@@ -1318,6 +1318,44 @@ html[data-loaded] .dp-scale-in {
   opacity: 0.65;
 }
 
+/* ---- The same field, inside a box ------------------------------------------
+   Used behind the navigation panels, which is where it does the most work: a
+   flat near-black rectangle is the one surface on this site with no light on
+   it at all, and a menu is looked at directly and repeatedly.
+
+   EVERY PIXEL OFFSET ABOVE IS RETUNED. The drift geometry is authored against
+   a viewport, so `left: calc(10% - 480px)` inside an 880px panel puts that
+   bubble a long way off the left edge and its rotation origins swing the rest
+   clean out of frame. Reused unchanged, four of the five simply are not in the
+   box. The proportions here are the same ones scaled to the panel.
+
+   IT IS DIMMER AND LESS BLURRED THAN THE PAGE LAYER. Less blurred because a
+   44px blur across 880px is one flat wash rather than a field with any
+   structure in it, and dimmer because this sits directly behind menu text at
+   reading distance rather than behind a whole page at arm's length. */
+.dp-bubbles.is-contained {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.42;
+  --dp-goo-blur: 26px;
+}
+/* No layer promotion here. The page layer is mounted once and drifts forever,
+   which is exactly what `will-change` is for; a menu panel mounts and unmounts
+   on every hover, and promoting five blurred elements each time is five new
+   compositor layers per open for a motion of a few pixels a second. */
+.dp-bubbles.is-contained .dp-bubble { will-change: auto; }
+.dp-bubbles.is-contained .dp-bubble-2 { transform-origin: calc(50% - 150px) 50%; }
+.dp-bubbles.is-contained .dp-bubble-3 {
+  top: calc(10% + 70px);
+  left: calc(10% - 175px);
+  transform-origin: calc(50% + 150px) 50%;
+}
+.dp-bubbles.is-contained .dp-bubble-4 { transform-origin: calc(50% - 80px) 50%; }
+.dp-bubbles.is-contained .dp-bubble-5 {
+  transform-origin: calc(50% - 270px) calc(50% + 70px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dp-bubble {
     animation: none !important;
@@ -1335,10 +1373,22 @@ html[data-loaded] .dp-scale-in {
    between events instead of static and then briefly not. 22 seconds and a few
    degrees: below the threshold where anyone notices it happening, above the one
    where the picture looks frozen. */
+/* THE STAGE IS TRANSLUCENT BECAUSE THE PANEL BEHIND IT IS NOW LIT. It used to
+   be opaque, which was right when the menu panel was a flat near-black
+   rectangle and wrong the moment the bubble field went in behind it: an opaque
+   slab in a lit panel reads as a hole punched through it. At these alphas the
+   scene still has its own dark ground to be lit against, and the drift passes
+   through it instead of stopping at its edge. The hairline is what keeps it a
+   pane rather than a smudge. */
 .dp-mv-frame {
   perspective: 760px;
   perspective-origin: 50% 44%;
-  background: radial-gradient(120% 100% at 50% 0%, #0b1226 0%, #05070f 62%);
+  background: radial-gradient(
+    120% 100% at 50% 0%,
+    rgba(11, 18, 38, 0.7) 0%,
+    rgba(5, 7, 15, 0.86) 62%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.07);
   isolation: isolate;
 }
 .dp-mv-scene {
@@ -2965,58 +3015,217 @@ html[data-loaded] .dp-scale-in {
 }
 
 /* ---- The search console ----------------------------------------------------
-   See components/SearchConsole. A flat product UI: panels placed on a
-   percentage grid, connector lines drawn in the same coordinate space so they
-   meet the cards exactly at any width, and signal travelling along those lines.
-
-   Everything enters once on a stagger and then holds. The only perpetual
-   motion is the travelling signal, because a console with four things pulsing
-   forever is a screensaver. */
+   See components/SearchConsole. A light product UI sitting in a dark hero: the
+   contrast is what makes it read as software rather than as another panel of
+   the page. Everything enters once on a stagger and holds; the only perpetual
+   motion is the signal on the connector, because a console with six things
+   pulsing forever is a screensaver. */
 .dp-sc {
   container-type: inline-size;
-}
-.dp-sc-frame {
   position: relative;
-  /* Taller than wide: seven panels and four connectors do not fit a square
-     without something being pushed on top of something else. */
-  aspect-ratio: 4 / 5;
-  width: 100%;
-  border-radius: 20px;
-  background:
-    radial-gradient(120% 90% at 20% 0%, rgba(91, 147, 255, 0.13), transparent 60%),
-    linear-gradient(155deg, #101832 0%, #0a0f22 45%, #070a16 100%);
-  background-color: #0a0f22;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    0 2px 8px -3px rgba(0, 0, 0, 0.6),
-    0 40px 80px -50px rgba(0, 0, 0, 0.95);
-  overflow: hidden;
+  /* Room above the frame for the badge and its connector to live outside it. */
+  padding-top: 13%;
+  /* A LITTLE BUOYANCY, ON `translate` RATHER THAN `transform`.
+     The frame's arrival animation owns its own `transform` and the hero's
+     scroll owns the wrapper's, so the perpetual motion is written on the
+     standalone `translate` property, where it composes with both instead of
+     erasing either. See the note above dp-float-a for the same reasoning.
+
+     ONE MOTION FOR THE WHOLE COMPONENT, badge, connector and frame together.
+     The connector is real geometry drawn across all three, so floating any one
+     of them on its own tears the line off its ends. The stops are eight
+     seconds apart with the horizontal drift out of phase with the vertical,
+     which is what keeps it from reading as a loop at four or five pixels.
+     The delay lets the entrance land first: a panel that is already drifting
+     while it arrives reads as unstable rather than as floating. */
+  animation: dp-sc-drift 19s ease-in-out 1.6s infinite;
+}
+@keyframes dp-sc-drift {
+  0%   { translate: 0 0; }
+  25%  { translate: 2px -3px; }
+  50%  { translate: 0 -5px; }
+  75%  { translate: -2px -2px; }
+  100% { translate: 0 0; }
 }
 
-/* Panels share one entrance: a short rise and fade, staggered by --d. */
-.dp-sc-card,
-.dp-sc-pill,
-.dp-sc-badge,
-.dp-sc-rail {
+/* The connector overlay spans the whole component, frame and badge alike, so
+   the path can be authored against one coordinate space. */
+.dp-sc-wire-layer {
   position: absolute;
-  /* Above the wires, below the sparks. */
-  z-index: 2;
-  animation: dp-sc-in 700ms cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) both;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
 }
+.dp-sc-wire {
+  fill: none;
+  stroke: rgba(143, 180, 255, 0.5);
+  stroke-width: 1;
+  stroke-dasharray: 300;
+  animation: dp-sc-draw 1200ms cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+}
+@keyframes dp-sc-draw {
+  from { stroke-dashoffset: 300; }
+  to { stroke-dashoffset: 0; }
+}
+.dp-sc-spark {
+  fill: #e6f0ff;
+  filter: drop-shadow(0 0 1.6px rgba(150, 200, 255, 0.95));
+  offset-rotate: 0deg;
+  animation: dp-sc-travel 4.2s cubic-bezier(0.5, 0, 0.5, 1) 1.4s infinite;
+}
+@keyframes dp-sc-travel {
+  0% { offset-distance: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* The badge that hangs off the connector. */
+.dp-sc-flag {
+  position: absolute;
+  /* Sits above the frame with its right edge just clear of the connector, so
+     the line passes beside it rather than through it. */
+  left: 1%;
+  top: 4.5%;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 1.4cqw;
+  border-radius: 999px;
+  background: rgba(91, 147, 255, 0.16);
+  border: 1px solid rgba(143, 180, 255, 0.4);
+  padding: 1.5cqw 3cqw;
+  color: #dbe8ff;
+  font-size: 2.7cqw;
+  font-weight: 600;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  animation: dp-sc-in 700ms cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+.dp-sc-sparkle {
+  width: 2.6cqw;
+  height: 2.6cqw;
+  flex-shrink: 0;
+  fill: currentColor;
+}
+
 @keyframes dp-sc-in {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
 }
 
-.dp-sc-card {
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  padding: 3.4cqw;
-  backdrop-filter: blur(6px);
+/* ---- The app frame -------------------------------------------------------- */
+/* GLASS, NOT WHITE. The reference runs white cards on a tinted ground, and
+   copying that literally put a page-bright slab in the middle of a dark hero:
+   correct structure, wrong material, and nothing else on this site looks like
+   it. What actually made the reference work is SEPARATION, a surface that is
+   plainly a different plane from the page behind it. Frosted glass gives that
+   separation in the language the rest of the site already speaks: the frame is
+   a lit pane, the cards are brighter panes resting on it, and the accent
+   actions stay saturated so the hierarchy survives. */
+.dp-sc-app {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.045));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 2px 10px -4px rgba(0, 0, 0, 0.6),
+    0 44px 90px -50px rgba(0, 0, 0, 0.98);
+  animation: dp-sc-in 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dp-sc-chrome {
+  display: flex;
+  align-items: center;
+  gap: 2.4cqw;
+  background: rgba(8, 13, 28, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2cqw 2.8cqw;
+}
+.dp-sc-chrome-mark {
+  width: 3.6cqw;
+  height: 4cqw;
+  flex-shrink: 0;
+}
+.dp-sc-chrome-title {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 2.5cqw;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.dp-sc-chrome-avatar {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 5.4cqw;
+  height: 5.4cqw;
+  border-radius: 999px;
+  background: rgba(143, 180, 255, 0.22);
+  color: #cfe0ff;
+  font-size: 2.1cqw;
+  font-weight: 700;
 }
 
-.dp-sc-row {
+/* ---- The card grid ---------------------------------------------------------
+   Two columns. Three, as in the reference, needs the width the reference has;
+   at the size this renders in the hero a third column puts every label under
+   ten pixels. */
+.dp-sc-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 1.7cqw;
+  padding: 2.3cqw;
+}
+.dp-sc-card {
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 2.3cqw;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  animation: dp-sc-in 640ms cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) both;
+}
+.dp-sc-card.is-chart { grid-column: 1 / -1; }
+.dp-sc-card.is-verdict {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  color: #f2d49a;
+  font-size: 2.6cqw;
+  font-weight: 700;
+  background: rgba(217, 164, 70, 0.14);
+  border-color: rgba(217, 164, 70, 0.3);
+}
+.dp-sc-star {
+  display: grid;
+  place-items: center;
+  width: 5.6cqw;
+  height: 5.6cqw;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: rgba(217, 164, 70, 0.28);
+}
+.dp-sc-star svg { width: 2.8cqw; height: 2.8cqw; fill: #f6dfae; }
+
+.dp-sc-cardtitle {
+  color: #f2f5ff;
+  font-size: 2.6cqw;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.dp-sc-cardsub {
+  margin-top: 0.6cqw;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 2.1cqw;
+}
+
+/* ---- The record ------------------------------------------------------------ */
+.dp-sc-record-head {
   display: flex;
   align-items: center;
   gap: 2.4cqw;
@@ -3027,114 +3236,194 @@ html[data-loaded] .dp-scale-in {
   width: 8cqw;
   height: 8cqw;
   flex-shrink: 0;
-  border-radius: 8px;
-  background: linear-gradient(142deg, rgba(91, 147, 255, 0.9), rgba(91, 147, 255, 0.35));
+  border-radius: 9px;
+  background: linear-gradient(142deg, #5b93ff, #2f6ae0);
   color: #fff;
-  font-size: 2.6cqw;
+  font-size: 2.7cqw;
   font-weight: 700;
-  letter-spacing: 0.02em;
 }
-.dp-sc-title {
-  color: #fff;
-  font-size: 3cqw;
-  font-weight: 600;
+.dp-sc-ident { min-width: 0; }
+.dp-sc-name {
+  display: block;
+  color: #f2f5ff;
+  font-size: 2.8cqw;
+  font-weight: 650;
   line-height: 1.2;
   white-space: nowrap;
 }
-.dp-sc-sub {
+.dp-sc-role {
+  display: block;
   margin-top: 0.5cqw;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 2.5cqw;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 2.2cqw;
   line-height: 1.2;
   white-space: nowrap;
 }
-.dp-sc-tag {
+.dp-sc-chip {
   margin-left: auto;
   flex-shrink: 0;
   border-radius: 999px;
-  background: rgba(67, 185, 142, 0.16);
   padding: 0.9cqw 2cqw;
-  color: #7fe0bb;
-  font-size: 2.2cqw;
-  font-weight: 600;
+  font-size: 2cqw;
+  font-weight: 650;
 }
+.dp-sc-chip.is-good { background: rgba(67, 185, 142, 0.18); color: #7fe0bb; }
 
-/* Three score rails under the record. They fill once, in sequence: a scorecard
-   being computed, not three bars that happen to be different lengths. */
-.dp-sc-meter {
+.dp-sc-subrow {
   display: flex;
-  flex-direction: column;
-  gap: 1.3cqw;
-  margin-top: 3cqw;
+  align-items: center;
+  gap: 1.4cqw;
+  margin-top: 2.2cqw;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  padding-top: 1.9cqw;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 2.2cqw;
+  font-weight: 550;
 }
-.dp-sc-meter span {
-  height: 1.1cqw;
+.dp-sc-subrow .dp-sc-sparkle { fill: var(--v-ring); }
+
+/* ---- The shortlist ---------------------------------------------------------- */
+.dp-sc-faces {
+  display: flex;
+  margin-top: 2.4cqw;
+}
+.dp-sc-faces span {
+  display: grid;
+  place-items: center;
+  width: 7cqw;
+  height: 7cqw;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  position: relative;
-  overflow: hidden;
+  border: 2px solid rgba(16, 24, 48, 0.85);
+  background: rgba(143, 180, 255, 0.22);
+  color: #dbe8ff;
+  font-size: 2cqw;
+  font-weight: 700;
+  /* Overlapped, as a stack of people always is in this kind of UI. */
+  margin-left: -1.6cqw;
+  animation: dp-sc-pop 480ms cubic-bezier(0.34, 1.26, 0.5, 1) calc(0.55s + var(--i) * 0.09s) both;
 }
-.dp-sc-meter span::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: var(--w);
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(91, 147, 255, 0.55), var(--v-ring));
-  transform-origin: left center;
-  animation: dp-sc-fill 900ms cubic-bezier(0.22, 1, 0.36, 1) calc(0.5s + var(--i) * 0.13s) both;
-}
-@keyframes dp-sc-fill {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+.dp-sc-faces span:first-child { margin-left: 0; }
+@keyframes dp-sc-pop {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: none; }
 }
 
-.dp-sc-eyebrow {
-  color: var(--v-ring);
+/* The accent action, filled, as in the reference. It is not a button element:
+   this is an illustration of an interface, and a real control here would be a
+   focus stop that goes nowhere. */
+.dp-sc-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.2cqw;
+  margin-top: 2.6cqw;
+  border-radius: 8px;
+  background: var(--v-primary);
+  padding: 1.4cqw 2.2cqw;
+  color: #fff;
   font-size: 2.1cqw;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  white-space: nowrap;
+}
+.dp-sc-action .dp-sc-sparkle { fill: #bcd6ff; }
+
+/* ---- Progress ---------------------------------------------------------------- */
+.dp-sc-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5cqw;
+  margin-top: 2cqw;
+}
+.dp-sc-tasks li {
+  display: flex;
+  align-items: center;
+  gap: 1.6cqw;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 2.2cqw;
+  line-height: 1.25;
+}
+.dp-sc-tasks li[data-done] { color: rgba(255, 255, 255, 0.9); font-weight: 550; }
+.dp-sc-tick {
+  width: 4cqw;
+  height: 4cqw;
+  flex-shrink: 0;
+}
+.dp-sc-tick circle { fill: rgba(255, 255, 255, 0.1); stroke: none; }
+.dp-sc-tick path { stroke: rgba(255, 255, 255, 0.3); }
+.dp-sc-tick.is-on circle { fill: var(--v-primary); }
+.dp-sc-tick.is-on path {
+  stroke: #fff;
+  stroke-dasharray: 12;
+  animation: dp-sc-tickdraw 500ms cubic-bezier(0.22, 1, 0.36, 1) calc(0.7s + var(--i) * 0.16s) both;
+}
+@keyframes dp-sc-tickdraw {
+  from { stroke-dashoffset: 12; }
+  to { stroke-dashoffset: 0; }
 }
 
-/* The practice chart. Rows fill left to right in order. */
+/* ---- The chart ----------------------------------------------------------------- */
+.dp-sc-chart-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2.4cqw;
+}
+.dp-sc-chart-head .dp-sc-action { margin-top: 0; flex-shrink: 0; }
 .dp-sc-bars {
   display: flex;
   flex-direction: column;
-  gap: 1.9cqw;
-  margin-top: 2.6cqw;
+  gap: 1.4cqw;
+  margin-top: 2.2cqw;
 }
 .dp-sc-bars li {
   display: grid;
-  grid-template-columns: 34% 1fr;
+  grid-template-columns: 26% 1fr;
   align-items: center;
   gap: 2cqw;
 }
 .dp-sc-bar-label {
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 2.3cqw;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 2.1cqw;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .dp-sc-bar {
-  height: 1.7cqw;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
+  height: 2cqw;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
   overflow: hidden;
 }
 .dp-sc-bar i {
   display: block;
   height: 100%;
   width: var(--w);
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(91, 147, 255, 0.5), var(--v-ring));
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--v-primary), #9cc2ff);
   transform-origin: left center;
-  animation: dp-sc-fill 1000ms cubic-bezier(0.22, 1, 0.36, 1) calc(0.7s + var(--i) * 0.11s) both;
+  animation: dp-sc-fill 900ms cubic-bezier(0.22, 1, 0.36, 1) calc(0.75s + var(--i) * 0.1s) both;
 }
+@keyframes dp-sc-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+/* Ticks, no values: the bars are measured against something, and this firm has
+   published no figure for what. */
+.dp-sc-axis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-left: calc(26% + 2cqw);
+  margin-top: 1.6cqw;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1cqw;
+}
+.dp-sc-axis span {
+  height: 3px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.22);
+}
+.dp-sc-axis span:last-child { justify-self: end; }
 
-/* The schedule. One slot is chosen, which is what makes it a suggestion that
-   was acted on rather than a list of times. */
+/* ---- The schedule ---------------------------------------------------------------- */
 .dp-sc-slots {
   display: flex;
   flex-wrap: wrap;
@@ -3143,114 +3432,33 @@ html[data-loaded] .dp-scale-in {
 }
 .dp-sc-slots span {
   border-radius: 7px;
-  background: rgba(255, 255, 255, 0.06);
-  padding: 1.2cqw 1.8cqw;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 2.2cqw;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1.3cqw 1.8cqw;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 2.1cqw;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 .dp-sc-slots span.is-on {
-  background: rgba(91, 147, 255, 0.9);
+  background: var(--v-primary);
   color: #fff;
-  animation: dp-sc-pick 620ms cubic-bezier(0.34, 1.26, 0.5, 1) 1.5s both;
+  animation: dp-sc-pick 600ms cubic-bezier(0.34, 1.26, 0.5, 1) 1.5s both;
 }
 @keyframes dp-sc-pick {
-  0% { background: rgba(255, 255, 255, 0.06); color: rgba(255, 255, 255, 0.6); transform: scale(1); }
-  55% { transform: scale(1.08); }
-  100% { background: rgba(91, 147, 255, 0.9); color: #fff; transform: scale(1); }
+  0% { background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.7); transform: scale(1); }
+  55% { transform: scale(1.07); }
+  100% { background: var(--v-primary); color: #fff; transform: scale(1); }
 }
 
-/* Action pills. Attached to a panel by a line, so they read as belonging to
-   it rather than floating beside it. */
-.dp-sc-pill {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  padding: 1.4cqw 2.6cqw;
-  color: #fff;
-  font-size: 2.3cqw;
-  font-weight: 600;
-  white-space: nowrap;
+@media (prefers-reduced-motion: reduce) {
+  .dp-sc, .dp-sc-app, .dp-sc-card, .dp-sc-flag, .dp-sc-wire,
+  .dp-sc-faces span, .dp-sc-bar i, .dp-sc-slots span.is-on,
+  .dp-sc-tick.is-on path {
+    animation: none;
+  }
+  .dp-sc-spark { display: none; }
 }
 
-.dp-sc-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 1.2cqw;
-  border-radius: 999px;
-  background: rgba(217, 164, 70, 0.16);
-  border: 1px solid rgba(217, 164, 70, 0.3);
-  padding: 1.2cqw 2.4cqw;
-  color: #f0cb84;
-  font-size: 2.2cqw;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.dp-sc-badge svg {
-  width: 2.6cqw;
-  height: 2.6cqw;
-  fill: currentColor;
-}
-
-/* The rail. */
-.dp-sc-rail {
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 3.2cqw 2.6cqw;
-}
-.dp-sc-tasks {
-  display: flex;
-  flex-direction: column;
-  gap: 2.2cqw;
-  margin-top: 2.6cqw;
-}
-.dp-sc-tasks li {
-  display: flex;
-  align-items: center;
-  gap: 1.6cqw;
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 2.2cqw;
-  line-height: 1.25;
-}
-.dp-sc-tasks li[data-done] {
-  color: rgba(255, 255, 255, 0.86);
-}
-.dp-sc-check {
-  width: 3.4cqw;
-  height: 3.4cqw;
-  flex-shrink: 0;
-  stroke: rgba(255, 255, 255, 0.28);
-}
-/* The tick draws itself, in task order: progress being made rather than a
-   list that arrived already finished. */
-.dp-sc-tasks li[data-done] .dp-sc-check {
-  stroke: var(--v-ring);
-}
-.dp-sc-tasks li[data-done] .dp-sc-check path {
-  stroke-dasharray: 12;
-  animation: dp-sc-tick 520ms cubic-bezier(0.22, 1, 0.36, 1) calc(0.9s + var(--i) * 0.22s) both;
-}
-@keyframes dp-sc-tick {
-  from { stroke-dashoffset: 12; }
-  to { stroke-dashoffset: 0; }
-}
-.dp-sc-links {
-  display: flex;
-  flex-direction: column;
-  gap: 1.8cqw;
-  margin-top: 3.2cqw;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 2.6cqw;
-}
-.dp-sc-links span {
-  color: rgba(255, 255, 255, 0.42);
-  font-size: 2.2cqw;
-  line-height: 1.25;
-}
 
 /* ---- Connectors -------------------------------------------------------------
    The lines sit UNDER the panels so they run into the cards rather than across
@@ -3266,7 +3474,7 @@ html[data-loaded] .dp-scale-in {
 }
 .dp-sc-wire {
   fill: none;
-  stroke: rgba(143, 180, 255, 0.26);
+  stroke: rgba(143, 180, 255, 0.34);
   stroke-width: 1;
   stroke-dasharray: 200;
   animation: dp-sc-draw 1100ms cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
@@ -3278,6 +3486,15 @@ html[data-loaded] .dp-scale-in {
 
 /* Over the panels, and in the same coordinate space as the wires. See the
    note in the component for why this is an SVG rather than a div. */
+.dp-sc-joint {
+  fill: rgba(143, 180, 255, 0.75);
+  animation: dp-sc-joint 420ms cubic-bezier(0.34, 1.26, 0.5, 1) 1.2s both;
+}
+@keyframes dp-sc-joint {
+  from { opacity: 0; transform: scale(0.2); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 .dp-sc-sparks {
   position: absolute;
   inset: 0;

@@ -34,6 +34,19 @@ import { SPRING_SOFT, useReducedMotion } from "@/lib/motion";
  *
  * Interactivity is off. The background is not the thing to look at, and the
  * pointer already has nothing to do here by request.
+ *
+ * IT ALSO RUNS INSIDE A BOX. `contained` swaps the fixed full-viewport layer
+ * for an absolute one that fills its offset parent, which is how the same
+ * field ends up behind the navigation panels. The geometry is retuned in CSS
+ * rather than here: the drift offsets are authored in pixels against a
+ * viewport, and reused unchanged in an 880px panel they put four of the five
+ * bubbles outside it.
+ *
+ * THE FILTER ID IS PER INSTANCE. Two copies of a hardcoded `id="dp-goo"` in
+ * one document is a duplicate id, and which one a given `url(#dp-goo)`
+ * resolves to is not something to leave to document order. The colons React
+ * puts in `useId` are stripped because they are legal in an id and a menace in
+ * a `url()` reference.
  */
 
 export type BubbleColors = {
@@ -57,6 +70,7 @@ const DP_COLORS: BubbleColors = {
 
 export default function BubbleBackground({
   interactive = false,
+  contained = false,
   transition = SPRING_SOFT,
   colors = DP_COLORS,
   className = "",
@@ -64,11 +78,14 @@ export default function BubbleBackground({
 }: React.ComponentProps<"div"> & {
   /** Follow the pointer with a sixth bubble. */
   interactive?: boolean;
+  /** Fill the offset parent instead of the viewport. */
+  contained?: boolean;
   transition?: SpringOptions;
   colors?: BubbleColors;
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
+  const gooId = `dp-goo-${React.useId().replace(/[^a-zA-Z0-9]/g, "")}`;
 
   /* Hooks run whether or not the pointer bubble is rendered: a hook behind a
      condition is the classic way this component would break the first time
@@ -92,14 +109,19 @@ export default function BubbleBackground({
   }, [interactive, reduced, x, y]);
 
   return (
-    <div ref={ref} aria-hidden="true" className={`dp-bubbles ${className}`} {...props}>
+    <div
+      ref={ref}
+      aria-hidden="true"
+      className={`dp-bubbles ${contained ? "is-contained" : ""} ${className}`}
+      {...props}
+    >
       {/* The metaball filter. Blur, then push the alpha channel through a steep
           contrast so touching blurs fuse into one shape with a hard edge rather
           than overlapping as two soft discs. That fusing is the whole look; a
           plain blur gives clouds, not bubbles. */}
       <svg className="dp-bubbles-defs" aria-hidden="true" focusable="false">
         <defs>
-          <filter id="dp-goo">
+          <filter id={gooId}>
             <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
             <feColorMatrix
               in="blur"
@@ -112,7 +134,12 @@ export default function BubbleBackground({
         </defs>
       </svg>
 
-      <div className="dp-bubbles-goo">
+      {/* The blur radius stays in CSS behind a custom property so the contained
+          variant can soften it without the inline style winning. */}
+      <div
+        className="dp-bubbles-goo"
+        style={{ filter: `url(#${gooId}) blur(var(--dp-goo-blur))` }}
+      >
         <div className="dp-bubble dp-bubble-1" style={{ ["--c" as string]: colors.first }} />
         <div className="dp-bubble dp-bubble-2" style={{ ["--c" as string]: colors.second }} />
         <div className="dp-bubble dp-bubble-3" style={{ ["--c" as string]: colors.third }} />

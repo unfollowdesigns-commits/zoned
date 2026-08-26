@@ -1,111 +1,89 @@
 /**
  * The work, as an interface.
  *
- * WHAT THIS IS. A flat product UI, laid out as a real dashboard would be, with
- * structural connector lines running from each panel to the action it affords
- * and signal travelling along those lines. It is the section's argument in one
- * picture: a search is not a mailbox full of CVs, it is an instrumented
- * process with a shortlist, a scorecard, a schedule and a market view attached
- * to each other.
+ * WHAT IT IS. A flat product UI: an app frame with its own chrome bar and a
+ * grid of white cards inside it, one floating badge outside the frame joined
+ * to it by a curved connector, and signal travelling that connector. It is the
+ * hero's claim in one picture: a search is an instrumented process with a
+ * record, a scorecard, a schedule and a market view attached to each other,
+ * not a mailbox full of CVs.
  *
- * IT IS NOT A SCREENSHOT AND MUST NEVER READ AS ONE. There is no product to
- * screenshot, and dressing an illustration up as a real console would be
- * claiming software the firm does not sell. So it is drawn in the site's own
- * material and stays deliberately schematic: no window chrome, no cursor, no
- * fake browser frame.
+ * WHY IT IS LIGHT ON A DARK HERO. The reference this is measured against runs
+ * white cards on a tinted ground, and that contrast is most of why it reads as
+ * a product rather than as an illustration: real software is light, and a dark
+ * translucent panel on a dark page reads as more page. The first version was
+ * glass on glass and had no focal point at all.
  *
- * THE CANDIDATE IS ANONYMOUS, AND THAT IS BOTH SAFER AND TRUER. The brief for
- * this asked for a named candidate card, "Marcus Vance, CFO Candidate". A
- * plausible full name on a plausible record is the kind of thing that gets
- * screenshotted out of context and read as a real placement, and inventing
- * people is the line this build holds everywhere else. It is also wrong about
- * the business: in retained search the candidate list is the confidential part,
- * and a console that showed real names on a public marketing page would be
- * advertising a breach. A reference and a role says the same thing about the
- * product and the right thing about the practice.
+ * WHAT IS DELIBERATELY NOT COPIED FROM THE REFERENCE. It runs photographs of
+ * people as candidate avatars. There is no photography on this site, and stock
+ * faces on a candidate record would be inventing people at the exact point
+ * where inventing people is worst. Monograms carry the same information about
+ * the interface and none of the risk.
  *
- * NO NUMBERS THAT COULD BE READ AS RESULTS. The bar chart is a distribution
- * across the four practice areas the firm actually runs (lib/site.ts), with no
- * scale, no axis and no counts. It shows that the work is measured, not what
- * it measured.
+ * THE CANDIDATE IS ANONYMOUS, AND THAT IS BOTH SAFER AND TRUER. A plausible
+ * full name on a plausible record is what gets screenshotted out of context
+ * and read as a real placement. It is also wrong about the business: in
+ * retained search the candidate list is the confidential part, so a console
+ * showing names on a public marketing page would be advertising a breach.
  *
- * CONNECTORS ARE ONE SVG OVER A PERCENTAGE GRID. Every panel is placed at a
- * percentage of the frame and the connector paths are drawn in the same
- * coordinate space, so the lines meet the cards exactly at any width instead
- * of being nudged into place with magic pixel offsets. The travelling dots ride
- * those same paths with `offset-path`, which means one source of truth for the
- * geometry: change a card's position and its line and its dot follow.
+ * NO NUMBERS THAT COULD BE READ AS RESULTS. The chart's axis carries ticks but
+ * no values and the bars carry no counts. It shows that the work is measured,
+ * not what it measured.
+ *
+ * IT IS A CSS GRID, NOT ABSOLUTE POSITIONING. The previous version placed
+ * every panel at a hand-tuned percentage, which is how the schedule ended up
+ * printed across two other cards the first time it rendered. A grid cannot
+ * overlap itself, and the one connector that does need real geometry is drawn
+ * outside the frame, where nothing is competing for the space.
  */
 
 import { FUNCTIONS } from "@/lib/site";
+import { MARK_PARTS } from "@/components/Logo";
 
-/* The four practice areas, straight from the navigation, so the chart cannot
-   disagree with what the firm says it covers. The weights are a shape, not a
-   measurement: see the note above. */
+/* Straight from the navigation, so the chart cannot disagree with what the
+   firm says it covers. The weights are a shape, not a measurement. */
 const PRACTICE = FUNCTIONS.map((f, i) => ({
-  /* "Finance | Accounting" is a nav label; a chart row wants the short form. */
   label: f.label.split(" | ")[0].split(",")[0],
-  weight: [92, 74, 58, 44][i],
+  weight: [88, 71, 55, 38][i],
 }));
 
-/**
- * Connector geometry, in the frame's own 0-100 coordinate space.
- *
- * EVERY PANEL HAS AN EXPLICIT TOP AND HEIGHT, and these paths are written
- * against those numbers rather than eyeballed. The first pass placed cards by
- * top-left alone and let their content decide how tall they were, which is
- * how the schedule panel ended up printed across both the scorecard pill and
- * the chart's heading. A figure whose parts are positioned absolutely needs
- * its layout written down somewhere; here it is LAYOUT below.
- */
-const LINES = [
-  /* Candidate record, down and across to its scorecard action. */
-  { d: "M9 27 V32.5 H13", dur: "3.4s", delay: "0s" },
-  /* Schedule, down and across to the match badge. */
-  { d: "M9 55.5 V60.5 H13", dur: "3.2s", delay: "1.5s" },
-  /* Candidate record, across to the rail that tracks it. */
-  { d: "M66 13 H70", dur: "2.9s", delay: "0.6s" },
-  /* Practice chart, down and across to its report action. */
-  { d: "M9 90 V96 H13", dur: "3.8s", delay: "1.1s" },
+const TASKS: Array<[string, boolean]> = [
+  ["Mandate defined", true],
+  ["Market mapped", true],
+  ["Shortlist agreed", true],
+  ["Panel scheduled", false],
 ];
 
-/**
- * Where each panel sits and how tall it is, as percentages of the frame.
- *
- * Heights are declared rather than derived so the connectors above can be
- * written against known edges. The type inside scales in `cqw`, so a panel's
- * content grows and shrinks with the frame and these numbers stay true at
- * every width.
+/** The connector, once, so the path and the spark that rides it cannot drift. */
+/*
+ * Leaves the badge's right edge, runs across, and turns down through a real
+ * radius into the frame's top edge. Routed this way round on purpose: the
+ * first version came in from the top right and passed BESIDE the badge, which
+ * left the badge looking like it was floating near a line rather than hanging
+ * off one. A connector has to start at the thing it connects.
  */
-const LAYOUT = {
-  candidate: { left: 3, top: 4, width: 63, height: 22 },
-  scorecard: { left: 13, top: 29.5 },
-  schedule: { left: 3, top: 39, width: 54, height: 16 },
-  badge: { left: 13, top: 57.5 },
-  chart: { left: 3, top: 62, width: 63, height: 28 },
-  report: { left: 13, top: 93 },
-  /* No height: the rail is a list, so it should be as tall as its list. A
-     fixed height left a third of it empty. */
-  rail: { left: 70, top: 4, width: 27 },
-} as const;
+const WIRE = "M27 8 H60 Q66 8 66 14 V18";
 
-/** Turns a layout entry into the inline style that positions it. */
-function place(k: keyof typeof LAYOUT, delay: string) {
-  const l = LAYOUT[k] as { left: number; top: number; width?: number; height?: number };
-  return {
-    left: `${l.left}%`,
-    top: `${l.top}%`,
-    ...(l.width ? { width: `${l.width}%` } : null),
-    ...(l.height ? { height: `${l.height}%` } : null),
-    ["--d" as string]: delay,
-  };
+function Sparkle() {
+  return (
+    <svg viewBox="0 0 12 12" className="dp-sc-sparkle" aria-hidden="true">
+      <path d="M6 0.5 L7.1 4.9 L11.5 6 L7.1 7.1 L6 11.5 L4.9 7.1 L0.5 6 L4.9 4.9 Z" />
+    </svg>
+  );
 }
 
-function Check() {
+function Tick({ on, i }: { on: boolean; i: number }) {
   return (
-    <svg viewBox="0 0 16 16" className="dp-sc-check" aria-hidden="true">
-      <circle cx="8" cy="8" r="7" fill="none" strokeWidth="1.4" />
-      <path d="M4.6 8.3 L6.9 10.5 L11.4 5.7" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 18 18" className={on ? "dp-sc-tick is-on" : "dp-sc-tick"} aria-hidden="true">
+      <circle cx="9" cy="9" r="8" />
+      <path
+        d="M5.2 9.3 L7.8 11.8 L12.8 6.4"
+        style={{ ["--i" as string]: i }}
+        fill="none"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -113,122 +91,136 @@ function Check() {
 export default function SearchConsole() {
   return (
     <div className="dp-sc" aria-hidden="true">
-      <div className="dp-sc-frame">
-        {/* ---- Connectors, under the panels so the lines run into them ---- */}
-        <svg className="dp-sc-wires" viewBox="0 0 100 100" preserveAspectRatio="none">
-          {LINES.map((l) => (
-            <path key={l.d} className="dp-sc-wire" d={l.d} vectorEffect="non-scaling-stroke" />
-          ))}
-        </svg>
-        {/* PLACEHOLDER: the sparks are rendered after the panels, below. */}
+      {/* ---- The connector, and the badge it carries ----------------------
+          One line with a real radius on its corner, running from the badge up
+          and over into the top of the frame. That move is the whole reason the
+          badge reads as attached to the product rather than pasted beside it.
+          It is drawn in its own overlay so it can sit outside the frame. */}
+      <svg className="dp-sc-wire-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path className="dp-sc-wire" d={WIRE} vectorEffect="non-scaling-stroke" />
+        <circle className="dp-sc-spark" r="1.1" style={{ offsetPath: `path("${WIRE}")` }} />
+      </svg>
 
-        {/* ---- The candidate record --------------------------------------- */}
-        <article className="dp-sc-card is-candidate" style={place("candidate", "0.05s")}>
-          <div className="dp-sc-row">
-            {/* A monogram, not a face. See the note on anonymity above. */}
-            <span className="dp-sc-avatar">04</span>
-            <div className="min-w-0">
-              <p className="dp-sc-title">Candidate 04</p>
-              <p className="dp-sc-sub">Chief Financial Officer</p>
-            </div>
-            <span className="dp-sc-tag">Vetted</span>
-          </div>
-          <div className="dp-sc-meter">
-            <span style={{ ["--w" as string]: "84%", ["--i" as string]: 0 }} />
-            <span style={{ ["--w" as string]: "68%", ["--i" as string]: 1 }} />
-            <span style={{ ["--w" as string]: "91%", ["--i" as string]: 2 }} />
-          </div>
-        </article>
+      {/* The one claim outside the frame, in the firm's own word for it from
+          What We Do rather than a slogan written for this slot. */}
+      <span className="dp-sc-flag">
+        <Sparkle />
+        Partner-Led
+      </span>
 
-        <span className="dp-sc-pill" style={place("scorecard", "0.45s")}>
-          Summarise scorecards
-        </span>
-
-        {/* ---- The practice chart ------------------------------------------ */}
-        <article className="dp-sc-card is-chart" style={place("chart", "0.2s")}>
-          <p className="dp-sc-eyebrow">Searches by practice</p>
-          <ul className="dp-sc-bars">
-            {PRACTICE.map((p, i) => (
-              <li key={p.label}>
-                <span className="dp-sc-bar-label">{p.label}</span>
-                <span className="dp-sc-bar">
-                  <i style={{ ["--w" as string]: `${p.weight}%`, ["--i" as string]: i }} />
-                </span>
-              </li>
-            ))}
-          </ul>
-        </article>
-
-        <span className="dp-sc-pill" style={place("report", "0.6s")}>
-          Build a report
-        </span>
-
-        {/* ---- The schedule ------------------------------------------------- */}
-        <article className="dp-sc-card is-schedule" style={place("schedule", "0.35s")}>
-          <p className="dp-sc-eyebrow">Suggested times</p>
-          <div className="dp-sc-slots">
-            {["Tue 09:30", "Wed 14:00", "Thu 11:15"].map((t, i) => (
-              <span key={t} className={i === 1 ? "is-on" : undefined}>
-                {t}
-              </span>
-            ))}
-          </div>
-        </article>
-
-        <span className="dp-sc-badge" style={place("badge", "0.75s")}>
-          <svg viewBox="0 0 12 12" aria-hidden="true">
-            <path d="M6 0.6 L7.6 4.2 L11.4 4.6 L8.6 7.2 L9.4 11 L6 9.1 L2.6 11 L3.4 7.2 L0.6 4.6 L4.4 4.2 Z" />
+      <div className="dp-sc-app">
+        {/* Chrome. A product has a frame around it; without one this is a pile
+            of cards. The mark is the real one, imported rather than redrawn. */}
+        <div className="dp-sc-chrome">
+          <svg viewBox={MARK_PARTS.viewBox} className="dp-sc-chrome-mark" aria-hidden="true">
+            <path d={MARK_PARTS.bracket} fill="#8fb4ff" />
+            <path d={MARK_PARTS.blueRing} fillRule="evenodd" fill="#8fb4ff" />
+            <path d={MARK_PARTS.inkRing} fillRule="evenodd" fill="#ffffff" />
           </svg>
-          Strong match
-        </span>
+          <span className="dp-sc-chrome-title">Active search</span>
+          <span className="dp-sc-chrome-avatar">DP</span>
+        </div>
 
-        {/* ---- The rail ------------------------------------------------------ */}
-        <aside className="dp-sc-rail" style={place("rail", "0.3s")}>
-          <p className="dp-sc-eyebrow">Active search</p>
-          <ul className="dp-sc-tasks">
-            {[
-              ["Mandate defined", true],
-              ["Market mapped", true],
-              ["Shortlist agreed", true],
-              ["Panel scheduled", false],
-            ].map(([label, done], i) => (
-              <li key={String(label)} data-done={done || undefined} style={{ ["--i" as string]: i }}>
-                <Check />
-                {label}
-              </li>
-            ))}
-          </ul>
-          <div className="dp-sc-links">
-            {["Open searches", "Pipeline", "Market insight"].map((l) => (
-              <span key={l}>{l}</span>
-            ))}
-          </div>
-        </aside>
+        <div className="dp-sc-grid">
+          {/* ---- The record ------------------------------------------------ */}
+          <article className="dp-sc-card is-record" style={{ ["--d" as string]: "0.08s" }}>
+            <div className="dp-sc-record-head">
+              <span className="dp-sc-avatar">04</span>
+              <span className="dp-sc-ident">
+                <span className="dp-sc-name">Candidate 04</span>
+                <span className="dp-sc-role">Chief Financial Officer</span>
+              </span>
+              <span className="dp-sc-chip is-good">Vetted</span>
+            </div>
+            <div className="dp-sc-subrow">
+              <Sparkle />
+              Scorecards summarised
+            </div>
+          </article>
 
-        {/* THE TRAVELLING SIGNAL, IN A SECOND SVG OVER THE TOP.
-            It is a separate element from the wires for two reasons. It has to
-            paint ABOVE the panels while the wires paint below them, so the
-            lines run into the cards but the signal is never swallowed by one.
-            And `offset-path: path()` resolves its coordinates in the units of
-            the element it is on: on an HTML div that means PIXELS, so the same
-            path string that spans this frame as an SVG child would have sent
-            every spark on a hundred-pixel run in the top-left corner. Inside an
-            SVG with the same viewBox as the wires, the numbers mean what they
-            mean everywhere else in this component. */}
-        <svg className="dp-sc-sparks" viewBox="0 0 100 100" preserveAspectRatio="none">
-          {LINES.map((l) => (
-            <circle
-              key={l.d}
-              className="dp-sc-spark"
-              r={0.9}
-              style={{
-                offsetPath: `path("${l.d}")`,
-                animationDuration: l.dur,
-                animationDelay: l.delay,
-              }}
-            />
-          ))}
-        </svg>
+          {/* ---- The task rail ---------------------------------------------- */}
+          <article className="dp-sc-card is-tasks" style={{ ["--d" as string]: "0.2s" }}>
+            <p className="dp-sc-cardtitle">Progress</p>
+            <ul className="dp-sc-tasks">
+              {TASKS.map(([label, done], i) => (
+                <li key={label} data-done={done || undefined}>
+                  <Tick on={done} i={i} />
+                  {label}
+                </li>
+              ))}
+            </ul>
+          </article>
+
+          {/* ---- The shortlist --------------------------------------------- */}
+          <article className="dp-sc-card is-list" style={{ ["--d" as string]: "0.28s" }}>
+            <p className="dp-sc-cardtitle">Shortlist</p>
+            <div className="dp-sc-faces">
+              {["01", "04", "07", "09"].map((n, i) => (
+                <span key={n} style={{ ["--i" as string]: i }}>
+                  {n}
+                </span>
+              ))}
+            </div>
+            <span className="dp-sc-action">
+              <Sparkle />
+              Summarise scorecards
+            </span>
+          </article>
+
+          {/* ---- The practice chart ------------------------------------------ */}
+          <article className="dp-sc-card is-chart" style={{ ["--d" as string]: "0.36s" }}>
+            <div className="dp-sc-chart-head">
+              <span>
+                <p className="dp-sc-cardtitle">Searches by practice</p>
+                <p className="dp-sc-cardsub">Across the four practices</p>
+              </span>
+              <span className="dp-sc-action">
+                <Sparkle />
+                Build a report
+              </span>
+            </div>
+            <ul className="dp-sc-bars">
+              {PRACTICE.map((p, i) => (
+                <li key={p.label}>
+                  <span className="dp-sc-bar-label">{p.label}</span>
+                  <span className="dp-sc-bar">
+                    <i style={{ ["--w" as string]: `${p.weight}%`, ["--i" as string]: i }} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {/* An axis with ticks and no values: enough to say the bars are
+                measured against something, without publishing a figure the
+                firm has not. */}
+            <div className="dp-sc-axis">
+              <span />
+              <span />
+              <span />
+            </div>
+          </article>
+
+          {/* ---- The schedule ------------------------------------------------- */}
+          <article className="dp-sc-card is-schedule" style={{ ["--d" as string]: "0.44s" }}>
+            <p className="dp-sc-cardtitle">Suggested interview times</p>
+            <div className="dp-sc-slots">
+              {["Tue 09:30", "Wed 14:00", "Thu 11:15"].map((t, i) => (
+                <span key={t} className={i === 1 ? "is-on" : undefined}>
+                  {t}
+                </span>
+              ))}
+            </div>
+          </article>
+
+          {/* ---- The verdict --------------------------------------------------- */}
+          <article className="dp-sc-card is-verdict" style={{ ["--d" as string]: "0.52s" }}>
+            <span className="dp-sc-star">
+              <svg viewBox="0 0 14 14" aria-hidden="true">
+                <path d="M7 0.8 L8.8 5 L13.3 5.4 L9.9 8.4 L10.9 12.8 L7 10.5 L3.1 12.8 L4.1 8.4 L0.7 5.4 L5.2 5 Z" />
+              </svg>
+            </span>
+            Strong match
+          </article>
+        </div>
       </div>
     </div>
   );
