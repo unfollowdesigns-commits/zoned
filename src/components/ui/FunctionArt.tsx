@@ -119,11 +119,16 @@ function Technology() {
     <>
       {/* Elbow connectors, the convention every tree diagram uses. */}
       <path className="dp-fa-line" style={{ ["--i" as string]: 0 }} d="M30 75h34" {...S} />
-      <path className="dp-fa-line" style={{ ["--i" as string]: 1 }} d="M64 75V44h36M64 75v62h36" {...S} />
+            {/* ABSOLUTE V, NOT RELATIVE v. Written relative these overshot their own
+          nodes: `v62` from y=75 lands at 137 while the node it is joining sits
+          at 106, so the lower branch ran thirty units past the seat and ended
+          in mid air. Absolute commands cannot drift from the coordinates the
+          nodes are placed with, which is the only reason to prefer them. */}
+      <path className="dp-fa-line" style={{ ["--i" as string]: 1 }} d="M64 75V44h36M64 75V106h36" {...S} />
       <path className="dp-fa-line" style={{ ["--i" as string]: 2 }} d="M100 44h36" {...S} />
-      <path className="dp-fa-line" style={{ ["--i" as string]: 3 }} d="M136 44V26h36M136 44v18h36" {...S} />
+      <path className="dp-fa-line" style={{ ["--i" as string]: 3 }} d="M136 44V26h36M136 44V62h36" {...S} />
       <path className="dp-fa-line" style={{ ["--i" as string]: 2 }} d="M100 106h36" {...S} />
-      <path className="dp-fa-line" style={{ ["--i" as string]: 3 }} d="M136 106V88h36M136 106v36h36" {...S} />
+      <path className="dp-fa-line" style={{ ["--i" as string]: 3 }} d="M136 106V88h36M136 106V124h36" {...S} />
       <Node x={root.x} y={root.y} on i={0} />
       {mid.map((m, i) => (
         <Node key={`m${i}`} x={m.x} y={m.y} i={2} />

@@ -8,6 +8,7 @@ import {
   useMotionValueEvent,
   useScroll,
   useTransform,
+  type MotionValue,
 } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useReducedMotion } from "@/lib/motion";
@@ -59,8 +60,23 @@ import { SERVICES } from "@/lib/site";
 const HEADLINE = "Our talent is finding";
 /* Longest first: the slot is sized by measuring this one. */
 const ROTATING = ["Professionals.", "Executives.", "Operators.", "Yours."];
+/**
+ * The lede changes as you descend, and the change is the point.
+ *
+ * The first states the problem, which is what a visitor at the top of a page
+ * needs. Holding that same paragraph for two and a half viewports while the
+ * camera flies into the field would waste the one thing a scrubbed hero can
+ * do that a static one cannot: say a second thing. So the block travels down
+ * with the dive and the paragraph under it hands over to the answer.
+ *
+ * The second is District Partners' own line, the one the footer already
+ * carries. It is not written for this slot, which is the point: nothing in
+ * this hero is copy invented to fill a shape.
+ */
 const LEDE =
   "When the talent decisions are as consequential as the capital decisions, you need more than a search firm. We design talent strategy from the boardroom down, and execute from day one.";
+const LEDE_LANDED =
+  "An independent, partner led firm built to serve clients wherever they need us most. Four ways in, one partner across all of them.";
 
 /* easeInOutCubic, for every scrubbed value: shaped but spread across the whole
    scroll, where a hard ease-out finishes the picture halfway through and
@@ -87,13 +103,35 @@ export default function CinematicHero() {
     diveRef.current = v;
   });
 
-  /* The type leaves as the descent begins: it fades and rises away in the
-     first half so the middle of the dive is the field alone, which is the
-     moment worth the scroll. The tail arrives once the camera is down. */
-  const typeOpacity = useTransform(scrollYProgress, [0.04, 0.5, 1], [1, 0, 0], { ease: SCRUB });
-  const typeY = useTransform(scrollYProgress, [0, 0.55, 1], [0, -84, -84], { ease: SCRUB });
-  const tailOpacity = useTransform(scrollYProgress, [0.62, 0.92, 1], [0, 1, 1], { ease: SCRUB });
-  const tailY = useTransform(scrollYProgress, [0.62, 0.92, 1], [26, 0, 0], { ease: SCRUB });
+  /* THE TYPE RIDES DOWN WITH THE CAMERA INSTEAD OF LEAVING. It used to fade
+     out and rise away in the first half, which threw away the headline for
+     most of the section and left the middle of the dive carrying nothing but
+     weather. Now the block travels down the frame and shrinks as it goes, so
+     it recedes WITH the descent rather than being removed from it, and the
+     paragraph under it hands over to a second line on the way. The words are
+     present for the whole scroll and say two different things across it.
+
+     Scaled from its own top left corner, so the block shrinks toward the
+     margin it is aligned to rather than drifting inward off the grid. */
+  const typeY = useTransform(scrollYProgress, [0, 1], ["0vh", "31vh"], { ease: SCRUB });
+  const typeScale = useTransform(scrollYProgress, [0, 1], [1, 0.62], { ease: SCRUB });
+  /* The two paragraphs are stacked in the same box and cross-faded, so the
+     swap costs no layout and the block never jumps as the text changes
+     length. */
+  /* EVERY EASED RANGE ENDS WITH A HOLD POINT AT 1, and that is a correctness
+     fix rather than a style. `useTransform` with a custom `ease` does not
+     clamp the normalized input before running the easing function: given a
+     range of [0.24, 0.44] and a progress of 0.98, the bezier is solved at
+     t = 3.7, where it returns close to zero again, so the mix comes back to
+     its STARTING value. Measured: at the bottom of the scrub the first
+     paragraph was fully opaque again and the second never appeared, so the
+     swap this section exists to perform silently did not happen. Writing each
+     range as [a, b, 1] with the final output repeated keeps the mapping
+     monotonic past b, so a value that has finished stays finished. */
+  const ledeAOpacity = useTransform(scrollYProgress, [0.24, 0.44, 1], [1, 0, 0], { ease: SCRUB });
+  const ledeBOpacity = useTransform(scrollYProgress, [0.42, 0.62, 1], [0, 1, 1], { ease: SCRUB });
+  const tailOpacity = useTransform(scrollYProgress, [0.7, 0.94, 1], [0, 1, 1], { ease: SCRUB });
+  const tailY = useTransform(scrollYProgress, [0.7, 0.94, 1], [24, 0, 0], { ease: SCRUB });
 
   /* No scroll length, no pin, no dive under reduced motion: one static screen
      with everything present. Animating nothing is correct here. */
@@ -124,9 +162,14 @@ export default function CinematicHero() {
         <ParticleWave opacity={0.9} searchApi={waveApi} diveRef={diveRef} />
         <Shade />
 
-        <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[13vh]">
-          <motion.div style={{ opacity: typeOpacity, y: typeY }}>
-            <Copy reduced={false} waveApi={waveApi} />
+        <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[12vh]">
+          <motion.div style={{ y: typeY, scale: typeScale, transformOrigin: "0% 0%" }}>
+            <Copy
+              reduced={false}
+              waveApi={waveApi}
+              ledeAOpacity={ledeAOpacity}
+              ledeBOpacity={ledeBOpacity}
+            />
           </motion.div>
 
           {/* The payoff row: arrives once the camera is down among the
@@ -152,13 +195,18 @@ function Shade() {
   );
 }
 
-/** The eyebrow, the headline with its typewriter, and the lede. */
+/** The eyebrow, the headline with its typewriter, and the changing lede. */
 function Copy({
   reduced,
   waveApi,
+  ledeAOpacity,
+  ledeBOpacity,
 }: {
   reduced: boolean;
   waveApi: React.MutableRefObject<WaveSearchApi | null>;
+  /** Absent under reduced motion, where only the first paragraph renders. */
+  ledeAOpacity?: MotionValue<number>;
+  ledeBOpacity?: MotionValue<number>;
 }) {
   return (
     <>
@@ -192,10 +240,22 @@ function Copy({
         </span>
       </h1>
 
-      <p className="mt-8 max-w-[52ch] text-pretty text-[length:var(--t-lede)] leading-[1.6] text-[var(--v-muted)]">
-        {reduced
-          ? LEDE
-          : LEDE.split(" ").map((word, i) => (
+      {reduced ? (
+        <p className="mt-8 max-w-[52ch] text-pretty text-[length:var(--t-lede)] leading-[1.6] text-[var(--v-muted)]">
+          {LEDE}
+        </p>
+      ) : (
+        /* Both paragraphs occupy the SAME grid cell, so the taller one sets
+           the height once and the cross-fade cannot shift the block as the
+           text changes length. Stacking them absolutely would do the same and
+           would take the box out of flow, which is what pushes the services
+           row underneath into the wrong place. */
+        <div className="mt-8 grid max-w-[52ch]">
+          <motion.p
+            style={{ opacity: ledeAOpacity, gridArea: "1 / 1" }}
+            className="text-pretty text-[length:var(--t-lede)] leading-[1.6] text-[var(--v-muted)]"
+          >
+            {LEDE.split(" ").map((word, i) => (
               <React.Fragment key={`${word}-${i}`}>
                 <span
                   className="dp-word"
@@ -205,7 +265,19 @@ function Copy({
                 </span>{" "}
               </React.Fragment>
             ))}
-      </p>
+          </motion.p>
+          {/* Hidden from assistive technology: it is the same message the
+              first paragraph and the services row already carry, and a screen
+              reader has no scroll position to make the swap meaningful. */}
+          <motion.p
+            aria-hidden="true"
+            style={{ opacity: ledeBOpacity, gridArea: "1 / 1" }}
+            className="text-pretty text-[length:var(--t-lede)] leading-[1.6] text-[var(--v-muted)]"
+          >
+            {LEDE_LANDED}
+          </motion.p>
+        </div>
+      )}
     </>
   );
 }
@@ -356,10 +428,7 @@ function Tail() {
         ))}
       </ul>
 
-      <div className="mt-9 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
-        <p className="text-[length:var(--t-small)] text-[var(--v-muted)]">
-          Independent, partner led, and built to serve clients wherever they need us most.
-        </p>
+      <div className="mt-9 flex flex-wrap items-center justify-end gap-4 border-t border-white/10 pt-6">
         <Link
           href="/contact"
           className="group inline-flex items-center gap-2.5 text-[length:var(--t-action)] font-semibold text-white transition-colors duration-200 hover:text-[var(--v-ring)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--v-ring)]"

@@ -3,7 +3,6 @@ import Link from "@/components/SiteLink";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import GlowButton from "@/components/ui/GlowButton";
 import LightBand from "@/components/ui/LightBand";
-import MediaSlot from "@/components/ui/MediaSlot";
 import SectionHeading from "@/components/ui/SectionHeading";
 import DrawIcon from "@/components/ui/DrawIcon";
 import { CardArt } from "@/components/ui/PostArt";
@@ -32,8 +31,12 @@ export const metadata: Metadata = {
  *     contact; the moment answers arrive they become accordions. An accordion
  *     that opens onto nothing is the empty-card mistake again.
  *
- * Every photograph is a MediaSlot placeholder by instruction: real pictures
- * drop in later, stock never does.
+ * EVERY FRAME CARRIES A GENERATED FIGURE, NOT A HELD PLACEHOLDER. The frames
+ * were MediaSlot stand-ins, which were honest and looked like what they were:
+ * empty. They now carry the same construction as the cards, each on a motif
+ * nothing else on the page uses, so the page is finished rather than waiting.
+ * Real photography still replaces any of them by swapping one element for an
+ * <Image>; stock never does.
  */
 
 /* Hues match components/EngagementMap.tsx, which is the whole connection
@@ -124,7 +127,12 @@ export default function WhatWeDoPage() {
             </Reveal>
           </div>
           <Reveal delay={0.14}>
-            <MediaSlot ratio="5 / 4" tone="dark" />
+            {/* The page's own figure rather than a held grey frame. Same
+                construction as the cards below, a motif none of them uses, so
+                the hero states the language the rest of the page speaks. */}
+            <div className="dp-art-hover relative aspect-[5/4] overflow-hidden rounded-[20px] ring-1 ring-inset ring-white/[0.08]">
+              <CardArt seed="what-we-do-hero" motif="perspective" colour="#5b93ff" />
+            </div>
           </Reveal>
         </div>
       </section>
@@ -172,7 +180,9 @@ export default function WhatWeDoPage() {
                   it is the one thing asking to be acted on. */}
               <Reveal delay={0.28}>
                 <div className="mt-10 flex flex-wrap items-center gap-6 rounded-[18px] bg-white p-6 shadow-[0_18px_40px_-30px_rgba(16,23,40,0.4)] ring-1 ring-inset ring-[var(--v-ink)]/[0.06] sm:flex-nowrap">
-                  <MediaSlot ratio="1 / 1" tone="light" className="w-20 shrink-0" />
+                  <div className="dp-art-hover relative aspect-square w-20 shrink-0 overflow-hidden rounded-[12px]">
+                    <CardArt seed="brief-a-search" motif="orbits" colour="#5b93ff" />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <p className="v-eyebrow">Ready to brief a search?</p>
                     <p className="mt-2 text-[length:var(--t-secondary)] leading-[1.6] text-[var(--v-muted)]">
@@ -218,11 +228,11 @@ export default function WhatWeDoPage() {
                   <Link
                     href={o.href}
                     data-draw-group
-                    className="dp-art-card group flex h-full flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_20px_48px_-36px_rgba(16,23,40,0.45)] ring-1 ring-inset ring-[var(--v-ink)]/[0.06] transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-[0_34px_64px_-34px_rgba(16,23,40,0.5)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--v-ring)]"
+                    className="dp-art-card group flex h-full flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_20px_48px_-36px_rgba(16,23,40,0.45)] ring-1 ring-inset ring-[var(--v-ink)]/[0.06] hover:shadow-[0_38px_70px_-32px_rgba(16,23,40,0.55)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--v-ring)]"
                   >
                     {/* The generated figure, and the light crossing it speeds
                         up on hover: see .dp-art-card. */}
-                    <div className="relative aspect-[16/11] overflow-hidden">
+                    <div className="dp-art-frame relative aspect-[16/11] overflow-hidden">
                       <CardArt seed={o.href} motif={o.motif} colour={o.colour} />
                       <span
                         aria-hidden="true"
@@ -266,9 +276,9 @@ export default function WhatWeDoPage() {
         <div className="relative z-[1] mx-auto max-w-[1280px] px-6 py-24 sm:py-28">
           <SectionHeading
             eyebrow="Choosing"
-            title="Three engagements,"
-            turn="different ground."
-            lede="They are not three sizes of the same thing. Each one sits somewhere different on how fast the seat is filled and how long it stays filled, which is usually the question underneath 'what do you offer'."
+            title="Not three sizes"
+            turn="of the same thing."
+            lede="Each engagement sits somewhere different on how fast the seat gets filled and how long it stays filled. That is usually the real question underneath 'what do you offer'."
           />
           <div className="mt-14">
             <EngagementMap />
@@ -335,7 +345,9 @@ export default function WhatWeDoPage() {
         <div className="relative z-[1] mx-auto max-w-[1280px] px-6 py-24 sm:py-28">
           <div className="grid items-stretch gap-8 lg:grid-cols-[0.44fr_0.56fr]">
             <Reveal>
-              <MediaSlot ratio="4 / 3" tone="dark" className="h-full" />
+              <div className="dp-art-hover relative h-full min-h-[280px] overflow-hidden rounded-[18px] ring-1 ring-inset ring-white/[0.08]">
+                <CardArt seed="founder-quote" motif="terraces" colour="#9b7bf0" />
+              </div>
             </Reveal>
             <Reveal delay={0.1}>
               <figure className="flex h-full flex-col justify-between rounded-[18px] bg-[var(--v-primary-deep)] p-8 sm:p-10">
@@ -387,7 +399,9 @@ export default function WhatWeDoPage() {
               </Reveal>
             </div>
             <Reveal delay={0.12}>
-              <MediaSlot ratio="4 / 5" tone="dark" />
+              <div className="dp-art-hover relative aspect-[4/5] overflow-hidden rounded-[20px] ring-1 ring-inset ring-white/[0.08]">
+                <CardArt seed="who-we-are" motif="lattice" colour="#35b0d8" />
+              </div>
             </Reveal>
           </div>
 

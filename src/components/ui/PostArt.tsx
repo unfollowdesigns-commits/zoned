@@ -255,6 +255,200 @@ const dashes: Draw = (r, c) => {
   return <g>{segs}</g>;
 };
 
+
+/** Orbits. Concentric rings around an off-centre core, cut by the frame. */
+const orbits: Draw = (r, c) => {
+  const n = 6;
+  const cx = 74 + r() * 10;
+  const cy = 34 + r() * 8;
+  return (
+    <g>
+      {Array.from({ length: n }, (_, i) => (
+        <ellipse
+          key={i}
+          className="dp-art-el"
+          style={{ ["--i" as string]: i }}
+          cx={q(cx)}
+          cy={q(cy)}
+          rx={q(7 + i * 9.5)}
+          ry={q(5 + i * 6.4)}
+          fill="none"
+          stroke={c}
+          strokeOpacity={q(0.6 - i * 0.07)}
+          strokeWidth={0.7}
+        />
+      ))}
+      <circle cx={q(cx)} cy={q(cy)} r={2.1} fill={c} fillOpacity={0.85} />
+    </g>
+  );
+};
+
+/** A perspective grid. Rules converging on a vanishing point, low and right. */
+const perspective: Draw = (r, c) => {
+  const vx = 88 + r() * 8;
+  const vy = 16 + r() * 8;
+  const lines = [];
+  for (let i = 0; i < 12; i += 1) {
+    const x = q(20 + i * 8);
+    lines.push(
+      <line
+        key={`r${i}`}
+        className="dp-art-el"
+        style={{ ["--i" as string]: i % WAVE }}
+        x1={x}
+        y1={62}
+        x2={q(vx)}
+        y2={q(vy)}
+        stroke={c}
+        strokeOpacity={q(0.42 - i * 0.02)}
+        strokeWidth={0.6}
+      />,
+    );
+  }
+  for (let i = 0; i < 7; i += 1) {
+    const t = Math.pow(i / 7, 1.8);
+    const y = q(62 - t * (62 - vy));
+    lines.push(
+      <line
+        key={`h${i}`}
+        className="dp-art-el"
+        style={{ ["--i" as string]: (i + 3) % WAVE }}
+        x1={q(20 + t * (vx - 20))}
+        y1={y}
+        x2={q(116 - t * (116 - vx))}
+        y2={y}
+        stroke={c}
+        strokeOpacity={q(0.34 - i * 0.03)}
+        strokeWidth={0.6}
+      />,
+    );
+  }
+  return <g>{lines}</g>;
+};
+
+/** A weave. Crosshatch at two angles, denser toward the corner. */
+const weave: Draw = (r, c) => {
+  const skew = q(6 + r() * 8);
+  const rows = [];
+  for (let i = 0; i < 16; i += 1) {
+    rows.push(
+      <line
+        key={`a${i}`}
+        className="dp-art-el"
+        style={{ ["--i" as string]: i % WAVE }}
+        x1={q(30 + i * 6)}
+        y1={-6}
+        x2={q(30 + i * 6 - skew * 3)}
+        y2={64}
+        stroke={c}
+        strokeOpacity={q(0.1 + i * 0.028)}
+        strokeWidth={0.8}
+      />,
+    );
+  }
+  for (let i = 0; i < 10; i += 1) {
+    rows.push(
+      <line
+        key={`b${i}`}
+        className="dp-art-el"
+        style={{ ["--i" as string]: (i + 5) % WAVE }}
+        x1={20}
+        y1={q(2 + i * 6)}
+        x2={124}
+        y2={q(2 + i * 6 + skew)}
+        stroke={c}
+        strokeOpacity={q(0.1 + i * 0.03)}
+        strokeWidth={0.8}
+      />,
+    );
+  }
+  return <g>{rows}</g>;
+};
+
+/** A lattice of seats, linked right and down. The house grammar, as texture. */
+const lattice: Draw = (r, c) => {
+  const jitter = r();
+  const cols = 9;
+  const rows = 5;
+  const out = [];
+  const px = (col: number) => q(38 + col * 10.5);
+  const py = (row: number) => q(8 + row * 11);
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const o = q(0.14 + ((col + row + jitter * 3) % 5) * 0.09);
+      if (col < cols - 1) {
+        out.push(
+          <line
+            key={`h${col}-${row}`}
+            className="dp-art-el"
+            style={{ ["--i" as string]: (col + row) % WAVE }}
+            x1={px(col)}
+            y1={py(row)}
+            x2={px(col + 1)}
+            y2={py(row)}
+            stroke={c}
+            strokeOpacity={o}
+            strokeWidth={0.5}
+          />,
+        );
+      }
+      if (row < rows - 1) {
+        out.push(
+          <line
+            key={`v${col}-${row}`}
+            className="dp-art-el"
+            style={{ ["--i" as string]: (col + row) % WAVE }}
+            x1={px(col)}
+            y1={py(row)}
+            x2={px(col)}
+            y2={py(row + 1)}
+            stroke={c}
+            strokeOpacity={o}
+            strokeWidth={0.5}
+          />,
+        );
+      }
+      out.push(
+        <rect
+          key={`n${col}-${row}`}
+          className="dp-art-el"
+          style={{ ["--i" as string]: (col + row) % WAVE }}
+          x={px(col) - 1}
+          y={py(row) - 1}
+          width={2}
+          height={2}
+          rx={0.4}
+          fill={c}
+          fillOpacity={q(o + 0.22)}
+        />,
+      );
+    }
+  }
+  return <g>{out}</g>;
+};
+
+/** Terraces. Stacked steps receding, like a section through a structure. */
+const terraces: Draw = (r, c) => {
+  const lean = q(r() * 6);
+  return (
+    <g>
+      {Array.from({ length: 8 }, (_, i) => (
+        <path
+          key={i}
+          className="dp-art-el"
+          style={{ ["--i" as string]: i }}
+          d={`M ${q(26 + i * 5)} 60 V ${q(48 - i * 5.2 + lean)} H ${q(122 - i * 3)}`}
+          fill="none"
+          stroke={c}
+          strokeOpacity={q(0.62 - i * 0.06)}
+          strokeWidth={1.1}
+          strokeLinejoin="round"
+        />
+      ))}
+    </g>
+  );
+};
+
 /**
  * Category to form and colour.
  *
@@ -262,7 +456,19 @@ const dashes: Draw = (r, c) => {
  * so they sit together as a set rather than competing: a taxonomy needs its
  * members to be distinguishable from each other and equal in weight.
  */
-export const MOTIFS = { contours, halftone, chevrons, field, stripes, dashes };
+export const MOTIFS = {
+  contours,
+  halftone,
+  chevrons,
+  field,
+  stripes,
+  dashes,
+  orbits,
+  perspective,
+  weave,
+  lattice,
+  terraces,
+};
 export type Motif = keyof typeof MOTIFS;
 
 const BY_CATEGORY: Record<string, { motif: Motif; colour: string }> = {
