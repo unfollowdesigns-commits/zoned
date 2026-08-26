@@ -163,3 +163,12 @@ Photography for this page, all currently `MediaSlot` placeholders (grep
     three offer card images (16:10, light)
     Josh Fisher portrait (4:3, light)
     who-we-are image (4:5, dark)
+
+## 11. The Resume Builder embed
+
+The Job Description Engine is live at `/resources/job-description-engine`,
+framed from `https://ccckaandve.zite.so` via `ui/ToolEmbed`.
+
+The Resume Builder is still the generic scaffold page. Send its URL and it
+gets the same treatment: one new route, one `<ToolEmbed>`, and the entry
+filtered out of `HAND_BUILT` in `src/app/resources/[slug]/page.tsx`.

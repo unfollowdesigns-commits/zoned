@@ -6,8 +6,12 @@ import NavLedger from "@/components/ui/NavLedger";
 import AwaitingCopy from "@/components/ui/AwaitingCopy";
 import { RESOURCES, NEW_TOOLS } from "@/lib/site";
 
-// "blog" is a static sibling route and takes precedence over this one.
-const ALL = [...RESOURCES, ...NEW_TOOLS].filter((r) => r.href !== "/resources/blog");
+/* Both of these have hand-built static sibling routes, which beat this dynamic
+   one for their paths. They are filtered out rather than merely shadowed
+   because generateStaticParams below would otherwise prerender a second,
+   unreachable copy of each at build time. */
+const HAND_BUILT = new Set(["/resources/blog", "/resources/job-description-engine"]);
+const ALL = [...RESOURCES, ...NEW_TOOLS].filter((r) => !HAND_BUILT.has(r.href));
 
 function find(slug: string) {
   return ALL.find((r) => r.href === `/resources/${slug}`);
