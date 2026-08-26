@@ -97,16 +97,15 @@ waiting in section 5 of `/the-dp-difference`.
 
     public/dp-difference/crm.png     1600 x 1200 or wider, 2x
 
-## 7. The hero video
+## 7. Hero footage, if any ever exists
 
-Currently loaded from `cdn.sceneai.art`, a third-party host. If that is slow or
-goes down, the hero degrades to a gradient.
+The stock clip is gone: the hero now runs on the generated particle field,
+which needs no assets. Real footage of the firm, the people, or the city
+would earn a place back on this page; stock will not. If it is ever shot,
+self-host it:
 
     public/hero.mp4
-
-Self-hosting it removes the dependency. Also worth having a poster frame at
-`public/hero-poster.jpg` so the first paint is the film rather than a flat
-colour.
+    public/hero-poster.jpg
 
 ## 8. Neue Haas Grotesk
 

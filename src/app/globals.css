@@ -1577,12 +1577,30 @@ html[data-loaded] .dp-scale-in {
   34%, 72% { transform: translate3d(var(--dx), var(--dy), 34px) scale(1); opacity: 1; }
   88%, 100% { transform: translate3d(0, 0, 0) scale(0.5); opacity: 0.25; }
 }
-/* The rule the shortlist lands against. */
+/* The rule the shortlist lands against.
+
+   AT THE PICKS' OWN DEPTH, NOT THE PLANE'S. It was drawn flat in the plane
+   while the held picks hover 34px above it, and perspective pulled the two
+   apart: the line rendered as a stray diagonal streak drifting below the dots
+   it was supposed to carry, which read as a rendering fault. A rule and the
+   entries on it are one object, so they live at one Z.
+
+   And it exists only while the shortlist does. A rank line standing in the
+   field while every candidate is back in the market is furniture from an
+   event that is not happening. Its cycle matches dp-mv-recruit's 9.5s: in as
+   the first pick arrives, out as they disperse. */
 .dp-mv-listline {
   position: absolute;
   width: 1px;
   margin-left: 7px;
-  background: linear-gradient(180deg, transparent, rgba(143, 180, 255, 0.5) 12%, rgba(143, 180, 255, 0.5) 88%, transparent);
+  transform: translateZ(34px);
+  background: linear-gradient(180deg, transparent, rgba(143, 180, 255, 0.55) 14%, rgba(143, 180, 255, 0.55) 86%, transparent);
+  animation: dp-mv-listline 9.5s ease-in-out infinite;
+}
+@keyframes dp-mv-listline {
+  0%, 24%   { opacity: 0; }
+  36%, 74%  { opacity: 1; }
+  86%, 100% { opacity: 0; }
 }
 
 /* ---- resources: the record ------------------------------------------------
@@ -1731,6 +1749,7 @@ html[data-loaded] .dp-scale-in {
   .dp-mv-plane,
   .dp-mv-cell,
   .dp-mv-pick,
+  .dp-mv-listline,
   .dp-mv-sheet,
   .dp-mv-disc,
   .dp-mv-core,

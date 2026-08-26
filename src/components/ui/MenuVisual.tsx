@@ -237,10 +237,15 @@ function Markets() {
         })}
         {/* The rule the shortlist lands against. Without something to line up
             ON, four bright dots in a row are four bright dots; with it they are
-            a list. */}
+            a list. Overhung slightly past the first and last rank so the ends
+            of the gradient fade clear of the dots rather than dying on them. */}
         <span
           className="dp-mv-listline"
-          style={{ left: `${LIST_X}%`, top: `${LIST_Y(0)}%`, height: `${LIST_Y(3) - LIST_Y(0)}%` }}
+          style={{
+            left: `${LIST_X}%`,
+            top: `${LIST_Y(0) - 7}%`,
+            height: `${LIST_Y(3) - LIST_Y(0) + 14}%`,
+          }}
         />
       </div>
     </Frame>

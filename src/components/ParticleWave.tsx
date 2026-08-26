@@ -33,12 +33,36 @@ import { useReducedMotion } from "@/lib/motion";
  * 200,000, and the sum of four waves at different angles and speeds does not
  * read as any of them.
  *
- * IT IS A BACKGROUND, AND IT DOES NOT REACT. There was a pointer bump and a set
- * of words riding the surface; both are gone by request. Worth keeping the
- * reason: this sits behind a headline that is the actual thing to read, and a
- * background that answers the mouse invites the mouse. Nothing here needs
- * anyone's attention, so nothing here asks for it.
+ * IT DOES NOT REACT TO THE POINTER. There was a pointer bump and a set of words
+ * riding the surface; both are gone by request. Worth keeping the reason: this
+ * sits behind a headline that is the actual thing to read, and a background
+ * that answers the mouse invites the mouse.
+ *
+ * IT DOES ANSWER THE HEADLINE, AND THAT IS A DIFFERENT THING. The hero headline
+ * types "finding Executives", and this field is the thing being searched: every
+ * dot is the market. So the typewriter drives a search IN it, through the
+ * searchApi ref below. When a word starts typing, a band of light sweeps the
+ * surface and a scatter of candidates glints in its wake; when the word
+ * commits, the glints die away until one remains, and that one lifts off the
+ * surface and holds bright for as long as the word holds; when the word starts
+ * deleting, it settles back and the field is weather again. The pointer asks
+ * for attention. The headline IS the content, and the field acting it out is
+ * the difference between a background and a stage.
  */
+
+/** What the hero's typewriter is allowed to ask of the field. */
+export type WaveSearchApi = {
+  /** A word has started typing: sweep the field, glint the candidates. */
+  search: (seed: number) => void;
+  /** The word committed: collapse the glints to one and hold it. */
+  resolve: () => void;
+  /** The word is being erased: let the field go back to being weather. */
+  release: () => void;
+};
+
+/** Candidates per search. Enough to read as a scatter, few enough that the
+ *  collapse to one is a visible narrowing rather than a lottery. */
+const CAND = 11;
 
 /** Camera. Focal length and the depth slab drawn. Height is derived, see build. */
 const FOCAL = 1100;
@@ -57,9 +81,12 @@ const AMP = 205;
 export default function ParticleWave({
   className = "",
   opacity = 1,
+  searchApi,
 }: {
   className?: string;
   opacity?: number;
+  /** Filled by this component with the search controls. See WaveSearchApi. */
+  searchApi?: React.MutableRefObject<WaveSearchApi | null>;
 }) {
   const ref = React.useRef<HTMLCanvasElement>(null);
   const reduced = useReducedMotion();
@@ -93,6 +120,98 @@ export default function ParticleWave({
     let visible = true;
     let last = 0;
     let clock = 0;
+
+    /* ---- The search ----------------------------------------------------
+       One small state machine: idle, sweeping, resolved, releasing. The
+       candidates are stored as FRACTIONS of the lattice, not indices, so a
+       resize mid-search rebuilds the grid without stranding them. */
+    const IDLE = 0;
+    const SWEEPING = 1;
+    const RESOLVED = 2;
+    const RELEASING = 3;
+    let phase = IDLE;
+    let sweepX = 0;
+    let pendingResolve = false;
+    let lift = 0;
+    const candFx = new Float32Array(CAND);
+    const candFr = new Float32Array(CAND);
+    const candGlow = new Float32Array(CAND);
+    /* Which candidate the search closes on. Always the one placed inside the
+       card's resting frame, so the resolution happens in the framed part of
+       the picture rather than behind the headline. */
+    const CHOSEN = 0;
+
+    function beginSearch(seed: number) {
+      /* mulberry32, inline: the scatter must be identical for a given word so
+         the figure is art-directable, and different between words so each
+         search reads as a different search. */
+      let a = (seed * 0x9e3779b9) | 0;
+      const rand = () => {
+        a |= 0;
+        a = (a + 0x6d2b79f5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+      for (let i = 0; i < CAND; i += 1) {
+        /* Kept off the extreme edges, and out of the far quarter where a
+           glint is smaller than a pixel. */
+        candFx[i] = 0.14 + rand() * 0.72;
+        candFr[i] = 0.3 + rand() * 0.5;
+      }
+      /* The chosen one lands mid-frame: inside the resting card, clear of the
+         headline block on the left. */
+      candFx[CHOSEN] = 0.44 + rand() * 0.14;
+      candFr[CHOSEN] = 0.52 + rand() * 0.1;
+      phase = SWEEPING;
+      sweepX = -0.08;
+      pendingResolve = false;
+    }
+
+    function requestResolve() {
+      if (phase === SWEEPING) pendingResolve = true;
+      else if (phase === IDLE || phase === RELEASING) {
+        /* Resolve with no sweep under way (the first word mounts already
+           typed): run the sweep anyway and close on it, so a resolution is
+           never shown without the search that produced it. */
+        beginSearch(1);
+        pendingResolve = true;
+      }
+    }
+
+    function releaseSearch() {
+      if (phase !== IDLE) phase = RELEASING;
+      pendingResolve = false;
+    }
+
+    /** Advance glints, lift and the sweep front by dt seconds. */
+    function stepSearch(dt: number) {
+      if (phase === SWEEPING) {
+        sweepX += dt / 1.15;
+        for (let i = 0; i < CAND; i += 1) {
+          /* The sweep IGNITES a glint as its front crosses the candidate:
+             cause, then effect, in that order and visibly. */
+          if (sweepX >= candFx[i] && candGlow[i] < 0.999) candGlow[i] = 1;
+        }
+        if (sweepX > 1.12) phase = pendingResolve ? RESOLVED : RELEASING;
+      }
+      for (let i = 0; i < CAND; i += 1) {
+        if (phase === RESOLVED && i === CHOSEN) {
+          candGlow[i] = Math.min(1, candGlow[i] + dt * 3);
+        } else {
+          /* The also-rans fade at a pace the eye can follow. The narrowing IS
+             the picture; instantaneous would read as a glitch. */
+          candGlow[i] -= candGlow[i] * dt * 1.9;
+        }
+      }
+      const liftTarget = phase === RESOLVED ? 1 : 0;
+      lift += (liftTarget - lift) * Math.min(1, dt * 3.2);
+      if (phase === RELEASING && lift < 0.01) {
+        let sum = 0;
+        for (let i = 0; i < CAND; i += 1) sum += candGlow[i];
+        if (sum < 0.02) phase = IDLE;
+      }
+    }
 
     function build() {
       const rect = canvas!.getBoundingClientRect();
@@ -144,10 +263,25 @@ export default function ParticleWave({
       }
     }
 
+    /** Per-column sweep brightening, rebuilt only while a sweep is running. */
+    let sweepBoost = new Float32Array(0);
+
     function draw() {
       if (!buf || !image) return;
       buf.fill(0);
       field();
+
+      if (sweepBoost.length !== cols) sweepBoost = new Float32Array(cols);
+      if (phase === SWEEPING) {
+        for (let c = 0; c < cols; c += 1) {
+          /* A soft gaussian band around the front. Column-only on purpose:
+             one exp per column per frame is nothing, one per point is 50k. */
+          const d = (c / (cols - 1) - sweepX) / 0.055;
+          sweepBoost[c] = Math.exp(-d * d);
+        }
+      } else if (sweepBoost[0] !== 0 || sweepBoost[cols - 1] !== 0) {
+        sweepBoost.fill(0);
+      }
 
       const cx = bw / 2;
 
@@ -183,13 +317,19 @@ export default function ParticleWave({
              still lets the crests be the event. */
           const t = n * 0.5 + 0.5;
           const t2 = t * t;
-          const inten = depth * (0.28 + 0.72 * t2);
+          /* The sweep lifts whatever it is passing over: the light finds the
+             surface, the surface does not light itself. */
+          const sw = sweepBoost[c];
+          const inten = depth * (0.28 + 0.72 * t2) * (1 + sw * 0.85);
 
-          /* Deep blue in the troughs, cyan on the crests. */
-          const rr = (14 + 76 * t2) | 0;
-          const gg = (52 + 158 * t2) | 0;
-          const bb = (112 + 143 * t2) | 0;
-          const a = (inten * 235) | 0;
+          /* Deep blue in the troughs, cyan on the crests, whitened briefly
+             under the sweep. */
+          /* Clamped per channel: a value past 255 would bleed into the next
+             channel when packed. */
+          const rr = Math.min(255, (14 + 76 * t2 + sw * 90) | 0);
+          const gg = Math.min(255, (52 + 158 * t2 + sw * 60) | 0);
+          const bb = Math.min(255, (112 + 143 * t2 + sw * 40) | 0);
+          const a = Math.min(255, (inten * 235) | 0);
           if (a < 3) continue;
 
           const ix = sx | 0;
@@ -204,6 +344,76 @@ export default function ParticleWave({
             plot(ix - 1, iy, rr, gg, bb, s);
             plot(ix, iy + 1, rr, gg, bb, s);
             plot(ix, iy - 1, rr, gg, bb, s);
+          }
+        }
+      }
+
+      /* ---- The candidates, over the surface --------------------------------
+         Drawn after the field so they sit on top of it, at the exact height the
+         surface has THIS frame: a glint that rode its own curve would detach
+         from the wave the moment it moved. The chosen one, once resolved,
+         lifts off the surface on a visible stem, which is the difference
+         between "a bright dot" and "one taken out of the field". */
+      for (let i = 0; i < CAND; i += 1) {
+        const glow = candGlow[i];
+        if (glow < 0.03) continue;
+        const c = Math.round(candFx[i] * (cols - 1));
+        const r = Math.round(candFr[i] * (rows - 1));
+        const fz = r / (rows - 1);
+        const wz = Z_FAR + (Z_NEAR - Z_FAR) * fz;
+        const scale = FOCAL / wz;
+        const wx = (candFx[i] - 0.5) * surfW;
+        const n =
+          (0.5 * tx[c] + 0.35 * tz[r] + 0.45 * td[c + r] + 0.3 * te[c - r + rows]) /
+          1.6;
+        const liftW = i === CHOSEN ? lift * 120 : 0;
+        const sx = (cx + wx * scale * res) | 0;
+        const syS = ((horizon + (camH - n * AMP) * scale) * res) | 0;
+        const sy = ((horizon + (camH - n * AMP - liftW) * scale) * res) | 0;
+
+        const a = Math.min(255, (glow * 255) | 0);
+        const half = (a * 0.45) | 0;
+        /* THE RESOLUTION IS THE EVENT, SO IT IS ALLOWED TO BE BRIGHT. A glint
+           and the chosen seat at the same size made the one moment the loop
+           builds to indistinguishable from the also-rans. Once the lift is
+           under way the chosen point gains a halo ring and a wider bloom,
+           scaled by the lift itself so it grows as the seat rises. */
+        if (i === CHOSEN && lift > 0.15) {
+          const ring = (a * 0.32 * lift) | 0;
+          const soft = (a * 0.14 * lift) | 0;
+          for (let dx = -3; dx <= 3; dx += 1) {
+            for (let dy = -3; dy <= 3; dy += 1) {
+              const d2 = dx * dx + dy * dy;
+              if (d2 <= 4) continue; /* the core below draws this part */
+              if (d2 <= 9) plot(sx + dx, sy + dy, 170, 215, 255, ring);
+              else if (d2 <= 16) plot(sx + dx, sy + dy, 120, 180, 255, soft);
+            }
+          }
+        }
+        /* Near-white, warm side of the palette's cyan: the one thing in the
+           field that is not field-coloured. */
+        plot(sx, sy, 235, 248, 255, a);
+        plot(sx + 1, sy, 225, 244, 255, a);
+        plot(sx - 1, sy, 225, 244, 255, a);
+        plot(sx, sy + 1, 225, 244, 255, a);
+        plot(sx, sy - 1, 225, 244, 255, a);
+        plot(sx + 2, sy, 160, 210, 255, half);
+        plot(sx - 2, sy, 160, 210, 255, half);
+        plot(sx, sy + 2, 160, 210, 255, half);
+        plot(sx, sy - 2, 160, 210, 255, half);
+        plot(sx + 1, sy + 1, 160, 210, 255, half);
+        plot(sx - 1, sy + 1, 160, 210, 255, half);
+        plot(sx + 1, sy - 1, 160, 210, 255, half);
+        plot(sx - 1, sy - 1, 160, 210, 255, half);
+
+        /* The stem: a dotted vertical from the surface point up to the lifted
+           seat, so the lift reads as a distance rather than a relocation. */
+        if (liftW > 4) {
+          const span = syS - sy;
+          const steps = Math.max(2, (span / (5 * res)) | 0);
+          for (let s = 1; s < steps; s += 1) {
+            const yy = (sy + (span * s) / steps) | 0;
+            plot(sx, yy, 150, 200, 255, (a * 0.35) | 0);
           }
         }
       }
@@ -234,6 +444,7 @@ export default function ParticleWave({
       const dt = last ? Math.min((now - last) / 1000, 0.1) : 0.016;
       last = now;
       clock += dt;
+      stepSearch(dt);
       draw();
       raf = requestAnimationFrame(frame);
     }
@@ -250,9 +461,18 @@ export default function ParticleWave({
     }
 
     build();
+    /* The controls the typewriter drives. Under reduced motion they are
+       no-ops rather than absent, so the caller never has to know. */
+    if (searchApi) {
+      searchApi.current = reduced
+        ? { search: () => {}, resolve: () => {}, release: () => {} }
+        : { search: beginSearch, resolve: requestResolve, release: releaseSearch };
+    }
     if (reduced) {
       draw();
-      return;
+      return () => {
+        if (searchApi) searchApi.current = null;
+      };
     }
 
     const ro = new ResizeObserver(build);
@@ -281,8 +501,9 @@ export default function ParticleWave({
       ro.disconnect();
       io.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
+      if (searchApi) searchApi.current = null;
     };
-  }, [reduced]);
+  }, [reduced, searchApi]);
 
   return (
     <canvas
