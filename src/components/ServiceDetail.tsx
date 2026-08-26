@@ -89,7 +89,20 @@ export default function ServiceDetail({
         </section>
       )}
 
-      {/* ---- How we search ------------------------------------------------ */}
+      {/* ---- How we search ------------------------------------------------
+          A LEDGER, NOT CARDS, AND THAT IS A ROBUSTNESS DECISION.
+
+          These four are the firm's commitments, and the body under each is
+          client copy that has not arrived. Rendered as cards, a title with no
+          body is a large empty box, which is exactly what shipped first: four
+          grey slabs with two words in each. The section looked unfinished
+          because it WAS being drawn as though something were missing.
+
+          A ruled row does not have that failure mode. An index, a large title
+          and a hairline is a complete object on its own, so the section reads
+          as deliberate today, and when the bodies arrive they fill the third
+          column without the layout changing shape. Build for the content you
+          have, in a form that accepts the content you are waiting for. */}
       {content.approach && content.approach.length > 0 && (
         <LightBand>
           <div className="mx-auto max-w-[1280px] px-6 py-20 sm:py-28">
@@ -97,16 +110,26 @@ export default function ServiceDetail({
               title={content.approachHeading ?? "How we"}
               turn={content.approachTurn}
             />
-            <ul className="mt-14 grid gap-4 sm:grid-cols-2">
+            <ol className="mt-14 border-t border-[var(--v-ink)]/[0.14]">
               {content.approach.map((a, i) => (
-                <li key={a.title} className="h-full">
-                  <Reveal delay={Math.min(i * 0.06, 0.24)} className="h-full" fill>
-                    <div className="flex h-full flex-col rounded-[20px] bg-[var(--v-ink)]/[0.04] p-8">
-                      <h3 className="v-display text-[length:var(--t-title)] leading-[1.2] text-[var(--v-ink)]">
+                <li key={a.title} className="border-b border-[var(--v-ink)]/[0.14]">
+                  <Reveal delay={Math.min(i * 0.07, 0.28)}>
+                    <div className="group relative grid items-baseline gap-x-10 gap-y-3 py-9 md:grid-cols-[3.5rem_minmax(0,1fr)_1.05fr] md:py-11">
+                      {/* The accent rule grows from the left on hover. One
+                          moving part, on the row you are pointing at, which is
+                          the whole of the interaction. */}
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-x-0 bottom-[-1px] h-px origin-left scale-x-0 bg-[var(--v-primary)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
+                      />
+                      <span className="text-[length:var(--t-small)] font-semibold tabular-nums text-[var(--v-primary)]">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <h3 className="v-display text-[length:clamp(26px,2.6vw,40px)] leading-[1.15] tracking-[-0.02em] text-[var(--v-ink)]">
                         {a.title}
                       </h3>
                       {a.body && (
-                        <p className="v-serif mt-4 text-[length:var(--t-secondary)] leading-[1.7] text-[var(--v-muted)]">
+                        <p className="v-serif text-[length:var(--t-secondary)] leading-[1.7] text-[var(--v-muted)]">
                           {a.body}
                         </p>
                       )}
@@ -114,7 +137,7 @@ export default function ServiceDetail({
                   </Reveal>
                 </li>
               ))}
-            </ul>
+            </ol>
           </div>
         </LightBand>
       )}
