@@ -22,6 +22,8 @@ export default function SectionHeading({
   title,
   turn,
   lede,
+  aside,
+  split: splitProp = false,
   align = "left",
   size = "full",
   glow = true,
@@ -33,6 +35,26 @@ export default function SectionHeading({
   /** The phrase that turns to the accent, on its own line. */
   turn?: React.ReactNode;
   lede?: React.ReactNode;
+  /**
+   * Supporting content set BESIDE the heading rather than under it: usually the
+   * lede and a call to action, sharing the heading's top edge.
+   *
+   * WHY THIS IS A LAYOUT AND NOT A MARGIN. Stacking eyebrow, heading and lede
+   * down the centre of a column gives every section on the site the same
+   * silhouette, and a page of identical silhouettes reads as generated no
+   * matter how good each one is. Splitting the row lets the heading be much
+   * larger than it could be if it had to leave room underneath, and the size
+   * jump between a 46px headline and a 15px paragraph next to it is the
+   * contrast an editorial page is built on. Passing this switches the block to
+   * two columns and moves the lede across into the second one.
+   */
+  aside?: React.ReactNode;
+  /**
+   * Force the two-column row without supplying anything beside the heading. A
+   * section whose action lives further down the page still wants the split,
+   * because the point of it is the heading's SIZE, not the column's contents.
+   */
+  split?: boolean;
   align?: "left" | "center";
   /**
    * "full" is the section title sized for a heading that owns the page's whole
@@ -60,13 +82,21 @@ export default function SectionHeading({
 }) {
   const centred = align === "center";
   const columnar = size === "column";
+  /* A split row only makes sense left-aligned: centred type with a column
+     hanging off one side is not a composition, it is a mistake. */
+  /* NEVER SPLIT A HEADING THAT IS ALREADY IN A COLUMN. `size="column"` means
+     the caller has put this inside a narrow measure, and dividing that again
+     gives a lede a hundred and fifty pixels wide. The split exists to let a
+     heading be BIG across a full measure; in a column there is no width to
+     split. */
+  const split = (splitProp || Boolean(aside)) && Boolean(lede) && !centred && !columnar;
 
-  return (
+  const block = (
     /* `relative` anchors the glow and `isolate` contains it. Without the
        isolation the glow's negative z-index escapes this stacking context and
        paints behind the section's own background, where it is invisible. */
     <div
-      className={`relative isolate ${centred ? "mx-auto text-center" : ""} ${className}`}
+      className={`relative isolate ${centred ? "mx-auto text-center" : ""} ${split ? "" : className}`}
     >
       {glow && <span aria-hidden="true" className="v-heading-glow" />}
       {eyebrow && (
@@ -123,10 +153,10 @@ export default function SectionHeading({
           )}
         </Tag>
 
-      {lede && (
+      {!split && lede && (
         <Reveal delay={0.14}>
           <p
-            className={`text-[length:var(--t-lede)] leading-[1.65] text-[var(--v-muted)] ${
+            className={`v-serif text-[length:var(--t-lede)] leading-[1.65] text-[var(--v-muted)] ${
               columnar ? "mt-6" : "mt-8"
             } ${centred ? "mx-auto max-w-[58ch]" : "max-w-[52ch]"}`}
           >
@@ -134,6 +164,28 @@ export default function SectionHeading({
           </p>
         </Reveal>
       )}
+    </div>
+  );
+
+  if (!split) return block;
+
+  /* The aside column starts at the heading's top edge, not the eyebrow's, which
+     is why it is padded down rather than simply aligned start: the eyebrow is a
+     label on the heading and the supporting column is a peer of the heading
+     itself. */
+  return (
+    <div className={`grid gap-8 lg:grid-cols-[1.25fr_1fr] lg:gap-16 ${className}`}>
+      {block}
+      <div className="lg:pt-[calc(var(--t-label)+2.1rem)]">
+        {lede && (
+          <Reveal delay={0.14}>
+            <p className="v-serif max-w-[46ch] text-[length:var(--t-lede)] leading-[1.65] text-[var(--v-muted)]">
+              {lede}
+            </p>
+          </Reveal>
+        )}
+        {aside && <Reveal delay={0.2}>{aside}</Reveal>}
+      </div>
     </div>
   );
 }

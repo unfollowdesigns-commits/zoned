@@ -81,6 +81,7 @@ export default function Specializations() {
           title="More specializations"
           turn="for your business."
           lede="Wherever you're building, the expertise is already in the room. Twelve disciplines, and the same partners across all of them."
+          split
         />
 
         <div className="mt-16 border-t border-[var(--v-border)]">

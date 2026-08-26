@@ -2,6 +2,7 @@ import Link from "@/components/SiteLink";
 import { ArrowUpRight } from "lucide-react";
 import { INDUSTRIES } from "@/lib/site";
 import { ICONS } from "@/components/icons";
+import GlowButton from "@/components/ui/GlowButton";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
 
@@ -28,6 +29,13 @@ export default function Industries() {
           title="Industries"
           turn="we know deeply."
           lede="Eight sectors we work in every week, and the operators, boards and sponsors inside them."
+          /* Split row. The heading gets its own column and can therefore be
+             much larger than it could be with a paragraph sitting under it. */
+          aside={
+            <GlowButton href="/who-we-serve" className="mt-7">
+              See every market
+            </GlowButton>
+          }
         />
 
         <ul className="mt-14 grid gap-4 sm:grid-cols-2 lg:mt-16">
