@@ -5,16 +5,25 @@ import Link from "@/components/SiteLink";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
 import { EASE, EXIT, SPRING, useReducedMotion } from "@/lib/motion";
+import { answer, WELCOME, type Reply } from "@/lib/assistant-answers";
 
 /**
  * The guided assistant.
  *
- * IT IS NOT A CHATBOT AND IT DOES NOT PRETEND TO BE ONE. There is no model
- * behind this, so it does not get a blinking caret, a "thinking" state, or a
- * free-text box that quietly discards what you type. Those are the things that
- * make a scripted widget feel like a bait and switch: a visitor types a real
- * question, gets a canned reply, and now distrusts the whole site. What this
- * does instead is state its nature in the header and answer with buttons.
+ * IT TAKES TYPED QUESTIONS, AND THEY ACTUALLY WORK. The earlier version had
+ * buttons only, on the argument that a free-text box which quietly discards
+ * what you type is a bait and switch. That argument is still right, so the box
+ * was added by making it real rather than by faking it: what you type is
+ * matched against the site's own content and answered from it. See
+ * lib/assistant-answers.
+ *
+ * THERE IS STILL NO MODEL BEHIND IT, AND THAT IS DELIBERATE. This page sells
+ * judgement about people. A generated reply that invents a service the firm
+ * does not offer, a fee it has not quoted or a timeline it cannot meet does
+ * more damage than no widget at all, and it is exactly the failure mode a
+ * language model has here. Retrieval over the firm's own pages cannot invent,
+ * and when it does not know it says so and offers a partner, which is a real
+ * answer where a confident guess is not.
  *
  * What it is: three questions that narrow a visitor to the one engagement that
  * fits, and a booking link that carries their answers with it. For the actual
@@ -130,15 +139,38 @@ const OUTCOMES: Record<string, Outcome> = {
   },
 };
 
+type Turn = { role: "you" | "dp"; text: string; links?: Reply["links"] };
+
 export default function Assistant() {
   const [open, setOpen] = React.useState(false);
   const [path, setPath] = React.useState<string[]>(["start"]);
+  /* The typed conversation, kept alongside the guided path rather than
+     replacing it: the buttons are still the fastest route for someone who
+     just wants the right page, and the box is there for everyone else. */
+  const [turns, setTurns] = React.useState<Turn[]>([]);
+  const [draft, setDraft] = React.useState("");
   const reduced = useReducedMotion();
   const panelRef = React.useRef<HTMLDivElement>(null);
+  const logRef = React.useRef<HTMLDivElement>(null);
 
   const here = path[path.length - 1];
   const step = STEPS[here];
   const outcome = OUTCOMES[here];
+  const chatting = turns.length > 0;
+
+  function ask(text: string) {
+    const q = text.trim();
+    if (!q) return;
+    const a = answer(q);
+    setTurns((t) => [...t, { role: "you", text: q }, { role: "dp", ...a }]);
+    setDraft("");
+  }
+
+  /* Keep the newest turn in view. A transcript that grows off the bottom of
+     its own box is the most common way a chat panel feels broken. */
+  React.useEffect(() => {
+    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+  }, [turns]);
 
   // Escape closes, which people expect of anything that floats over a page.
   React.useEffect(() => {
@@ -153,8 +185,19 @@ export default function Assistant() {
   // Focus moves into the panel on open so a keyboard user is not left behind
   // at the launcher, and the trail resets so a reopened panel starts fresh.
   React.useEffect(() => {
-    if (open) panelRef.current?.focus();
-    else setPath(["start"]);
+    if (open) {
+      panelRef.current?.focus();
+      /* Opens on a greeting rather than straight into an interrogation. It is
+         seeded here rather than held as a constant first turn so that closing
+         and reopening genuinely starts over: a panel that reopens mid-
+         conversation is confusing, and one that reopens with yesterday's
+         answers still in it is worse. */
+      setTurns([{ role: "dp", text: WELCOME }]);
+    } else {
+      setPath(["start"]);
+      setTurns([]);
+      setDraft("");
+    }
   }, [open]);
 
   return (
@@ -237,12 +280,13 @@ export default function Assistant() {
           >
             <div className="relative z-[2] flex items-start justify-between gap-4 border-b border-[var(--v-border)] p-5">
               <div>
-                <p className="v-eyebrow mb-1.5">Find your starting point</p>
-                {/* Says what it is, in the header, unprompted. A scripted widget
-                    that lets you assume it is an AI has already lost the trust
-                    it was built to earn. */}
+                <p className="v-eyebrow mb-1.5">District Partners</p>
+                {/* Says what it is, in the header, unprompted. Answering from
+                    the site rather than from a model is a feature worth
+                    stating: it is why this thing cannot make something up. */}
                 <p className="text-[length:var(--t-small)] leading-[1.5] text-[var(--v-muted)]">
-                  A few questions, not a chatbot. Answers go straight to a partner.
+                  Ask a question or pick a path. Answers come from this site, so nothing here
+                  is invented.
                 </p>
               </div>
               <button
@@ -256,6 +300,57 @@ export default function Assistant() {
             </div>
 
             <div className="relative z-[2] p-5">
+              {/* THE TRANSCRIPT. Only present once something has been asked, so
+                  a visitor who just wants the guided path never sees an empty
+                  chat box waiting to be filled. */}
+              {chatting && (
+                <div
+                  ref={logRef}
+                  className="mb-4 flex max-h-[15rem] flex-col gap-3 overflow-y-auto pr-1"
+                  aria-live="polite"
+                >
+                  {turns.map((t, i) => (
+                    <div
+                      key={i}
+                      className={
+                        t.role === "you"
+                          ? "self-end rounded-[14px] rounded-br-[4px] bg-[var(--v-primary)] px-3.5 py-2.5 text-[length:var(--t-small)] leading-[1.5] text-white"
+                          : "self-start rounded-[14px] rounded-bl-[4px] bg-white/[0.06] px-3.5 py-2.5 text-[length:var(--t-small)] leading-[1.6] text-[var(--v-ink)]/90"
+                      }
+                      style={{ maxWidth: "92%" }}
+                    >
+                      {t.text}
+                      {t.links && t.links.length > 0 && (
+                        <span className="mt-2.5 flex flex-wrap gap-1.5">
+                          {t.links.map((l) =>
+                            l.external ? (
+                              <a
+                                key={l.href}
+                                href={l.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="rounded-full border border-[var(--v-border)] px-2.5 py-1 text-[length:var(--t-label)] font-medium text-[var(--v-ring)] transition-colors hover:border-[var(--v-primary)] hover:bg-[var(--v-primary)]/10"
+                              >
+                                {l.label}
+                              </a>
+                            ) : (
+                              <Link
+                                key={l.href}
+                                href={l.href}
+                                onClick={() => setOpen(false)}
+                                className="rounded-full border border-[var(--v-border)] px-2.5 py-1 text-[length:var(--t-label)] font-medium text-[var(--v-ring)] transition-colors hover:border-[var(--v-primary)] hover:bg-[var(--v-primary)]/10"
+                              >
+                                {l.label}
+                              </Link>
+                            ),
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={here}
@@ -337,6 +432,37 @@ export default function Assistant() {
                   Back
                 </button>
               )}
+
+              {/* THE BOX. `form` rather than a bare input so Enter submits and
+                  a mobile keyboard shows a Go key, both of which people expect
+                  and neither of which a click handler on a button provides. */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  ask(draft);
+                }}
+                className="mt-4 flex items-center gap-2 border-t border-[var(--v-border)] pt-4"
+              >
+                <label htmlFor="dp-assistant-input" className="sr-only">
+                  Ask District Partners a question
+                </label>
+                <input
+                  id="dp-assistant-input"
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder="Ask a question"
+                  autoComplete="off"
+                  className="min-w-0 flex-1 rounded-full border border-[var(--v-border)] bg-white/[0.04] px-4 py-2.5 text-[length:var(--t-small)] text-[var(--v-ink)] outline-none transition-colors placeholder:text-[var(--v-muted)] focus:border-[var(--v-primary)] focus-visible:ring-2 focus-visible:ring-[var(--v-ring)]"
+                />
+                <button
+                  type="submit"
+                  aria-label="Send"
+                  disabled={!draft.trim()}
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--v-primary)] text-white transition-[opacity,background-color] hover:bg-[var(--v-primary-deep)] disabled:opacity-35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
+                >
+                  <ArrowRight size={16} strokeWidth={2.2} aria-hidden="true" />
+                </button>
+              </form>
             </div>
           </motion.div>
           </div>
