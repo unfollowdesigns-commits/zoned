@@ -311,10 +311,23 @@
 /* ---- Sticky scroll rail -------------------------------------------------
    The heading pins while its items pass. `clip` on html/body rather than
    `hidden` is what keeps this working, see the tokens file. */
+/* PINNED ONLY WHERE THERE IS A SECOND COLUMN TO PIN IT BESIDE. This was
+   `position: sticky` at every width, and the two-column layout it belongs to
+   only exists at `lg`. Below that the grid collapses to one column, so the
+   heading pinned itself at the top of the viewport and the card stack, which
+   is sticky in its own right, scrolled straight over it: measured at 390x844,
+   "Search and interim, under one partner" and its lede were printed underneath
+   three service cards for a thousand pixels of scroll.
+
+   A sticky element with nothing beside it is not a rail, it is an obstacle. */
 .v-sticky-rail {
-  position: sticky;
-  top: 6rem;
   align-self: start;
+}
+@media (min-width: 1024px) {
+  .v-sticky-rail {
+    position: sticky;
+    top: 6rem;
+  }
 }
 
 /* ---- Section divider ---- */

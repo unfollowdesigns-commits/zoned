@@ -56,17 +56,30 @@ export default function BlogPage() {
                     href={`/resources/blog/${post.slug}`}
                     className="v-lift group block overflow-hidden rounded-[var(--radius)]"
                   >
-                    <div className="relative aspect-[16/9] sm:aspect-[21/8]">
+                    {/* IN FLOW, NOT TWO ABSOLUTE CORNERS. The chip was pinned
+                        top-left and the headline block bottom-left inside a
+                        fixed 16:9 box. On a phone that box is 219px tall and
+                        these headlines wrap to four lines, so the bottom block
+                        grew upward and printed straight through the chip:
+                        "INTERIM & FRACTIONAL" rendered on top of "The 5
+                        Candidates Who Thrive". Absolute corners only hold while
+                        the content is shorter than the box, which is an
+                        assumption no headline can be asked to honour.
+
+                        A flex column with the art behind it cannot overlap at
+                        any length: the card grows instead. The fixed ratio
+                        comes back at `sm`, where the width makes it safe. */}
+                    <div className="relative flex min-h-[360px] flex-col justify-between p-6 sm:aspect-[21/8] sm:min-h-0 sm:p-10">
                       <PostArt slug={post.slug} category={post.category} />
 
-                      <span className="absolute left-6 top-6 rounded-full bg-black/35 px-3 py-1 text-[length:var(--t-label)] font-medium uppercase tracking-[0.1em] text-white/80 backdrop-blur-sm">
+                      <span className="relative w-fit rounded-full bg-black/35 px-3 py-1 text-[length:var(--t-label)] font-medium uppercase tracking-[0.1em] text-white/80 backdrop-blur-sm">
                         {post.category}
                       </span>
 
                       {/* The headline sits on the art, bottom-left, inside a max
                           measure so it never runs the full width of a 21:8 card
                           and becomes a single unreadable line. */}
-                      <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
+                      <div className="relative mt-8">
                         <h2
                           className="v-display max-w-[20ch] text-balance text-white transition-colors duration-200 group-hover:text-[var(--v-primary-soft,#a9c4ff)]"
                           style={{

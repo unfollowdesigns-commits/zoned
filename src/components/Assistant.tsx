@@ -176,18 +176,31 @@ export default function Assistant() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="dp-assistant"
-        className="v-ios flex items-center gap-3 rounded-full py-2.5 pl-2.5 pr-5 text-[length:var(--t-small)] font-semibold text-white outline-none transition-[transform,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--v-ring)]"
+        /* A DISC ON A PHONE, A PILL ON A DESKTOP, and that is a bug fix
+           rather than a preference. The label makes this 182 units wide, and
+           it is fixed to the bottom right corner of every page, so on a 390px
+           screen it covered nearly half the line it happened to be sitting
+           over. Swept across six routes it was printing over body copy,
+           headlines and card titles at almost every scroll position: 18 of
+           the 27 collisions found on mobile were this one control.
+
+           The label is what does not fit, so the label is what goes. The
+           question mark and the affordance survive at 44px, which is also the
+           minimum comfortable touch target, and the accessible name is
+           carried by aria-label so nothing is lost to a screen reader. */
+        aria-label={open ? "Close the assistant" : "Where do I start?"}
+        className="v-ios flex h-11 w-11 items-center justify-center rounded-full text-[length:var(--t-small)] font-semibold text-white outline-none transition-[transform,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--v-ring)] sm:h-auto sm:w-auto sm:justify-start sm:gap-3 sm:py-2.5 sm:pl-2.5 sm:pr-5"
         initial={reduced ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: EASE, delay: 1.1 }}
       >
         <span
           aria-hidden="true"
-          className="relative grid h-8 w-8 place-items-center rounded-full bg-[var(--v-primary)]/15 text-[length:var(--t-small)] font-bold text-[var(--v-ring)]"
+          className="relative grid h-7 w-7 place-items-center rounded-full bg-[var(--v-primary)]/15 text-[length:var(--t-small)] font-bold text-[var(--v-ring)] sm:h-8 sm:w-8"
         >
           ?
         </span>
-        <span className="relative">{open ? "Close" : "Where do I start?"}</span>
+        <span className="relative hidden sm:inline">{open ? "Close" : "Where do I start?"}</span>
       </motion.button>
       </div>
 
