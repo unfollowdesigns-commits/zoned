@@ -681,31 +681,6 @@ html[data-loaded] .dp-scale-in {
    Framer element renders at its `initial` values there. An `initial` of
    opacity 0 means an invisible mark from first paint until hydration, which is
    most of the curtain's life on a cold load. See components/Preloader.tsx. */
-@keyframes dp-pre-letter {
-  from { transform: translateY(115%); }
-  to   { transform: translateY(0); }
-}
-@keyframes dp-pre-rule {
-  from { transform: scaleX(0); opacity: 0; }
-  to   { transform: scaleX(1); opacity: 1; }
-}
-
-.dp-pre-letter > span {
-  display: inline-block;
-  animation: dp-pre-letter 0.85s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s) both;
-}
-
-.dp-pre-rule {
-  animation: dp-pre-rule 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.95s both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dp-pre-letter > span,
-  .dp-pre-rule {
-    animation: none;
-  }
-}
-
 /* ---- Footer wordmark ----------------------------------------------------
    The name set enormous and almost invisible, sitting behind the footer's last
    row. It closes the page the way a colophon closes a book: the brand gets the
@@ -2105,51 +2080,150 @@ html[data-loaded] .dp-scale-in {
 }
 
 /* ---- Card art --------------------------------------------------------------
-   See components/ui/PostArt.tsx. The figure never changes: the LIGHT moves
-   over it. One band crossing beneath the marks, one very slow drift on the
-   group above, and nothing else, so a grid of six cards runs twelve composited
-   animations rather than the eight hundred that animating the marks
-   themselves would cost. Both carry the card's seeded --phase, so a grid is
-   lit in turn instead of in unison. */
-.dp-art {
-  transform-box: view-box;
-}
-.dp-art-sweep {
-  animation: dp-art-sweep 9s var(--phase, 0s) cubic-bezier(0.45, 0, 0.55, 1) infinite;
-}
-@keyframes dp-art-sweep {
-  /* Holds off screen for the back third: a band that restarts the instant it
-     leaves reads as a repeating wipe, and the pause is what makes it a
-     passing light instead. */
-  0%        { transform: translateX(0); }
-  62%, 100% { transform: translateX(168px); }
-}
-.dp-art-body {
-  transform-origin: 62% 58%;
-  animation: dp-art-drift 26s var(--phase, 0s) ease-in-out infinite;
-}
-@keyframes dp-art-drift {
-  0%, 100% { transform: scale(1) translateX(0); }
-  50%      { transform: scale(1.035) translateX(-1.2px); }
-}
+   See components/ui/PostArt.tsx.
 
-/* The card lifts the light as well as itself. A hover that only moves the box
-   leaves the art inert inside it, which is what makes a card feel printed. */
-.dp-art-card:hover .dp-art-sweep,
-.dp-art-card:focus-within .dp-art-sweep {
-  animation-duration: 4.5s;
+   THE FIGURE IS STILL AT REST AND MOVES ON HOVER, which is a reversal of the
+   first attempt and the right one. That version ran a light band across every
+   card forever: six cards in a grid all quietly pulsing is ambient noise
+   competing with the headlines beside them, and it never touched the marks
+   themselves, which is what anyone actually looks at.
+
+   Now nothing moves until a card is pointed at or focused, and then the marks
+   ripple: one short pulse travelling through them in index order, so the
+   pattern reads as being redrawn rather than merely lit. Being hover-scoped is
+   what makes it affordable to animate the marks at all. A grid at rest costs
+   nothing, and only the one card under the pointer is ever running.
+
+   --i is the position in the wave, taken modulo 24 in the component so a motif
+   of 130 dots and one of 6 chevrons both ripple over the same short interval
+   instead of one taking two seconds to finish. */
+.dp-art-el {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.dp-art-card:hover .dp-art-el,
+.dp-art-card:focus-within .dp-art-el,
+.dp-art-hover:hover .dp-art-el,
+.dp-art-hover:focus-within .dp-art-el {
+  animation: dp-art-el 640ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 26ms) both;
+}
+@keyframes dp-art-el {
+  0%   { transform: scale(1); }
+  38%  { transform: scale(1.24); }
+  100% { transform: scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dp-art-sweep,
-  .dp-art-body {
+  .dp-art-card:hover .dp-art-el,
+  .dp-art-card:focus-within .dp-art-el,
+  .dp-art-hover:hover .dp-art-el,
+  .dp-art-hover:focus-within .dp-art-el {
     animation: none;
   }
-  /* Rest with the light ON the figure rather than parked off the left edge,
-     so the still frame is the lit one. */
-  .dp-art-sweep {
-    transform: translateX(70px);
+}
+
+/* ---- First-paint curtain ---------------------------------------------------
+   Both of these are CSS rather than Framer, and that is the whole point: the
+   curtain ships in the server HTML, so anything driven by React state or by a
+   Framer `initial` is invisible or inert until hydration, which on a cold load
+   is most of the curtain's life. See kit/components/Curtain, note 4. */
+.v-curtain-bloom {
+  animation: dp-curtain-bloom 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes dp-curtain-bloom {
+  0%   { opacity: 0; transform: scale(0.7); }
+  62%  { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0.75; transform: scale(1); }
+}
+
+/* easeOutExpo in keyframes: work finishing, not a linear timer pretending to
+   measure something. */
+.v-curtain-fill {
+  width: 0;
+  animation: dp-curtain-fill var(--dur, 1600ms) linear both;
+}
+@keyframes dp-curtain-fill {
+  0%   { width: 0%; }
+  20%  { width: 60%; }
+  45%  { width: 84%; }
+  70%  { width: 94%; }
+  100% { width: 100%; }
+}
+
+/* ---- The mark assembling ---------------------------------------------------
+   See components/Preloader. The monogram is two square rings that interlock
+   because one is dropped below and left of the other, plus the bracket that
+   opens it. So the sequence takes it apart and puts it back: the bracket
+   arrives from the left, the blue ring drops from above, the ink ring rises
+   from below, and they lock. A fade would animate the logo; this animates what
+   the logo IS.
+
+   CSS keyframes, not Framer, for the reason above: this has to be moving in
+   the server HTML. */
+.dp-mark-part {
+  transform-box: fill-box;
+  animation-duration: 760ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+}
+.dp-mark-bracket {
+  transform-origin: right center;
+  animation-name: dp-mark-bracket;
+  animation-delay: 0.06s;
+}
+@keyframes dp-mark-bracket {
+  from { opacity: 0; transform: translateX(-42px); }
+  to   { opacity: 1; transform: none; }
+}
+.dp-mark-blue {
+  animation-name: dp-mark-blue;
+  animation-delay: 0.2s;
+}
+@keyframes dp-mark-blue {
+  from { opacity: 0; transform: translateY(-56px); }
+  to   { opacity: 1; transform: none; }
+}
+.dp-mark-ink {
+  animation-name: dp-mark-ink;
+  animation-delay: 0.3s;
+}
+@keyframes dp-mark-ink {
+  from { opacity: 0; transform: translateY(56px); }
+  to   { opacity: 1; transform: none; }
+}
+/* The lock: one short settle once both rings are home, on the whole monogram,
+   so the pieces read as clicking together rather than as arriving separately
+   and stopping. */
+.dp-mark-lock {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dp-mark-lock 560ms cubic-bezier(0.34, 1.26, 0.5, 1) 0.88s both;
+}
+@keyframes dp-mark-lock {
+  0%   { transform: scale(1); }
+  38%  { transform: scale(1.045); }
+  100% { transform: scale(1); }
+}
+
+@keyframes dp-pre-letter {
+  from { transform: translateY(115%); }
+  to   { transform: translateY(0); }
+}
+
+.dp-pre-letter > span {
+  display: inline-block;
+  animation: dp-pre-letter 0.62s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v-curtain-bloom,
+  .v-curtain-fill,
+  .dp-mark-part,
+  .dp-mark-lock,
+  .dp-pre-letter > span {
+    animation: none;
   }
+  .v-curtain-fill { width: 100%; }
 }
 
 /* ---- Engagement map --------------------------------------------------------

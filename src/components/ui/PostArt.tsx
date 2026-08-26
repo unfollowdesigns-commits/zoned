@@ -81,6 +81,18 @@ function rng(seed: number) {
  */
 const q = (n: number) => Math.round(n * 1000) / 1000;
 
+/**
+ * How long the hover ripple takes to cross a figure, in wave positions.
+ *
+ * Every mark carries its index modulo this, so a motif of 130 dots and one of
+ * 6 chevrons finish in the same short interval. Without it the delay is the
+ * raw index and the graduated field would still be rippling three seconds
+ * after the pointer left. The repeat also makes dense motifs ripple in bands
+ * rather than in one front, which reads better on a grid of dots than a single
+ * sweep would.
+ */
+const WAVE = 14;
+
 type Draw = (r: () => number, c: string) => React.ReactNode;
 
 /* Every motif is drawn in a 100 x 56 box, anchored so its weight sits low and
@@ -99,6 +111,8 @@ const contours: Draw = (r, c) => {
         return (
           <path
             key={i}
+            className="dp-art-el"
+            style={{ ["--i" as string]: i }}
             d={`M ${100 - k * 1.5} 60 C ${86 - k} ${44 - k * 0.3}, ${96 - k * 0.4} ${30 - k * 0.5}, ${112} ${28 - k * 0.8}`}
             fill="none"
             stroke={c}
@@ -124,7 +138,16 @@ const halftone: Draw = (r, c) => {
       const rad = q(0.45 + Math.max(0, wave) * 1.5);
       if (rad < 0.5) continue;
       dots.push(
-        <circle key={`${col}-${row}`} cx={x} cy={y} r={rad} fill={c} fillOpacity={q(0.28 + rad * 0.3)} />,
+        <circle
+          key={`${col}-${row}`}
+          className="dp-art-el"
+          style={{ ["--i" as string]: (col + row) % WAVE }}
+          cx={x}
+          cy={y}
+          r={rad}
+          fill={c}
+          fillOpacity={q(0.28 + rad * 0.3)}
+        />,
       );
     }
   }
@@ -142,6 +165,8 @@ const chevrons: Draw = (r, c) => {
         return (
           <path
             key={i}
+            className="dp-art-el"
+            style={{ ["--i" as string]: i }}
             d={`M ${q(52 + o)} 60 L ${q(80 + o)} ${q(26 - o * 0.25)} L ${q(108 + o)} 60`}
             fill="none"
             stroke={c}
@@ -165,7 +190,18 @@ const field: Draw = (r, c) => {
     const y = q(4 + ((i * 37) % 56) + (((i * 6151) % 7) - 3) * 0.5);
     const d = q(Math.min(1, Math.max(0, (x - 44) / 60)));
     const rad = q(0.35 + d * 1.7);
-    dots.push(<circle key={i} cx={x} cy={y} r={rad} fill={c} fillOpacity={q(0.18 + d * 0.55)} />);
+    dots.push(
+      <circle
+        key={i}
+        className="dp-art-el"
+        style={{ ["--i" as string]: i % WAVE }}
+        cx={x}
+        cy={y}
+        r={rad}
+        fill={c}
+        fillOpacity={q(0.18 + d * 0.55)}
+      />,
+    );
   }
   return <g>{dots}</g>;
 };
@@ -179,6 +215,8 @@ const stripes: Draw = (r, c) => {
       {Array.from({ length: n }, (_, i) => (
         <rect
           key={i}
+          className="dp-art-el"
+          style={{ ["--i" as string]: i % WAVE }}
           x={q(40 + i * 3.4)}
           y={-14}
           width={1.5}
@@ -201,6 +239,8 @@ const dashes: Draw = (r, c) => {
     segs.push(
       <rect
         key={i}
+        className="dp-art-el"
+        style={{ ["--i" as string]: i % WAVE }}
         x={x}
         y={y}
         width={4.6}
@@ -239,21 +279,20 @@ const FALLBACK = { motif: "contours" as Motif, colour: "#5b93ff" };
 /**
  * The art, animated, for any card that wants it.
  *
- * THE ANIMATION IS TWO ELEMENTS, NOT TWO HUNDRED. The obvious way to bring
- * these to life is to animate the marks themselves, and it is the wrong way:
- * the graduated field alone is 130 circles, so six cards in a grid would be
- * running eight hundred animations to make a background shimmer. It would also
- * break the brief, which is that the PATTERNS DO NOT CHANGE. A figure whose
- * parts move is a different figure.
+ * IT IS STILL AT REST AND THE MARKS RIPPLE ON HOVER. The first attempt ran a
+ * light band across every card forever, which was wrong twice: a grid of six
+ * cards all quietly pulsing is ambient noise competing with the headlines
+ * beside them, and it lit the figure without ever touching the marks, which
+ * are the thing anyone actually looks at.
  *
- * So the figure holds its shape and the LIGHT moves over it: one slow band
- * crossing beneath the marks, and one very slow drift on the group above it.
- * Two animated elements per card, both composited, and the design is untouched.
- * It is also the same idea the hero runs at full size, where a sweep crosses
- * the market and lights what it passes: one grammar, two scales.
+ * Pointing at a card now sends one short pulse through its marks in index
+ * order, so the pattern reads as being redrawn. Scoping it to hover is what
+ * makes animating the marks affordable at all: a grid at rest costs nothing,
+ * and only the card under the pointer is ever running. See the .dp-art-el
+ * rules, and WAVE below for why a 130 dot motif and a 6 chevron one take the
+ * same time to cross.
  *
- * Deterministic, server rendered, no JavaScript. The phase is seeded so a grid
- * of cards is never in unison, which is what would make it read as a loop.
+ * Deterministic, server rendered, no JavaScript.
  */
 export function CardArt({
   seed: seedInput,
@@ -271,18 +310,12 @@ export function CardArt({
   const random = rng(seed);
   const draw = MOTIFS[motif] ?? contours;
   const gid = `pa-${seed.toString(36)}`;
-  /* Spread across the sweep's own cycle, so cards in a grid are lit in turn
-     rather than together. Negative, so every card is already mid-cycle on its
-     first frame and none of them starts dark. */
-  const phase = q(-((seed % 900) / 100));
-
   return (
     <svg
       viewBox="0 0 100 56"
       preserveAspectRatio="xMidYMid slice"
       aria-hidden="true"
       className={`dp-art absolute inset-0 h-full w-full ${className}`}
-      style={{ ["--phase" as string]: `${phase}s` }}
     >
       <defs>
         <linearGradient id={`${gid}-bg`} x1="0" y1="0" x2="1" y2="1">
@@ -293,13 +326,6 @@ export function CardArt({
           <stop offset="0%" stopColor={colour} stopOpacity="0.30" />
           <stop offset="100%" stopColor={colour} stopOpacity="0" />
         </radialGradient>
-        {/* The travelling band. Soft at both edges so it has no leading line:
-            a hard edge would read as a wipe rather than as light. */}
-        <linearGradient id={`${gid}-sweep`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor={colour} stopOpacity="0" />
-          <stop offset="50%" stopColor={colour} stopOpacity="0.34" />
-          <stop offset="100%" stopColor={colour} stopOpacity="0" />
-        </linearGradient>
         {/* Fades the figure out toward the top left, so the category chip and
             anything laid over the card sit on quiet ground rather than across
             a line. */}
@@ -315,11 +341,7 @@ export function CardArt({
 
       <rect width="100" height="56" fill={`url(#${gid}-bg)`} />
       <circle cx={78} cy={44} r={40} fill={`url(#${gid}-glow)`} />
-      {/* Beneath the marks: the pattern is lit BY it, rather than washed over. */}
-      <rect className="dp-art-sweep" x={-34} y={0} width={34} height={56} fill={`url(#${gid}-sweep)`} />
-      <g className="dp-art-body" mask={`url(#${gid}-mask)`}>
-        {draw(random, colour)}
-      </g>
+      <g mask={`url(#${gid}-mask)`}>{draw(random, colour)}</g>
     </svg>
   );
 }

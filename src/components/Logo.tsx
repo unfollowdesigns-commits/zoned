@@ -43,6 +43,23 @@ const INK_RING = { x: 67, y: 67, w: 195, h: 226 };
 const BRACKET = "M0 0h50v34H34v119h16v34H0Z";
 
 /**
+ * The mark's three pieces, and the box they live in, published separately.
+ *
+ * Anything that needs to animate the monogram has to address its parts, and
+ * the alternative is a second copy of this geometry somewhere else, which is
+ * how a logo ends up subtly different in one place on a site. One definition,
+ * two consumers: LogoMark below draws them together, the preloader assembles
+ * them. When the official vector arrives, only the four values above change.
+ */
+export const MARK_PARTS = {
+  viewBox: "0 0 262 293",
+  blue: BLUE,
+  bracket: BRACKET,
+  blueRing: ring(BLUE_RING.x, BLUE_RING.y, BLUE_RING.w, BLUE_RING.h),
+  inkRing: ring(INK_RING.x, INK_RING.y, INK_RING.w, INK_RING.h),
+};
+
+/**
  * The monogram alone. Use it wherever the full lockup is too wide to read:
  * a mobile header, a favicon, the preloader.
  */

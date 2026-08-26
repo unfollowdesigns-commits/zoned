@@ -273,12 +273,23 @@ export default function Header() {
           {NAV.map((name) => {
             const active = pathname.startsWith(SECTION_PREFIX[name]);
             return (
-              <button
+              /* A LINK, NOT A BUTTON, AND THAT WAS A REAL DEAD END. Every
+                 top level item opened a panel and went nowhere: clicking
+                 "What We Do" toggled the menu, so the section landing pages
+                 existed and could not be reached from the bar that names
+                 them. A section header in a mega menu has to do both jobs,
+                 which is the standard pattern: hover or focus opens the
+                 panel, click navigates.
+
+                 Keeping the panel open on click would be wrong too. The
+                 navigation is happening, so the menu is closed here rather
+                 than left hanging over the page that is arriving. */
+              <Link
                 key={name}
-                type="button"
+                href={SECTION_PREFIX[name]}
                 className="relative rounded-full px-4 py-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)] transition-colors hover:text-white"
                 aria-expanded={open === name}
-                aria-current={active ? "true" : undefined}
+                aria-current={active ? "page" : undefined}
                 onMouseEnter={(e) => {
                   cancelClose();
                   openFrom(name, e.currentTarget);
@@ -287,7 +298,7 @@ export default function Header() {
                   cancelClose();
                   openFrom(name, e.currentTarget);
                 }}
-                onClick={() => setOpen(open === name ? null : name)}
+                onClick={() => setOpen(null)}
               >
                 {open === name && (
                   <motion.span
@@ -306,7 +317,7 @@ export default function Header() {
                     className="absolute inset-x-0 -bottom-0.5 mx-auto h-1 w-1 rounded-full bg-[var(--v-primary)]"
                   />
                 )}
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -591,19 +602,27 @@ export default function Header() {
             className="overflow-hidden border-t border-[var(--v-border)] lg:hidden"
           >
             <div className="flex max-h-[70vh] flex-col gap-1 overflow-y-auto px-6 py-4">
-              <MobileSection title="What We Do" items={SERVICES} pathname={pathname} />
+              <MobileSection
+                title="What We Do"
+                href="/what-we-do"
+                items={SERVICES}
+                pathname={pathname}
+              />
               <MobileSection
                 title="Who We Serve"
+                href="/who-we-serve"
                 items={[...FUNCTIONS, ...INDUSTRIES]}
                 pathname={pathname}
               />
               <MobileSection
                 title="Resources"
+                href="/resources"
                 items={[...RESOURCES, ...NEW_TOOLS]}
                 pathname={pathname}
               />
               <MobileSection
                 title="About"
+                href="/about"
                 items={[...COMPANY, { label: "Contact", href: "/contact" }]}
                 pathname={pathname}
               />
@@ -621,12 +640,25 @@ export default function Header() {
   );
 }
 
+/**
+ * One accordion in the mobile sheet.
+ *
+ * THE SECTION PAGE IS THE FIRST ROW INSIDE IT. On the desktop bar the section
+ * title is itself a link, but on touch a title that navigates and also expands
+ * is a coin toss for the person tapping it, so here the title keeps its one
+ * job and the landing page gets an explicit row of its own. Without it the
+ * four section pages are unreachable from the mobile menu entirely, which is
+ * the same dead end the desktop bar had.
+ */
 function MobileSection({
   title,
+  href,
   items,
   pathname,
 }: {
   title: string;
+  /** The section landing page, listed first inside the panel. */
+  href: string;
   items: NavItem[];
   pathname: string;
 }) {
@@ -657,6 +689,15 @@ function MobileSection({
             className="overflow-hidden"
           >
             <div className="flex flex-col pb-2">
+              <Link
+                href={href}
+                aria-current={pathname === href ? "page" : undefined}
+                className={`py-2.5 pl-6 text-[length:var(--t-secondary)] font-medium ${
+                  pathname === href ? "text-[var(--v-primary)]" : "text-[var(--v-ink)]"
+                }`}
+              >
+                {title} overview
+              </Link>
               {items.map((item) => {
                 const active = pathname === item.href;
                 return (
