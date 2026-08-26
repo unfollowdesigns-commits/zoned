@@ -8,6 +8,7 @@ import { Menu, X, ChevronRight } from "lucide-react";
 import { EASE, SPRING_SOFT } from "@/lib/motion";
 import LinkedInIcon from "./LinkedInIcon";
 import Logo from "./Logo";
+import GlassStack from "@/components/ui/GlassStack";
 import {
   WHAT_WE_DO_MENU,
   FUNCTIONS,
@@ -276,19 +277,25 @@ export default function Header() {
               transition={{ duration: 0.22, ease: EASE }}
               className="absolute left-0 right-0 top-full flex justify-center px-4"
             >
-              <div className="g-glass mt-2 w-full max-w-[680px] overflow-hidden rounded-[18px] border border-white/[0.08] bg-[#070a15]/90 p-4 backdrop-blur-xl shadow-[0_30px_80px_-40px_rgba(0,0,0,0.95)]">
+              <div className="g-glass mt-2 w-full max-w-[880px] overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#070a15]/92 p-5 backdrop-blur-xl shadow-[0_30px_80px_-40px_rgba(0,0,0,0.95)]">
                 {open === "What We Do" && (
-                  <div className="grid grid-cols-2 gap-8">
-                    {WHAT_WE_DO_MENU.map((col) => (
-                      <div key={col.heading}>
-                        <ColumnHeading>{col.heading}</ColumnHeading>
-                        <div className="flex flex-col gap-1">
-                          {col.items.map((item) => (
-                            <MenuLink key={item.href} item={item} />
-                          ))}
+                  /* Links left, picture right, which is the reference's shape.
+                     The panel is wider than the others because it is carrying a
+                     visual; the rest stay at their own natural width. */
+                  <div className="grid grid-cols-[1.15fr_0.85fr] gap-6">
+                    <div className="grid grid-cols-2 gap-6">
+                      {WHAT_WE_DO_MENU.map((col) => (
+                        <div key={col.heading}>
+                          <ColumnHeading>{col.heading}</ColumnHeading>
+                          <div className="flex flex-col gap-1">
+                            {col.items.map((item) => (
+                              <MenuLink key={item.href} item={item} />
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                    <GlassStack className="min-h-[228px]" />
                   </div>
                 )}
 

@@ -1335,3 +1335,85 @@ html[data-loaded] .dp-scale-in {
     animation: none !important;
   }
 }
+
+/* ---- Glass plane cluster ---------------------------------------------------
+   See components/ui/GlassStack.tsx for why each part is here. In short: the
+   glass is made of EDGES, not of fill. */
+.dp-glass-stack {
+  /* Perspective on the container rather than on each plane, so all five share
+     one vanishing point and read as being in the same space. Per-plane
+     perspective gives five separate little scenes. */
+  perspective: 900px;
+  perspective-origin: 50% 42%;
+}
+.dp-glass-scene {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+/* The light the planes are lit BY. Without it they glow on their own, which is
+   the tell that nothing in the picture is a real surface. */
+.dp-glass-lamp {
+  position: absolute;
+  left: 50%;
+  top: 24%;
+  height: 62%;
+  width: 78%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(
+    closest-side,
+    rgba(96, 148, 255, 0.30),
+    rgba(56, 120, 235, 0.10) 55%,
+    transparent 78%
+  );
+  filter: blur(26px);
+}
+
+.dp-glass-plane {
+  position: absolute;
+  border-radius: 13px;
+  transform-style: preserve-3d;
+  /* 1. A gradient fill, never flat: a flat translucent fill reads as film. */
+  background: linear-gradient(
+    142deg,
+    rgba(214, 230, 255, 0.20) 0%,
+    rgba(150, 185, 255, 0.09) 42%,
+    rgba(90, 130, 220, 0.05) 100%
+  );
+  /* 2. The lit edge. Bright top-left, dim bottom-right: one source, above and
+        to the left, which is what gives a rectangle thickness.
+     3. The refraction: a saturated line down ONE side only. This does more
+        than any amount of fill, and doing it on all four sides turns the plane
+        into a neon outline instead. */
+  box-shadow:
+    inset 1px 1px 0 rgba(226, 238, 255, 0.55),
+    inset -1px -1px 0 rgba(120, 150, 210, 0.16),
+    inset -3px 0 6px -3px rgba(120, 200, 255, 0.85),
+    0 18px 40px -22px rgba(0, 0, 0, 0.9);
+  animation: dp-glass-drift var(--dur, 14s) var(--delay, 0s) ease-in-out infinite;
+  will-change: transform;
+}
+
+/* The pose is carried in the keyframes rather than in a base transform, because
+   a transform on the element and an animated transform on the same element do
+   not compose: the animation simply wins and the pose is discarded. */
+@keyframes dp-glass-drift {
+  0%,
+  100% {
+    transform: rotateX(var(--rx)) rotateY(var(--ry)) translateZ(var(--tz))
+      translateY(-4px);
+  }
+  50% {
+    transform: rotateX(calc(var(--rx) * 0.45)) rotateY(calc(var(--ry) * 1.25))
+      translateZ(calc(var(--tz) + 26px)) translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-glass-plane {
+    animation: none;
+    transform: rotateX(var(--rx)) rotateY(var(--ry)) translateZ(var(--tz));
+  }
+}
