@@ -75,8 +75,20 @@ const CAND = 11;
  * would re-render a component whose output is a canvas that repaints itself
  * anyway, and a scrubbed value changes every scroll frame.
  */
-const DIVE_CAM = 0.62; /* how much of the camera height the dive gives up */
-const DIVE_AMP = 0.75; /* how much taller the waves get at full depth */
+/*
+ * TUNED AGAINST THE FRAME, NOT AGAINST THE PHYSICS. The first pass gave up 62%
+ * of the camera height, which is a correct descent and a bad picture: the
+ * sheet's screen span is proportional to camera height, so surrendering that
+ * much of it shrank the field into the bottom of the frame and left the top
+ * two thirds empty. Descending should put you INSIDE the field, not above a
+ * smaller copy of it.
+ *
+ * So the camera gives up less and the amplitude gains far more. The sheet
+ * keeps its height and the crests tower past the eye line, which is what being
+ * down among waves actually looks like, and the frame stays full.
+ */
+const DIVE_CAM = 0.42; /* how much of the camera height the dive gives up */
+const DIVE_AMP = 1.6; /* how much taller the waves get at full depth */
 
 /** Camera. Focal length and the depth slab drawn. Height is derived, see build. */
 const FOCAL = 1100;

@@ -132,7 +132,7 @@ export default function CinematicHero() {
           {/* The payoff row: arrives once the camera is down among the
               crests, taking the place the type left. The frame is never
               carrying both. */}
-          <motion.div className="mt-auto pb-12" style={{ opacity: tailOpacity, y: tailY }}>
+          <motion.div className="mt-auto pb-10" style={{ opacity: tailOpacity, y: tailY }}>
             <Tail />
           </motion.div>
         </div>
@@ -314,34 +314,65 @@ function FlipWord({
   );
 }
 
-/** The supporting row at the foot of the hero. */
+/**
+ * What the dive lands on.
+ *
+ * IT USED TO BE A HAIRLINE ROW OF FOUR WORDS, and that left the bottom of the
+ * scrub showing seventy percent bare screen: the visitor scrolled two and a
+ * half viewports and arrived at almost nothing, which makes the whole descent
+ * feel like it was for its own sake. A transformation has to deliver something.
+ *
+ * So the landing is the firm's four ways in, each with the line site.ts
+ * already carries for it, over a rule. Nothing invented, nothing duplicated in
+ * a new form: this is the same set the thin row linked to, given the room to
+ * actually be read, which is what the space was for.
+ */
 function Tail() {
   return (
-    <div className="flex flex-col gap-6 border-t border-white/15 pt-7 sm:flex-row sm:items-center sm:justify-between">
-      <ul className="flex flex-wrap gap-x-7 gap-y-2">
+    <div className="border-t border-white/15 pt-8">
+      <ul className="grid gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-4">
         {SERVICES.slice(0, 4).map((s) => (
           <li key={s.href}>
             <Link
               href={s.href}
-              className="text-[length:var(--t-small)] text-white/70 transition-colors duration-200 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--v-ring)]"
+              className="group block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--v-ring)]"
             >
-              {s.label}
+              <span className="flex items-center gap-2 text-[length:var(--t-action)] font-semibold text-white">
+                {s.label}
+                <ArrowRight
+                  size={15}
+                  strokeWidth={2.2}
+                  aria-hidden="true"
+                  className="text-white/45 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1 group-hover:text-white"
+                />
+              </span>
+              {s.note && (
+                <span className="mt-2 block max-w-[26ch] text-[length:var(--t-small)] leading-[1.55] text-[var(--v-muted)]">
+                  {s.note}
+                </span>
+              )}
             </Link>
           </li>
         ))}
       </ul>
-      <Link
-        href="/contact"
-        className="group inline-flex items-center gap-2.5 text-[length:var(--t-action)] font-semibold text-white transition-colors duration-200 hover:text-[var(--v-ring)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--v-ring)]"
-      >
-        Start a conversation
-        <ArrowRight
-          size={17}
-          strokeWidth={2.2}
-          aria-hidden="true"
-          className="transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
-        />
-      </Link>
+
+      <div className="mt-9 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+        <p className="text-[length:var(--t-small)] text-[var(--v-muted)]">
+          Independent, partner led, and built to serve clients wherever they need us most.
+        </p>
+        <Link
+          href="/contact"
+          className="group inline-flex items-center gap-2.5 text-[length:var(--t-action)] font-semibold text-white transition-colors duration-200 hover:text-[var(--v-ring)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--v-ring)]"
+        >
+          Start a conversation
+          <ArrowRight
+            size={17}
+            strokeWidth={2.2}
+            aria-hidden="true"
+            className="transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+          />
+        </Link>
+      </div>
     </div>
   );
 }
