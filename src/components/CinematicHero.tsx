@@ -2,6 +2,13 @@
 
 import * as React from "react";
 import Link from "@/components/SiteLink";
+import {
+  cubicBezier,
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useReducedMotion } from "@/lib/motion";
 import ParticleWave, { type WaveSearchApi } from "@/components/ParticleWave";
@@ -20,6 +27,16 @@ import { SERVICES } from "@/lib/site";
  * slab, because there was nothing behind the glass to treat. A transformation
  * whose subject is nothing is decoration, however smoothly it runs. So the
  * frame went with the footage.
+ *
+ * THE SCROLL TRANSFORMATION CAME BACK, POINTED AT THE RIGHT SUBJECT. Cutting
+ * the card also cut the one scroll-driven transformation on the site, and that
+ * was a real loss: the expansion was the moment the page felt built. So the
+ * scrub returns, but what it scrubs is the camera. Scrolling flies the viewer
+ * DOWN INTO the field: the horizon sinks, the surface compresses toward the
+ * foot of the frame, the waves grow against the falling camera until the
+ * crests tower past the eye line, and the type hands off to the services row
+ * once the descent is done. The wow is the same commodity the card sold;
+ * the subject is finally ours.
  *
  * WHAT THE HERO SAYS NOW. The particle field is not scenery behind the
  * headline: it is the thing the headline is about. The field is the market.
@@ -45,84 +62,151 @@ const ROTATING = ["Professionals.", "Executives.", "Operators.", "Yours."];
 const LEDE =
   "When the talent decisions are as consequential as the capital decisions, you need more than a search firm. We design talent strategy from the boardroom down, and execute from day one.";
 
+/* easeInOutCubic, for every scrubbed value: shaped but spread across the whole
+   scroll, where a hard ease-out finishes the picture halfway through and
+   leaves the back half of the section dead. Learned here the hard way once
+   already. */
+const SCRUB = cubicBezier(0.65, 0, 0.35, 1);
+
 export default function CinematicHero() {
   const reduced = useReducedMotion();
   /* The channel from the typewriter to the field. See WaveSearchApi. */
   const waveApi = React.useRef<WaveSearchApi | null>(null);
+  /* The channel from the scroll to the camera. A ref, not state: it changes
+     every scroll frame and is read by a canvas loop, so React re-rendering
+     over it would be pure waste. */
+  const diveRef = React.useRef(0);
+
+  const wrap = React.useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: wrap,
+    offset: ["start start", "end end"],
+  });
+  const dive = useTransform(scrollYProgress, [0, 1], [0, 1], { ease: SCRUB });
+  useMotionValueEvent(dive, "change", (v) => {
+    diveRef.current = v;
+  });
+
+  /* The type leaves as the descent begins: it fades and rises away in the
+     first half so the middle of the dive is the field alone, which is the
+     moment worth the scroll. The tail arrives once the camera is down. */
+  const typeOpacity = useTransform(scrollYProgress, [0.04, 0.5, 1], [1, 0, 0], { ease: SCRUB });
+  const typeY = useTransform(scrollYProgress, [0, 0.55, 1], [0, -84, -84], { ease: SCRUB });
+  const tailOpacity = useTransform(scrollYProgress, [0.62, 0.92, 1], [0, 1, 1], { ease: SCRUB });
+  const tailY = useTransform(scrollYProgress, [0.62, 0.92, 1], [26, 0, 0], { ease: SCRUB });
+
+  /* No scroll length, no pin, no dive under reduced motion: one static screen
+     with everything present. Animating nothing is correct here. */
+  if (reduced) {
+    return (
+      <section className="relative h-svh min-h-[560px] overflow-hidden">
+        <ParticleWave opacity={0.9} searchApi={waveApi} />
+        <Shade />
+        <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[13vh]">
+          <Copy reduced waveApi={waveApi} />
+          <div className="mt-auto pb-12">
+            <Tail />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    /* svh, not vh: on a phone the URL bar makes 100vh taller than the screen,
-       and a hero that is one screen must actually be one screen. */
-    <section className="relative h-svh min-h-[560px] overflow-hidden">
-      {/* The stage. Behind everything, driven by the headline. Under reduced
-          motion it draws one static frame and the search verbs are no-ops:
-          that visitor gets the surface without the performance. */}
-      <ParticleWave opacity={0.9} searchApi={waveApi} />
+    /* 260vh: enough scroll for the descent to be watched, short of the 360vh
+       the old card needed for its five phases. The dive is one move. */
+    <div ref={wrap} className="relative h-[260vh]">
+      {/* svh, not vh: on a phone the URL bar makes 100vh taller than the
+          screen, and a pinned frame must actually be one screen. */}
+      <div className="sticky top-0 h-svh min-h-[560px] overflow-hidden">
+        {/* The stage. The headline drives the search in it; the scroll drives
+            the camera down into it. See ParticleWave for both. */}
+        <ParticleWave opacity={0.9} searchApi={waveApi} diveRef={diveRef} />
+        <Shade />
 
-      {/* A foot of shade, so the tail row always has quiet ground. The field
-          runs out of the bottom of the frame and is at its nearest and
-          sparsest there; the shade also settles that edge against the next
-          section. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-[34vh] bg-[linear-gradient(180deg,transparent_0%,rgba(5,7,15,0.72)_100%)]"
-      />
+        <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[13vh]">
+          <motion.div style={{ opacity: typeOpacity, y: typeY }}>
+            <Copy reduced={false} waveApi={waveApi} />
+          </motion.div>
 
-      <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[13vh]">
-        <p className="v-eyebrow text-[var(--v-primary)]">Talent Infrastructure</p>
-
-        <h1
-          className="v-display mt-7 max-w-[18ch] text-balance text-white"
-          style={{
-            fontSize: "var(--t-hero)",
-            lineHeight: "var(--lh-hero)",
-            letterSpacing: "var(--tr-hero)",
-          }}
-        >
-          {HEADLINE.split(" ").map((word, i) => (
-            <React.Fragment key={`${word}-${i}`}>
-              <span
-                className={reduced ? undefined : "dp-word"}
-                style={
-                  reduced ? undefined : { animationDelay: `${(0.35 + i * 0.055).toFixed(3)}s` }
-                }
-              >
-                {word}
-              </span>{" "}
-            </React.Fragment>
-          ))}
-          <span
-            className={reduced ? undefined : "dp-word"}
-            style={reduced ? undefined : { animationDelay: "0.57s" }}
-          >
-            <FlipWord words={ROTATING} reduced={reduced} wave={waveApi} />
-          </span>
-        </h1>
-
-        <p className="mt-8 max-w-[52ch] text-pretty text-[length:var(--t-lede)] leading-[1.6] text-[var(--v-muted)]">
-          {reduced
-            ? LEDE
-            : LEDE.split(" ").map((word, i) => (
-                <React.Fragment key={`${word}-${i}`}>
-                  <span
-                    className="dp-word"
-                    style={{ animationDelay: `${(1.0 + i * 0.026).toFixed(3)}s` }}
-                  >
-                    {word}
-                  </span>{" "}
-                </React.Fragment>
-              ))}
-        </p>
-
-        {/* The supporting row sits at the foot from the first frame. It used
-            to arrive at the end of the scroll scrub; with no scrub there is no
-            end, and a visitor should never have to earn the way into the
-            services. */}
-        <div className="mt-auto pb-12">
-          <Tail />
+          {/* The payoff row: arrives once the camera is down among the
+              crests, taking the place the type left. The frame is never
+              carrying both. */}
+          <motion.div className="mt-auto pb-12" style={{ opacity: tailOpacity, y: tailY }}>
+            <Tail />
+          </motion.div>
         </div>
       </div>
-    </section>
+    </div>
+  );
+}
+
+/** A foot of shade, so whatever text is at the bottom sits on quiet ground,
+ *  and the hero's lower edge settles against the section after it. */
+function Shade() {
+  return (
+    <div
+      aria-hidden="true"
+      className="absolute inset-x-0 bottom-0 h-[34vh] bg-[linear-gradient(180deg,transparent_0%,rgba(5,7,15,0.72)_100%)]"
+    />
+  );
+}
+
+/** The eyebrow, the headline with its typewriter, and the lede. */
+function Copy({
+  reduced,
+  waveApi,
+}: {
+  reduced: boolean;
+  waveApi: React.MutableRefObject<WaveSearchApi | null>;
+}) {
+  return (
+    <>
+      <p className="v-eyebrow text-[var(--v-primary)]">Talent Infrastructure</p>
+
+      <h1
+        className="v-display mt-7 max-w-[18ch] text-balance text-white"
+        style={{
+          fontSize: "var(--t-hero)",
+          lineHeight: "var(--lh-hero)",
+          letterSpacing: "var(--tr-hero)",
+        }}
+      >
+        {HEADLINE.split(" ").map((word, i) => (
+          <React.Fragment key={`${word}-${i}`}>
+            <span
+              className={reduced ? undefined : "dp-word"}
+              style={
+                reduced ? undefined : { animationDelay: `${(0.35 + i * 0.055).toFixed(3)}s` }
+              }
+            >
+              {word}
+            </span>{" "}
+          </React.Fragment>
+        ))}
+        <span
+          className={reduced ? undefined : "dp-word"}
+          style={reduced ? undefined : { animationDelay: "0.57s" }}
+        >
+          <FlipWord words={ROTATING} reduced={reduced} wave={waveApi} />
+        </span>
+      </h1>
+
+      <p className="mt-8 max-w-[52ch] text-pretty text-[length:var(--t-lede)] leading-[1.6] text-[var(--v-muted)]">
+        {reduced
+          ? LEDE
+          : LEDE.split(" ").map((word, i) => (
+              <React.Fragment key={`${word}-${i}`}>
+                <span
+                  className="dp-word"
+                  style={{ animationDelay: `${(1.0 + i * 0.026).toFixed(3)}s` }}
+                >
+                  {word}
+                </span>{" "}
+              </React.Fragment>
+            ))}
+      </p>
+    </>
   );
 }
 

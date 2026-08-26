@@ -64,6 +64,20 @@ export type WaveSearchApi = {
  *  collapse to one is a visible narrowing rather than a lottery. */
 const CAND = 11;
 
+/**
+ * THE DIVE. The hero's scroll scrub drives `diveRef` from 0 to 1, and the
+ * camera descends toward the surface: height falls away, the waves grow, and
+ * the field goes from something looked AT to something flown INTO. This is
+ * the scroll transformation that used to belong to a card of stock footage,
+ * pointed at the one subject the site actually owns.
+ *
+ * It is a ref holding a number, not React state, read once per frame. State
+ * would re-render a component whose output is a canvas that repaints itself
+ * anyway, and a scrubbed value changes every scroll frame.
+ */
+const DIVE_CAM = 0.62; /* how much of the camera height the dive gives up */
+const DIVE_AMP = 0.75; /* how much taller the waves get at full depth */
+
 /** Camera. Focal length and the depth slab drawn. Height is derived, see build. */
 const FOCAL = 1100;
 const Z_NEAR = 900;
@@ -82,11 +96,15 @@ export default function ParticleWave({
   className = "",
   opacity = 1,
   searchApi,
+  diveRef,
 }: {
   className?: string;
   opacity?: number;
   /** Filled by this component with the search controls. See WaveSearchApi. */
   searchApi?: React.MutableRefObject<WaveSearchApi | null>;
+  /** 0 flat overview, 1 down at the surface. Written by the hero's scroll
+      scrub, read here once per frame. See THE DIVE above. */
+  diveRef?: React.MutableRefObject<number>;
 }) {
   const ref = React.useRef<HTMLCanvasElement>(null);
   const reduced = useReducedMotion();
@@ -285,6 +303,23 @@ export default function ParticleWave({
 
       const cx = bw / 2;
 
+      /* THE DIVE, SOLVED PER FRAME. At 0 these are exactly the built camera.
+         As it runs to 1 the camera height falls away and the horizon is
+         re-solved by pinning the NEAR edge instead of the far one, so the
+         whole sheet sinks and compresses toward the foot of the frame the way
+         ground does when descending toward it, while the amplitude grows
+         against the shrinking camera height until the crests tower past the
+         eye line. Two multiplies and a divide per frame: the cost of the
+         entire transformation. */
+      const dive = diveRef ? Math.min(1, Math.max(0, diveRef.current)) : 0;
+      const dCamH = camH * (1 - DIVE_CAM * dive);
+      const dHorizon = dive === 0 ? horizon : h * BOTTOM_AT - (dCamH * FOCAL) / Z_NEAR;
+      const dAmp = AMP * (1 + DIVE_AMP * dive);
+      /* Nearer means brighter and coarser: the light and the dot size both
+         gain with depth so the descent is felt in the material, not only in
+         the geometry. */
+      const dGain = 1 + 0.35 * dive;
+
       for (let r = 0; r < rows; r += 1) {
         const fz = r / (rows - 1);
         /* Far rows first, so nearer points land on top where they share a
@@ -296,7 +331,7 @@ export default function ParticleWave({
            part of the picture, and fading it to a quarter threw away the
            texture that makes the space read as deep. */
         const depth = 0.45 + 0.55 * fz;
-        const dotPx = scale * res * 1.15;
+        const dotPx = scale * res * 1.15 * (1 + 0.35 * dive);
 
         for (let c = 0; c < cols; c += 1) {
           const wx = (c / (cols - 1) - 0.5) * surfW;
@@ -304,9 +339,9 @@ export default function ParticleWave({
             (0.5 * tx[c] + 0.35 * tz[r] + 0.45 * td[c + r] + 0.3 * te[c - r + rows]) /
             1.6;
 
-          const wy = n * AMP;
+          const wy = n * dAmp;
           const sx = cx + wx * scale * res;
-          const sy = (horizon + (camH - wy) * scale) * res;
+          const sy = (dHorizon + (dCamH - wy) * scale) * res;
           if (sx < 0 || sx >= bw || sy < 0 || sy >= bh) continue;
 
           /* Crests carry the colour and most of the light, but the troughs have
@@ -320,7 +355,7 @@ export default function ParticleWave({
           /* The sweep lifts whatever it is passing over: the light finds the
              surface, the surface does not light itself. */
           const sw = sweepBoost[c];
-          const inten = depth * (0.28 + 0.72 * t2) * (1 + sw * 0.85);
+          const inten = depth * (0.28 + 0.72 * t2) * (1 + sw * 0.85) * dGain;
 
           /* Deep blue in the troughs, cyan on the crests, whitened briefly
              under the sweep. */
@@ -368,8 +403,8 @@ export default function ParticleWave({
           1.6;
         const liftW = i === CHOSEN ? lift * 120 : 0;
         const sx = (cx + wx * scale * res) | 0;
-        const syS = ((horizon + (camH - n * AMP) * scale) * res) | 0;
-        const sy = ((horizon + (camH - n * AMP - liftW) * scale) * res) | 0;
+        const syS = ((dHorizon + (dCamH - n * dAmp) * scale) * res) | 0;
+        const sy = ((dHorizon + (dCamH - n * dAmp - liftW) * scale) * res) | 0;
 
         const a = Math.min(255, (glow * 255) | 0);
         const half = (a * 0.45) | 0;

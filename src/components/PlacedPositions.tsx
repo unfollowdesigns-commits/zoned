@@ -126,43 +126,43 @@ function Rail({
 }
 
 /**
- * THE SIZE IS THE WHOLE POINT OF THIS COMPONENT'S LAST REVISION.
+ * PILLS, BY DECISION. The bare-text version of these rails is on record above;
+ * the objection to pills (they read as filters) was raised and overruled, so
+ * the job now is pills that could not be mistaken for a template's tag cloud.
  *
- * These ran at `--t-display-fluid`, which tops out at 64px, in the display
- * weight of 700, in full-strength ink and full-strength blue. That is the
- * treatment reserved for a section's actual heading, and it was being spent on
- * a supporting detail: the result was two black-and-blue bands that dominated
- * the page and left nothing for the real headings to be louder than.
+ * What makes these house pills rather than generic chips:
  *
- * Scale is relative. Making the loudest thing on the page something that only
- * supports the argument does not just make that element too big, it flattens
- * everything else by removing the contrast the hierarchy depends on.
+ * THE SEAT IS ON THE PILL. Each one carries a small square node, the same
+ * grammar as everything else on the site (ui/Mark.tsx: nodes are seats, filled
+ * means placed). The node starts as an outline and FILLS, one pill after
+ * another down the belt, on a slow shared cycle: the section is called "the
+ * seats we fill", and the pills show seats being filled. The stagger runs on
+ * the pill's index, so the fill travels along the rail like work being done,
+ * not like lights twinkling.
  *
- * So this drops to roughly a third of the size, out of the display weight, and
- * to a tone that recedes. It reads as a quiet ticker running under the section,
- * which is what a list of job titles should be. The blue survives only in the
- * separator dots: one accent, used small, is what keeps two rows of repeating
- * text from turning into wallpaper.
+ * MATERIAL, NOT OUTLINE. A hairline border alone is the chip every generated
+ * page ships. These are a white surface on the cream ground with a real (soft,
+ * tight) shadow, so the belt reads as objects riding a surface rather than
+ * text with boxes drawn round it. The tinted row sits at lower opacity, a
+ * step behind, which keeps the pair reading as two depths of one machine.
  */
 function Titles({ tint }: { tint: boolean }) {
   return (
     <>
-      {PLACED_POSITIONS.map((title) => (
-        <span key={title} className="flex shrink-0 items-center">
+      {PLACED_POSITIONS.map((title, idx) => (
+        <span
+          key={title}
+          className={`dp-pill ${tint ? "is-tint" : ""}`}
+          style={{ ["--d" as string]: `${idx * 1.7}s` }}
+        >
+          <span aria-hidden="true" className="dp-pill-seat" />
           <span
-            className={`px-[0.9em] text-[length:clamp(15px,1.5vw,21px)] font-medium leading-[1.4] tracking-[-0.005em] ${
-              /* Two tones a step apart, not two colours. The difference gives
-                 the pair depth so it does not read as one printed block, and it
-                 is small enough that neither row competes for attention. */
-              tint ? "text-[var(--v-muted)]" : "text-[var(--v-ink)]/75"
+            className={`text-[length:clamp(13px,1.15vw,16px)] font-medium leading-none tracking-[-0.005em] ${
+              tint ? "text-[var(--v-muted)]" : "text-[var(--v-ink)]/80"
             }`}
           >
             {title}
           </span>
-          <span
-            aria-hidden="true"
-            className="h-[3px] w-[3px] shrink-0 rounded-full bg-[var(--v-primary)]/60"
-          />
         </span>
       ))}
     </>
@@ -188,13 +188,15 @@ export default function PlacedPositions() {
         {reduced ? (
           /* No belt under reduced motion: the same information as a list, which
              is what the rails are saying anyway. */
-          <ul className="mx-auto flex max-w-[1280px] flex-wrap gap-x-7 gap-y-2 px-6">
+          <ul className="mx-auto flex max-w-[1280px] flex-wrap gap-2.5 px-6">
             {PLACED_POSITIONS.map((t) => (
-              <li
-                key={t}
-                className="text-[length:clamp(15px,1.5vw,21px)] font-medium text-[var(--v-ink)]/75"
-              >
-                {t}
+              <li key={t} className="dp-pill">
+                {/* Filled at rest: under reduced motion the seat rests on the
+                    meaningful state, placed. */}
+                <span aria-hidden="true" className="dp-pill-seat" />
+                <span className="text-[length:clamp(13px,1.15vw,16px)] font-medium leading-none text-[var(--v-ink)]/80">
+                  {t}
+                </span>
               </li>
             ))}
           </ul>
@@ -202,7 +204,7 @@ export default function PlacedPositions() {
           /* The rows sit close together now. At 64px they needed separating or
              they collided; at this size a tight pair reads as one object, which
              is the calmer picture and one fewer thing on the page. */
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2.5">
             <Rail direction={-1} baseSpeed={1.8}>
               <Titles tint={false} />
             </Rail>

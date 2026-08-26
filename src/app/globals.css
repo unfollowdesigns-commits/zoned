@@ -2004,3 +2004,61 @@ html[data-loaded] .dp-scale-in {
     animation: none;
   }
 }
+
+/* ---- Placement pills -------------------------------------------------------
+   See components/PlacedPositions.tsx. Two decisions carried here:
+
+   MATERIAL. A white surface with a tight soft shadow on the cream ground, so
+   the belt reads as objects riding a surface. A hairline outline alone is the
+   chip every generated page ships, and outline-instead-of-fill is the exact
+   habit this project keeps cutting.
+
+   THE SEAT FILLS. Each pill carries one node in the house grammar, outlined at
+   rest, and the fill travels pill by pill down the rail on one shared 22s
+   cycle with per-pill negative delays. The delays are negative so every pill
+   is already mid-cycle on the first frame; positive ones would leave the far
+   end of the belt inert for its first twenty seconds. */
+.dp-pill {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 9px;
+  margin-right: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(16, 23, 40, 0.07);
+  box-shadow:
+    0 1px 2px rgba(16, 23, 40, 0.05),
+    0 10px 22px -16px rgba(16, 23, 40, 0.22);
+}
+/* The second rail sits a step behind: fainter surface, no drop shadow. Two
+   depths of one machine, not two competing rows. */
+.dp-pill.is-tint {
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 1px 2px rgba(16, 23, 40, 0.04);
+}
+.dp-pill-seat {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  border: 1.5px solid color-mix(in srgb, var(--v-primary) 65%, transparent);
+  animation: dp-seat-fill 22s calc(var(--d, 0s) * -1) ease-in-out infinite;
+}
+@keyframes dp-seat-fill {
+  0%, 5% { background: transparent; box-shadow: none; }
+  8%, 13% {
+    background: var(--v-primary);
+    box-shadow: 0 0 9px color-mix(in srgb, var(--v-primary) 55%, transparent);
+  }
+  17%, 100% { background: transparent; box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-pill-seat {
+    animation: none;
+    /* Resting on the meaningful state: placed. */
+    background: var(--v-primary);
+  }
+}
