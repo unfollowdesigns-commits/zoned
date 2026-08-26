@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import DrawIcon from "@/components/ui/DrawIcon";
+import TileArt from "@/components/ui/TileArt";
 import PageHero from "@/components/ui/PageHero";
 import LightBand from "@/components/ui/LightBand";
 import SectionHeading from "@/components/ui/SectionHeading";
@@ -43,8 +43,20 @@ export const metadata: Metadata = {
     "We took decades of recruiting experience, kept what works, eliminated what doesn't, and built a search firm for the way companies hire today.",
 };
 
-/** Section 3. Icons follow the concepts named in the brief for each feature. */
-const STACK = [
+/**
+ * Section 3.
+ *
+ * `icon` selects both the tile's schematic band and its glyph elsewhere.
+ * `example` is the worked example that closes each card; it is deliberately
+ * absent until the client writes one, because inventing what this stack
+ * produces would be a product claim the firm has not made. See the tile markup.
+ */
+const STACK: Array<{
+  icon: string;
+  title: string;
+  body: string;
+  example?: string;
+}> = [
   {
     icon: "scan",
     title: "Market Motion Detection",
@@ -238,15 +250,36 @@ export default function DPDifferencePage() {
                       className="group relative flex h-full flex-col overflow-hidden rounded-[20px] bg-white/[0.055] p-7 transition-colors duration-300 hover:bg-white/[0.085]"
                     >
                       <PointerLight size={220} />
-                      <span className="grid h-10 w-10 place-items-center rounded-[11px] bg-[var(--v-primary)]/14 text-[var(--v-primary)]">
-                        <DrawIcon name={item.icon} size={18} delay={Math.min(i * 0.05, 0.25)} />
-                      </span>
+                      {/* LEADS WITH THE PICTURE, NOT WITH A 18px GLYPH. An icon
+                          at the top of a card is a label for the card; a band
+                          across the top is the card's subject. See ui/TileArt
+                          for why these are schematics rather than charts. */}
+                      <TileArt name={item.icon} />
                       <h3 className="v-display mt-5 text-[length:var(--t-heading)] leading-[1.3]">
                         {item.title}
                       </h3>
                       <p className="mt-2.5 text-[length:var(--t-small)] leading-[1.6] text-[var(--v-muted)]">
                         {item.body}
                       </p>
+
+                      {/* THE WORKED EXAMPLE STRIP, WIRED BUT EMPTY.
+
+                          The reference closes each card with a tinted strip
+                          carrying a concrete example, and it is the best thing
+                          on those cards: it turns a feature name into something
+                          a reader can picture. Writing one here would mean
+                          inventing what this stack produces, which is a claim
+                          about the product that nobody at the firm has made. So
+                          the slot exists and renders the moment `example` is
+                          filled in above. One line per feature, from them. */}
+                      {item.example && (
+                        <div className="-mx-7 -mb-7 mt-7 bg-black/25 px-7 py-5">
+                          <p className="v-eyebrow mb-1.5">Example</p>
+                          <p className="text-[length:var(--t-small)] leading-[1.6] text-[var(--v-muted)]">
+                            {item.example}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </Reveal>
                 </li>
