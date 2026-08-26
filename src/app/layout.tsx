@@ -58,10 +58,39 @@ const wordmark = Familjen_Grotesk({
   subsets: ["latin"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dpadvisory.com";
+const TITLE = "District Partners | Executive & Professional Search";
+const DESCRIPTION =
+  "District Partners is an independent, partner-led talent advisory firm. Executive search, professional search, interim leadership, fractional and project support.";
+
 export const metadata: Metadata = {
-  title: "District Partners | Executive & Professional Search",
-  description:
-    "District Partners is an independent, partner-led talent advisory firm. Executive search, professional search, interim leadership, fractional and project support.",
+  /* WITHOUT metadataBase, Next resolves the generated og:image to a RELATIVE
+     url and every platform that fetches it fails: a share card is fetched by
+     a server that has no idea what site it came from. It reads an env var so
+     staging and production each advertise themselves rather than pointing
+     previews at the live domain. */
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
+  applicationName: "District Partners",
+  openGraph: {
+    type: "website",
+    siteName: "District Partners",
+    title: TITLE,
+    description: DESCRIPTION,
+    url: SITE_URL,
+    locale: "en_US",
+  },
+  twitter: {
+    /* The large card, because the generated image is 1200x630 and the small
+       card would centre-crop it to a square and cut the wordmark off. */
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  /* The colour a mobile browser paints its own chrome with, so the address bar
+     matches the site instead of flashing white above a dark page. */
+  themeColor: "#080b16",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -14,11 +14,14 @@ import { ArrowUpRight } from "lucide-react";
  * IT ALWAYS SHIPS ITS OWN ESCAPE HATCH. A cross-origin frame can fail in ways
  * this page cannot detect: the host can send X-Frame-Options or a frame
  * ancestors policy, a corporate proxy can block it, and a browser in strict
- * tracking-prevention mode can refuse third-party storage the tool needs to
- * work. In every one of those the frame renders empty and no error reaches the
- * parent. So the direct link sits under it always, not as a fallback that has
- * to be triggered: a visitor looking at a blank frame has somewhere to go
- * without needing anyone to have anticipated why.
+ * tracking-prevention mode can refuse the third-party storage the tool needs.
+ * If the tool is blank after this, X-Frame-Options or frame-ancestors on the
+ * tool's own host is the remaining cause, and only that host can fix it.
+ *
+ * In every one of those cases the frame renders empty and no error reaches
+ * this page. So the direct link sits under it always, not as a fallback that
+ * has to be triggered: a visitor looking at a blank frame has somewhere to go
+ * without anyone having had to anticipate why.
  *
  * `loading="lazy"` because the tool is heavier than the page around it and
  * nobody scrolling past should pay for it, and the frame is given a real
@@ -44,16 +47,28 @@ export default function ToolEmbed({
         className="relative overflow-hidden rounded-[20px] bg-white shadow-[0_30px_70px_-45px_rgba(16,23,40,0.6)] ring-1 ring-inset ring-[var(--v-ink)]/[0.08]"
         style={{ height: "78vh", minHeight }}
       >
+        {/* NO `sandbox` ATTRIBUTE, AND REMOVING IT IS THE FIX. It was set to
+            allow scripts and forms but NOT allow-same-origin, which sounded
+            careful and broke the tool outright. A sandboxed frame without
+            allow-same-origin is given a unique opaque origin, and in an opaque
+            origin every storage API throws on access rather than returning
+            empty: localStorage, sessionStorage, IndexedDB, cookies. Practically
+            every modern web app touches one of those while booting, so the
+            frame loaded, the app threw, and the panel stayed blank with no
+            error crossing back into this page to explain it.
+
+            Sandboxing buys nothing here anyway. The value of the attribute is
+            constraining content you do not control; this is District Partners'
+            own tool on District Partners' own host. It is already isolated by
+            the ordinary same-origin policy, which is what actually keeps a
+            cross-origin frame from touching this page. */}
         <iframe
           src={src}
           title={title}
           loading="lazy"
           className="h-full w-full border-0"
-          /* No allow-same-origin: the tool is a separate origin and nothing
-             here needs to reach into it. Forms and scripts are what it is for;
-             popups let it open its own results. */
-          sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
           referrerPolicy="strict-origin-when-cross-origin"
+          allow="clipboard-write"
         />
       </div>
 

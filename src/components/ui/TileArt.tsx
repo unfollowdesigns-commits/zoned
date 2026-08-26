@@ -22,13 +22,13 @@
 
 const A = "var(--v-ring)";
 
-function Frame({ children }: { children: React.ReactNode }) {
+function Frame({ kind, children }: { kind: string; children: React.ReactNode }) {
   return (
     <svg
       viewBox="0 0 120 56"
       fill="none"
       aria-hidden="true"
-      className="h-[56px] w-full"
+      className={`dp-ta dp-ta-${kind} h-[56px] w-full`}
       preserveAspectRatio="xMidYMid meet"
     >
       {children}
@@ -40,10 +40,12 @@ function Frame({ children }: { children: React.ReactNode }) {
 function Ranked() {
   const h = [40, 34, 27, 21, 16, 12, 9, 7];
   return (
-    <Frame>
+    <Frame kind="ranked">
       {h.map((v, i) => (
         <rect
           key={i}
+          className="dp-ta-bar"
+          style={{ ["--i" as string]: i }}
           x={4 + i * 14.5}
           y={48 - v}
           width={9}
@@ -65,12 +67,21 @@ function Mapped() {
     [104, 42, false], [18, 44, false], [62, 8, false], [46, 28, false],
   ];
   return (
-    <Frame>
+    <Frame kind="mapped">
       {pts.map(([x, y, hot], i) => (
-        <circle key={i} cx={x} cy={y} r={hot ? 3.4 : 2.1} fill={A} opacity={hot ? 0.95 : 0.3} />
+        <circle
+          key={i}
+          className={hot ? "dp-ta-pt is-hot" : "dp-ta-pt"}
+          style={{ ["--i" as string]: i }}
+          cx={x}
+          cy={y}
+          r={hot ? 3.4 : 2.1}
+          fill={A}
+          opacity={hot ? 0.95 : 0.3}
+        />
       ))}
       {/* The ring is the "found" gesture. It encloses, it does not quantify. */}
-      <ellipse cx={82} cy={23} rx={22} ry={14} stroke={A} strokeWidth={1} opacity={0.45} />
+      <ellipse className="dp-ta-ring" cx={82} cy={23} rx={22} ry={14} stroke={A} strokeWidth={1} opacity={0.45} pathLength={100} />
     </Frame>
   );
 }
@@ -78,17 +89,19 @@ function Mapped() {
 /** A signal trace with a detected spike. */
 function Motion() {
   return (
-    <Frame>
+    <Frame kind="motion">
       <path
+        className="dp-ta-trace"
         d="M2 38 L14 36 L22 39 L32 34 L42 37 L52 20 L58 44 L66 33 L76 36 L88 32 L98 37 L110 34 L118 36"
         stroke={A}
         strokeWidth={1.6}
         strokeLinecap="round"
         strokeLinejoin="round"
         opacity={0.9}
+        pathLength={100}
       />
-      <circle cx={52} cy={20} r={3.6} fill={A} />
-      <circle cx={52} cy={20} r={8} stroke={A} strokeWidth={1} opacity={0.4} />
+      <circle className="dp-ta-spike" cx={52} cy={20} r={3.6} fill={A} />
+      <circle className="dp-ta-halo" cx={52} cy={20} r={8} stroke={A} strokeWidth={1} opacity={0.4} />
     </Frame>
   );
 }
@@ -97,13 +110,15 @@ function Motion() {
 function Grid() {
   const live = new Set([3, 7, 12, 18, 21, 26]);
   return (
-    <Frame>
+    <Frame kind="grid">
       {Array.from({ length: 32 }, (_, i) => {
         const c = i % 8;
         const r = Math.floor(i / 8);
         return (
           <rect
             key={i}
+            className={live.has(i) ? "dp-ta-cell is-live" : "dp-ta-cell"}
+            style={{ ["--i" as string]: c + r }}
             x={5 + c * 14}
             y={7 + r * 12}
             width={10}
@@ -121,10 +136,12 @@ function Grid() {
 /** Stacked planes with one drawn out of the stack. */
 function Layers() {
   return (
-    <Frame>
+    <Frame kind="layers">
       {[0, 1, 2].map((i) => (
         <rect
           key={i}
+          className="dp-ta-layer"
+          style={{ ["--i" as string]: i }}
           x={18 + i * 4}
           y={34 - i * 9}
           width={62}
@@ -134,7 +151,7 @@ function Layers() {
           opacity={0.22 + i * 0.06}
         />
       ))}
-      <rect x={40} y={6} width={62} height={9} rx={2.5} fill={A} opacity={0.95} />
+      <rect className="dp-ta-lift" x={40} y={6} width={62} height={9} rx={2.5} fill={A} opacity={0.95} />
     </Frame>
   );
 }
@@ -142,14 +159,14 @@ function Layers() {
 /** Concentric sweep with contacts on it. */
 function Radar() {
   return (
-    <Frame>
+    <Frame kind="radar">
       {[10, 18, 26].map((r, i) => (
-        <circle key={r} cx={60} cy={46} r={r} stroke={A} strokeWidth={1} opacity={0.4 - i * 0.09} />
+        <circle key={r} className="dp-ta-arc" style={{ ["--i" as string]: i }} cx={60} cy={46} r={r} stroke={A} strokeWidth={1} opacity={0.4 - i * 0.09} />
       ))}
-      <path d="M60 46 L86 30" stroke={A} strokeWidth={1.4} opacity={0.85} strokeLinecap="round" />
-      <circle cx={74} cy={33} r={2.6} fill={A} opacity={0.9} />
-      <circle cx={45} cy={31} r={2.2} fill={A} opacity={0.55} />
-      <circle cx={68} cy={22} r={2.2} fill={A} opacity={0.45} />
+      <path className="dp-ta-sweep" d="M60 46 L86 30" stroke={A} strokeWidth={1.4} opacity={0.85} strokeLinecap="round" />
+      <circle className="dp-ta-hit" style={{ ["--i" as string]: 0 }} cx={74} cy={33} r={2.6} fill={A} opacity={0.9} />
+      <circle className="dp-ta-hit" style={{ ["--i" as string]: 1 }} cx={45} cy={31} r={2.2} fill={A} opacity={0.55} />
+      <circle className="dp-ta-hit" style={{ ["--i" as string]: 2 }} cx={68} cy={22} r={2.2} fill={A} opacity={0.45} />
     </Frame>
   );
 }
@@ -157,16 +174,18 @@ function Radar() {
 /** A curve rising, with its area behind it. Shape only, no scale. */
 function Curve() {
   return (
-    <Frame>
-      <path d="M2 46 C 26 44, 40 34, 56 28 C 74 21, 92 16, 118 10 L118 50 L2 50 Z" fill={A} opacity={0.16} />
+    <Frame kind="curve">
+      <path className="dp-ta-area" d="M2 46 C 26 44, 40 34, 56 28 C 74 21, 92 16, 118 10 L118 50 L2 50 Z" fill={A} opacity={0.16} />
       <path
+        className="dp-ta-line"
         d="M2 46 C 26 44, 40 34, 56 28 C 74 21, 92 16, 118 10"
         stroke={A}
         strokeWidth={1.7}
         strokeLinecap="round"
         opacity={0.9}
+        pathLength={100}
       />
-      <circle cx={118} cy={10} r={3.2} fill={A} />
+      <circle className="dp-ta-tip" cx={118} cy={10} r={3.2} fill={A} />
     </Frame>
   );
 }
@@ -174,11 +193,11 @@ function Curve() {
 /** Ripples travelling out from a source. */
 function Pulse() {
   return (
-    <Frame>
+    <Frame kind="pulse">
       {[6, 13, 20, 27].map((r, i) => (
-        <circle key={r} cx={60} cy={28} r={r} stroke={A} strokeWidth={1.2} opacity={0.6 - i * 0.13} />
+        <circle key={r} className="dp-ta-wave" style={{ ["--i" as string]: i }} cx={60} cy={28} r={r} stroke={A} strokeWidth={1.2} opacity={0.6 - i * 0.13} />
       ))}
-      <circle cx={60} cy={28} r={3.2} fill={A} />
+      <circle className="dp-ta-core" cx={60} cy={28} r={3.2} fill={A} />
     </Frame>
   );
 }
@@ -198,7 +217,7 @@ export default function TileArt({ name }: { name: string }) {
   const Art = ART[name];
   if (!Art) return null;
   return (
-    <div className="mb-7 rounded-[13px] bg-[var(--v-primary)]/[0.07] px-4 py-4">
+    <div className="dp-ta-host mb-7 rounded-[13px] bg-[var(--v-primary)]/[0.07] px-4 py-4 transition-colors duration-300">
       <Art />
     </div>
   );

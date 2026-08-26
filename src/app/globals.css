@@ -2790,3 +2790,163 @@ html[data-loaded] .dp-scale-in {
     transform: scaleX(1);
   }
 }
+
+/* ---- Capability tile figures -----------------------------------------------
+   See components/ui/TileArt. Eight figures, and each performs its own verb on
+   hover rather than sharing one pulse: the bars rank, the map finds, the trace
+   spikes, the grid lights, the layers separate, the radar sweeps, the curve
+   draws, the pulse radiates. A shared effect across eight different pictures
+   is what makes a set of icons read as decoration; a verb per picture is what
+   makes it read as meaning.
+
+   Every rule is scoped to the card, so eight figures at rest cost nothing and
+   only the one under the pointer runs. `[data-draw-group]` is the card the
+   page already marks up for its icon draw-on, reused here so the whole tile is
+   the target rather than a 56px figure inside it. */
+.dp-ta {
+  overflow: visible;
+}
+[data-draw-group]:hover .dp-ta-host,
+[data-draw-group]:focus-within .dp-ta-host {
+  background: color-mix(in srgb, var(--v-primary) 12%, transparent);
+}
+
+/* Shared: every animated part transforms about its own centre unless a rule
+   below says otherwise. */
+.dp-ta-bar, .dp-ta-pt, .dp-ta-cell, .dp-ta-layer, .dp-ta-lift,
+.dp-ta-hit, .dp-ta-wave, .dp-ta-arc, .dp-ta-spike, .dp-ta-halo, .dp-ta-tip {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Ranked: the bars build off the baseline, tallest first, so the ordering is
+   performed rather than presented. */
+.dp-ta-bar { transform-origin: bottom; }
+[data-draw-group]:hover .dp-ta-bar,
+[data-draw-group]:focus-within .dp-ta-bar {
+  animation: dp-ta-rise 560ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 45ms) both;
+}
+@keyframes dp-ta-rise { from { transform: scaleY(0.15); } to { transform: scaleY(1); } }
+
+/* Mapped: the field settles, then the cluster is found and the ring closes
+   around it. The ring draws along its own length, which is why it carries a
+   pathLength attribute in the component. */
+[data-draw-group]:hover .dp-ta-pt,
+[data-draw-group]:focus-within .dp-ta-pt {
+  animation: dp-ta-blip 480ms cubic-bezier(0.34, 1.26, 0.5, 1) calc(var(--i) * 26ms) both;
+}
+[data-draw-group]:hover .dp-ta-pt.is-hot,
+[data-draw-group]:focus-within .dp-ta-pt.is-hot {
+  animation-delay: calc(320ms + var(--i) * 26ms);
+  animation-duration: 620ms;
+}
+@keyframes dp-ta-blip { 0% { transform: scale(0.4); } 55% { transform: scale(1.35); } 100% { transform: scale(1); } }
+.dp-ta-ring { stroke-dasharray: 100; }
+[data-draw-group]:hover .dp-ta-ring,
+[data-draw-group]:focus-within .dp-ta-ring {
+  animation: dp-ta-draw 760ms cubic-bezier(0.22, 1, 0.36, 1) 200ms both;
+}
+@keyframes dp-ta-draw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+
+/* Motion: the trace draws left to right and the spike lands as it is reached,
+   with the halo expanding after it. Detection, in order. */
+.dp-ta-trace { stroke-dasharray: 100; }
+[data-draw-group]:hover .dp-ta-trace,
+[data-draw-group]:focus-within .dp-ta-trace {
+  animation: dp-ta-draw 900ms cubic-bezier(0.35, 0, 0.2, 1) both;
+}
+[data-draw-group]:hover .dp-ta-spike,
+[data-draw-group]:focus-within .dp-ta-spike {
+  animation: dp-ta-blip 520ms cubic-bezier(0.34, 1.26, 0.5, 1) 380ms both;
+}
+[data-draw-group]:hover .dp-ta-halo,
+[data-draw-group]:focus-within .dp-ta-halo {
+  animation: dp-ta-halo 900ms cubic-bezier(0.22, 1, 0.36, 1) 420ms both;
+}
+@keyframes dp-ta-halo {
+  0% { transform: scale(0.35); opacity: 0.75; }
+  100% { transform: scale(1); opacity: 0.4; }
+}
+
+/* Grid: the ripple crosses on the diagonal, and the live cells land last and
+   brightest, so "a few are live" is the conclusion rather than the premise. */
+[data-draw-group]:hover .dp-ta-cell,
+[data-draw-group]:focus-within .dp-ta-cell {
+  animation: dp-ta-cell 520ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 42ms) both;
+}
+@keyframes dp-ta-cell { 0% { opacity: 0.08; } 100% { opacity: inherit; } }
+[data-draw-group]:hover .dp-ta-cell.is-live,
+[data-draw-group]:focus-within .dp-ta-cell.is-live {
+  animation: dp-ta-live 620ms cubic-bezier(0.34, 1.26, 0.5, 1) calc(260ms + var(--i) * 42ms) both;
+}
+@keyframes dp-ta-live {
+  0% { transform: scale(0.7); opacity: 0.2; }
+  55% { transform: scale(1.22); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
+}
+
+/* Layers: the stack compresses and the top plane draws out of it. */
+[data-draw-group]:hover .dp-ta-layer,
+[data-draw-group]:focus-within .dp-ta-layer {
+  animation: dp-ta-settle 620ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 70ms) both;
+}
+@keyframes dp-ta-settle { from { transform: translate(6px, 6px); opacity: 0.1; } to { transform: none; } }
+[data-draw-group]:hover .dp-ta-lift,
+[data-draw-group]:focus-within .dp-ta-lift {
+  animation: dp-ta-lift 700ms cubic-bezier(0.22, 1, 0.36, 1) 260ms both;
+}
+@keyframes dp-ta-lift { from { transform: translate(-14px, 18px); opacity: 0.2; } to { transform: none; opacity: 0.95; } }
+
+/* Radar: the sweep actually sweeps, and each contact registers as the beam
+   passes it. A radar whose beam does not turn is a picture of a radar. */
+.dp-ta-sweep { transform-box: fill-box; transform-origin: 0 100%; }
+[data-draw-group]:hover .dp-ta-sweep,
+[data-draw-group]:focus-within .dp-ta-sweep {
+  animation: dp-ta-sweep 1600ms cubic-bezier(0.4, 0, 0.4, 1) both;
+}
+@keyframes dp-ta-sweep { from { rotate: -62deg; } to { rotate: 26deg; } }
+[data-draw-group]:hover .dp-ta-arc,
+[data-draw-group]:focus-within .dp-ta-arc {
+  animation: dp-ta-blip 520ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 70ms) both;
+}
+[data-draw-group]:hover .dp-ta-hit,
+[data-draw-group]:focus-within .dp-ta-hit {
+  animation: dp-ta-blip 560ms cubic-bezier(0.34, 1.26, 0.5, 1) calc(340ms + var(--i) * 220ms) both;
+}
+
+/* Curve: the line draws and its area fills in behind it. */
+.dp-ta-line { stroke-dasharray: 100; }
+[data-draw-group]:hover .dp-ta-line,
+[data-draw-group]:focus-within .dp-ta-line {
+  animation: dp-ta-draw 880ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dp-ta-area { transform-box: fill-box; transform-origin: left bottom; }
+[data-draw-group]:hover .dp-ta-area,
+[data-draw-group]:focus-within .dp-ta-area {
+  animation: dp-ta-fill 880ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes dp-ta-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+[data-draw-group]:hover .dp-ta-tip,
+[data-draw-group]:focus-within .dp-ta-tip {
+  animation: dp-ta-blip 520ms cubic-bezier(0.34, 1.26, 0.5, 1) 700ms both;
+}
+
+/* Pulse: the rings travel outward from the core and fade as they go, which is
+   what a pulse does and what four concentric circles on their own do not. */
+[data-draw-group]:hover .dp-ta-wave,
+[data-draw-group]:focus-within .dp-ta-wave {
+  animation: dp-ta-pulse 1500ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 190ms) infinite;
+}
+@keyframes dp-ta-pulse {
+  0% { transform: scale(0.35); opacity: 0.75; }
+  70% { opacity: 0.12; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+[data-draw-group]:hover .dp-ta-core,
+[data-draw-group]:focus-within .dp-ta-core {
+  animation: dp-ta-blip 620ms cubic-bezier(0.34, 1.26, 0.5, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-ta * { animation: none !important; }
+}
