@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Copy } from "lucide-react";
+import { ArrowUpRight, Check, Copy } from "lucide-react";
 import { EASE, useReducedMotion } from "@/lib/motion";
 import SectionHeading from "@/components/ui/SectionHeading";
 import GlowButton from "@/components/ui/GlowButton";
@@ -83,34 +83,63 @@ const DESTINATIONS = [
   },
 ];
 
-/** Retypes the prompt when it changes, so the composer looks like it is thinking. */
-function TypedPrompt({ text, reduced }: { text: string; reduced: boolean }) {
+/**
+ * Retypes the prompt when it changes, and REPORTS WHEN THE DRAFT IS DONE.
+ *
+ * The report is the point. The send row arms off it, so the card has a
+ * cause and an effect: the question is drafted, and only then do the ways of
+ * sending it stand up. Before that, the composer was a paragraph that changed
+ * while three buttons sat there ignoring it, which is exactly the
+ * nothing-responds-to-anything quality that reads as generated.
+ */
+function TypedPrompt({
+  text,
+  reduced,
+  onSettled,
+}: {
+  text: string;
+  reduced: boolean;
+  /** Called with false the moment a redraft starts, true when it completes. */
+  onSettled: (done: boolean) => void;
+}) {
   const [shown, setShown] = React.useState(text);
 
   React.useEffect(() => {
     if (reduced) {
       setShown(text);
+      onSettled(true);
       return;
     }
     setShown("");
+    onSettled(false);
     let i = 0;
     // Several characters per tick: typing one at a time is charming for a
     // sentence and interminable for a paragraph this long.
     const id = setInterval(() => {
       i = Math.min(text.length, i + 4);
       setShown(text.slice(0, i));
-      if (i >= text.length) clearInterval(id);
+      if (i >= text.length) {
+        clearInterval(id);
+        onSettled(true);
+      }
     }, 12);
     return () => clearInterval(id);
-  }, [text, reduced]);
+  }, [text, reduced, onSettled]);
+
+  const done = shown.length >= text.length;
 
   return (
     <p className="min-h-[7.5rem] text-[length:var(--t-body)] leading-[1.65] text-[var(--v-ink)] sm:min-h-[6rem]">
       {shown}
-      {shown.length < text.length && (
+      {/* The caret stays after the draft settles, resting on a blink: a
+          composer waiting to send, not a paragraph that happens to be done.
+          While typing it is solid, which is how a real caret behaves mid-keystroke. */}
+      {!reduced && (
         <span
           aria-hidden="true"
-          className="ml-0.5 inline-block h-[1.05em] w-[2px] translate-y-[0.18em] bg-[var(--v-primary)]"
+          className={`ml-0.5 inline-block h-[1.05em] w-[2px] translate-y-[0.18em] bg-[var(--v-primary)] ${
+            done ? "dp-ask-caret" : ""
+          }`}
         />
       )}
     </p>
@@ -121,6 +150,10 @@ export default function AskAI() {
   const reduced = useReducedMotion();
   const [active, setActive] = React.useState(0);
   const [copied, setCopied] = React.useState(false);
+  /* True once the current draft has finished typing. The send row arms off
+     this: see TypedPrompt. */
+  const [settled, setSettled] = React.useState(false);
+  const onSettled = React.useCallback((d: boolean) => setSettled(d), []);
   const prompt = QUESTIONS[active].prompt;
 
   async function copy() {
@@ -159,6 +192,13 @@ export default function AskAI() {
         <div className="v-glass relative overflow-hidden p-7 sm:p-9">
           <p className="v-eyebrow relative z-[2] mb-5">Your question</p>
 
+          {/* FILLED, NOT OUTLINED. The first pass drew five outlined pills and
+              double-ringed the active one, inside an outlined prompt box,
+              inside a bordered card: separation by outline three layers deep,
+              the exact habit this project keeps deleting. The chips are now
+              quiet fills, and the active one is a SOLID primary object that
+              slides between them, so the state is carried by material instead
+              of by a second border. */}
           <ul className="relative z-[2] mb-7 flex flex-wrap gap-2">
             {QUESTIONS.map((q, i) => (
               <li key={q.chip}>
@@ -166,17 +206,17 @@ export default function AskAI() {
                   type="button"
                   onClick={() => setActive(i)}
                   aria-pressed={i === active}
-                  className={`relative rounded-full border px-4 py-2 text-[length:var(--t-small)] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)] ${
+                  className={`relative rounded-full px-4 py-2 text-[length:var(--t-small)] font-medium transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)] ${
                     i === active
-                      ? "border-[var(--v-primary)] text-[var(--v-ink)]"
-                      : "border-[var(--v-border)] text-[var(--v-muted)] hover:border-[var(--v-border-strong)] hover:text-[var(--v-ink)]"
+                      ? "text-white"
+                      : "bg-white/[0.05] text-[var(--v-muted)] hover:bg-white/[0.09] hover:text-[var(--v-ink)]"
                   }`}
                 >
-                  {i === active && !reduced && (
+                  {i === active && (
                     <motion.span
-                      layoutId="ask-ai-chip"
+                      layoutId={reduced ? undefined : "ask-ai-chip"}
                       aria-hidden="true"
-                      className="absolute inset-0 -z-10 rounded-full bg-[var(--v-primary)]/15"
+                      className="absolute inset-0 -z-10 rounded-full bg-[var(--v-primary)] shadow-[0_4px_16px_-6px_var(--v-primary)]"
                       transition={{ duration: 0.3, ease: EASE }}
                     />
                   )}
@@ -186,22 +226,55 @@ export default function AskAI() {
             ))}
           </ul>
 
-          <div className="relative z-[2] rounded-[calc(var(--radius)-0.35rem)] border border-[var(--v-border)] bg-black/25 p-5">
-            <TypedPrompt text={prompt} reduced={reduced} />
+          {/* The draft. A filled well rather than another outlined box: the
+              card's one border budget is spent on the glass itself. The left
+              rule is the message's spine, and it brightens when the draft
+              settles, which is the well's own part of the armed state. */}
+          <div
+            className="relative z-[2] rounded-[calc(var(--radius)-0.35rem)] bg-black/30 p-5 pl-6"
+            data-settled={settled || undefined}
+          >
+            <span
+              aria-hidden="true"
+              className={`absolute bottom-4 left-0 top-4 w-[2px] rounded-full transition-colors duration-500 ${
+                settled ? "bg-[var(--v-primary)]/70" : "bg-white/15"
+              }`}
+            />
+            <TypedPrompt text={prompt} reduced={reduced} onSettled={onSettled} />
           </div>
 
+          {/* THE SEND ROW ARMS WHEN THE DRAFT SETTLES. While the question is
+              still typing the destinations hold back at half presence; the
+              moment it completes they stand up in order. Cause, then effect:
+              a finished question is what makes sending it a thing to do. They
+              stay clickable throughout, because a control that ignores a
+              click over a flourish is a bug, not a nuance. */}
           <div className="relative z-[2] mt-7 flex flex-wrap items-center gap-2.5">
-            {DESTINATIONS.map((d) => (
-              <a
+            {DESTINATIONS.map((d, i) => (
+              <motion.a
                 key={d.label}
                 href={d.href(prompt)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="v-edge rounded-full px-5 py-2.5 text-[length:var(--t-small)] font-semibold text-[var(--v-ink)]/85 outline-none transition-colors duration-200 hover:text-[var(--v-ink)] focus-visible:ring-2 focus-visible:ring-[var(--v-ring)]"
+                animate={
+                  reduced
+                    ? { opacity: 1, y: 0 }
+                    : settled
+                      ? { opacity: 1, y: 0 }
+                      : { opacity: 0.45, y: 3 }
+                }
+                transition={{ duration: 0.32, ease: EASE, delay: settled ? i * 0.07 : 0 }}
+                className="v-edge group inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-5 py-2.5 text-[length:var(--t-small)] font-semibold text-[var(--v-ink)]/85 outline-none transition-colors duration-200 hover:bg-white/[0.09] hover:text-[var(--v-ink)] focus-visible:ring-2 focus-visible:ring-[var(--v-ring)]"
               >
                 Ask {d.label}
+                <ArrowUpRight
+                  size={14}
+                  strokeWidth={2.2}
+                  aria-hidden="true"
+                  className="text-[var(--v-muted)] transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[var(--v-ink)]"
+                />
                 <span className="sr-only"> (opens in a new tab)</span>
-              </a>
+              </motion.a>
             ))}
 
             <button

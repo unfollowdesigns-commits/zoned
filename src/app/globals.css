@@ -2062,3 +2062,14 @@ html[data-loaded] .dp-scale-in {
     background: var(--v-primary);
   }
 }
+
+/* ---- Ask-an-assistant composer ---------------------------------------------
+   The caret rests on a blink once the draft settles: a composer waiting to
+   send. Solid while typing, which is how a real caret behaves mid-keystroke. */
+.dp-ask-caret {
+  animation: dp-ask-caret 1.06s steps(2, jump-none) infinite;
+}
+@keyframes dp-ask-caret {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
