@@ -1461,8 +1461,8 @@ html[data-loaded] .dp-scale-in {
    arrival that also comes forward through 200px of depth is a placement. */
 .dp-mv-arriving {
   position: absolute;
-  left: 50%;
-  top: 24%;
+  /* `left` comes from the tier, `top` is the tier's own rule line. */
+  top: 0;
   width: 14px;
   height: 14px;
   margin: -7px 0 0 -7px;
@@ -1471,19 +1471,21 @@ html[data-loaded] .dp-scale-in {
   box-shadow:
     0 0 0 1px rgba(226, 240, 255, 0.6),
     0 0 18px 3px rgba(120, 180, 255, 0.55);
-  animation:
-    dp-mv-arrive 12s cubic-bezier(0.16, 1, 0.3, 1) infinite,
-    dp-float-a 15s ease-in-out infinite;
+  /* No float of its own. It is inside the tier and inherits that one, which is
+     what guarantees it lands exactly in the gap rather than near it. */
+  animation: dp-mv-arrive 12s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 @keyframes dp-mv-arrive {
-  0%   { transform: translate3d(0, -260%, -180px) scale(0.62); opacity: 0; }
+  /* In px, and no Z of its own: the tier already sits at its depth, so the
+     seat only has to travel the distance from behind and above it. */
+  0%   { transform: translate3d(0, -96px, -190px) scale(0.6); opacity: 0; }
   8%   { opacity: 1; }
   /* Long, and eased almost to a stop rather than snapping into place. */
-  30%  { transform: translate3d(0, 0, 68px) scale(1); opacity: 1; }
+  30%  { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
   /* The hold is most of the loop. The subject is the seat being FILLED, so the
      filled state is what the picture spends its time showing. */
-  88%  { transform: translate3d(0, 0, 68px) scale(1); opacity: 1; }
-  100% { transform: translate3d(0, -260%, -180px) scale(0.62); opacity: 0; }
+  88%  { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  100% { transform: translate3d(0, -96px, -190px) scale(0.6); opacity: 0; }
 }
 
 /* ---- markets: the short list rises ---------------------------------------
@@ -1676,7 +1678,7 @@ html[data-loaded] .dp-scale-in {
      bare animation:none leaves this visitor a picture with its subject
      missing. */
   .dp-mv-scene { transform: rotateX(1deg) rotateY(-6deg); }
-  .dp-mv-arriving { transform: translate3d(0, 0, 68px); opacity: 1; }
+  .dp-mv-arriving { transform: none; opacity: 1; }
   .dp-mv-cell.is-on { transform: translateZ(42px); opacity: 1; }
   .dp-mv-sheet { transform: none; opacity: 1; }
   .dp-mv-spoke i { opacity: 0; }

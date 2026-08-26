@@ -76,6 +76,15 @@ function Tier({
   top: number;
   width: number;
   seats: number;
+  /**
+   * Index of the empty seat. The arriving seat is rendered INSIDE this tier
+   * rather than beside it, which is not a tidiness preference: it inherits the
+   * tier's float and therefore cannot drift out of phase with the gap it is
+   * supposed to land in. Measured before the change, the seat sat 7 to 10px
+   * below the vacancy for the whole of the hold and the offset oscillated,
+   * because the two were on the same 15s curve nine seconds apart. The one
+   * moment the entire figure exists to show was the one moment it got wrong.
+   */
   vacantAt?: number;
   /** Which float curve, and how slow. Different per tier so the structure
       breathes rather than moving as one rigid object. */
@@ -103,6 +112,12 @@ function Tier({
           style={{ left: `${((i + 0.5) / seats) * 100}%` }}
         />
       ))}
+      {vacantAt !== undefined && (
+        <span
+          className="dp-mv-arriving"
+          style={{ left: `${((vacantAt + 0.5) / seats) * 100}%` }}
+        />
+      )}
     </div>
   );
 }
@@ -116,9 +131,8 @@ function Services() {
           picture about the seat at the top of one. */}
       <Tier z={0} top={68} width={84} seats={4} float="b" dur={21} />
       <Tier z={34} top={46} width={58} seats={3} float="c" dur={17} delay={-4} />
+      {/* The seat that arrives lives inside this tier: see the note on Tier. */}
       <Tier z={68} top={24} width={30} seats={1} vacantAt={0} float="a" dur={15} delay={-9} />
-      {/* Comes from behind the structure and above it, and lands in the gap. */}
-      <span className="dp-mv-arriving" />
     </Frame>
   );
 }

@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "@/components/SiteLink";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { Menu, X, ChevronRight, ArrowRight } from "lucide-react";
 import { EASE, SPRING_SOFT } from "@/lib/motion";
 import LinkedInIcon from "./LinkedInIcon";
 import Logo from "./Logo";
@@ -16,7 +16,7 @@ import {
   RESOURCES,
   NEW_TOOLS,
   COMPANY,
-  BLOG_POSTS,
+  BLOG_POSTS_BY_DATE,
   SERVICES,
   LINKEDIN_URL,
   type NavItem,
@@ -44,21 +44,33 @@ const SECTION_PREFIX: Record<NavName, string> = {
  * "Search" adds nothing a reader did not already have.
  *
  * What replaces it is the line of copy that says what the service IS, which was
- * already there and was being crowded by a picture of a briefcase. A rule that
- * appears on the left edge on hover marks the active row instead: it belongs to
- * the type, it costs no artwork, and it cannot look borrowed.
+ * already there and was being crowded by a picture of a briefcase.
+ *
+ * THE HOVER IS THE TYPE, NOT A SHAPE BEHIND IT. Two shapes were tried and both
+ * were wrong for the same reason: a tinted rounded rectangle and a rule down
+ * the left edge are both a decoration ABOUT the row rather than anything
+ * happening to it, and they are what every generated menu reaches for first.
+ *
+ * Instead the row steps aside. The title slides right into a gutter that was
+ * already reserved, an arrow takes the space it vacated, and the description
+ * comes up from muted to readable. Nothing is drawn that was not already
+ * there; the only new mark is the arrow, and an arrow beside a link is a
+ * statement of where it goes rather than an ornament. It also means the row
+ * has no edges to get wrong at any width.
  */
 function MenuLink({ item }: { item: NavItem }) {
   return (
     <Link
       href={item.href}
-      className="group relative flex flex-col rounded-[13px] py-3 pl-4 pr-3 transition-colors duration-200 hover:bg-white/[0.06]"
+      className="group relative flex flex-col py-3 pl-7 pr-3"
     >
-      <span
+      {/* Sits in the gutter the title is about to move out of. */}
+      <ArrowRight
         aria-hidden="true"
-        className="absolute bottom-3 left-0 top-3 w-[2px] origin-top scale-y-0 rounded-full bg-[var(--v-primary)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100"
+        size={13}
+        className="pointer-events-none absolute left-1 top-[1.05rem] -translate-x-1.5 text-[var(--v-primary)] opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100"
       />
-      <span className="flex items-center gap-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)]">
+      <span className="flex items-center gap-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1.5">
         {item.label}
         {item.badge && (
           <span className="rounded-full bg-[var(--v-primary)]/15 px-2 py-0.5 text-[length:var(--t-label)] font-semibold uppercase tracking-wide text-[var(--v-ring)]">
@@ -67,7 +79,7 @@ function MenuLink({ item }: { item: NavItem }) {
         )}
       </span>
       {item.note && (
-        <span className="mt-1 text-[length:var(--t-small)] leading-snug text-[var(--v-muted)]">
+        <span className="mt-1 text-[length:var(--t-small)] leading-snug text-[var(--v-muted)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1.5 group-hover:text-[var(--v-ink)]/80">
           {item.note}
         </span>
       )}
@@ -355,9 +367,16 @@ export default function Header() {
                             <Link
                               key={item.href}
                               href={item.href}
-                              className="rounded-xl px-2.5 py-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)] transition-colors hover:bg-white/[0.05]"
+                              className="group relative py-2 pl-7 pr-3 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)]"
                             >
-                              {item.label}
+                              <ArrowRight
+                                aria-hidden="true"
+                                size={13}
+                                className="pointer-events-none absolute left-1 top-[0.72rem] -translate-x-1.5 text-[var(--v-primary)] opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100"
+                              />
+                              <span className="block transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1.5">
+                                {item.label}
+                              </span>
                             </Link>
                           ))}
                         </div>
@@ -370,24 +389,59 @@ export default function Header() {
                       </div>
                       <div>
                         <ColumnHeading>From the Blog</ColumnHeading>
+                        {/* THREE, NOT ALL NINE. Every post was being listed, which
+                            made this panel taller than the viewport on a laptop
+                            and turned a menu into a page. A menu's job is to
+                            show the way in, so it carries the three most recent
+                            and hands the rest to the archive, which is the
+                            thing actually built for a long list.
+
+                            REAL POSTS ONLY. Six of the nine entries are flagged
+                            `placeholder`, meaning their titles are invented to
+                            fill out the index; the post page for one says in as
+                            many words that nothing on it came from District
+                            Partners. Those are honest on a page that explains
+                            itself and dishonest as a headline in the navigation,
+                            where a visitor reads them as articles the firm
+                            published. Sorted by date because "most recent" has
+                            to be true, not just written in a comment. */}
                         <div className="flex flex-col gap-3">
-                          {BLOG_POSTS.map((post) => (
+                          {BLOG_POSTS_BY_DATE.filter((p) => !p.placeholder)
+                            .slice(0, 3)
+                            .map((post) => (
                             <Link
                               key={post.slug}
                               href={`/resources/blog/${post.slug}`}
-                              className="rounded-xl p-2 transition-colors hover:bg-white/[0.05]"
+                              className="group relative py-1.5 pl-7 pr-2"
                             >
-                              <p className="text-[length:var(--t-small)] font-medium leading-snug text-[var(--v-ink)]">
-                                {post.title}
-                              </p>
-                              <p className="mt-1 text-[length:var(--t-small)] text-[var(--v-muted)]">{post.date}</p>
+                              <ArrowRight
+                                aria-hidden="true"
+                                size={13}
+                                className="pointer-events-none absolute left-1 top-[0.62rem] -translate-x-1.5 text-[var(--v-primary)] opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100"
+                              />
+                              <span className="block transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1.5">
+                                <span className="block text-[length:var(--t-small)] font-medium leading-snug text-[var(--v-ink)]">
+                                  {post.title}
+                                </span>
+                                <span className="mt-1 block text-[length:var(--t-small)] text-[var(--v-muted)]">
+                                  {post.date}
+                                </span>
+                              </span>
                             </Link>
                           ))}
+                          {/* No count. Nine would be counting six invented
+                              entries as things the firm has published, and any
+                              smaller number goes stale the moment the real
+                              archive lands. */}
                           <Link
                             href="/resources/blog"
-                            className="px-2 text-[length:var(--t-small)] font-semibold text-[var(--v-muted)] hover:text-[var(--v-primary)]"
+                            className="group mt-1 inline-flex items-center gap-1.5 pl-7 text-[length:var(--t-small)] font-semibold text-[var(--v-ring)]"
                           >
-                            All Articles
+                            All articles
+                            <ArrowRight
+                              size={13}
+                              className="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1"
+                            />
                           </Link>
                         </div>
                       </div>
