@@ -1357,12 +1357,38 @@ html[data-loaded] .dp-scale-in {
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
-  animation: dp-mv-orbit 22s ease-in-out infinite;
+  animation: dp-mv-orbit 36s ease-in-out infinite;
 }
 @keyframes dp-mv-orbit {
   0%,
-  100% { transform: rotateX(2deg) rotateY(-9deg); }
-  50%  { transform: rotateX(-1deg) rotateY(9deg); }
+  100% { transform: rotateX(2.5deg) rotateY(-11deg); }
+  33%  { transform: rotateX(-1.5deg) rotateY(4deg); }
+  66%  { transform: rotateX(1deg) rotateY(11deg); }
+}
+
+/* ---- The float ------------------------------------------------------------
+   THIS IS A SEPARATE PROPERTY FROM `transform`, ON PURPOSE AND NOT BY ACCIDENT.
+   CSS resolves `translate`, then `rotate`, then `scale`, then `transform`, so a
+   float written here composes with whatever pose or arrival the element's
+   `transform` is already doing instead of overwriting it. Trying to do both in
+   one `transform` is what forces every element to restate its own base pose
+   inside every keyframe, and the first thing anyone forgets is one of them.
+
+   Three curves at four durations, none a multiple of another and none a
+   multiple of the 36s orbit. Two slow motions with no common period compound
+   into something that never visibly repeats, which is the whole difference
+   between "floating" and "looping". */
+@keyframes dp-float-a {
+  0%, 100% { translate: 0 -5px 0; }
+  50%      { translate: 0 5px 7px; }
+}
+@keyframes dp-float-b {
+  0%, 100% { translate: 0 4px 0; }
+  50%      { translate: 0 -6px -6px; }
+}
+@keyframes dp-float-c {
+  0%, 100% { translate: 0 -3px 5px; }
+  50%      { translate: 0 6px -4px; }
 }
 
 /* The source the scene is lit by. Without something to be lit BY, every element
@@ -1392,6 +1418,8 @@ html[data-loaded] .dp-scale-in {
   height: 0;
   transform: translateX(-50%) translateZ(var(--z));
   transform-style: preserve-3d;
+  animation: var(--float, dp-float-a) var(--fd, 15s) ease-in-out infinite;
+  animation-delay: var(--fdel, 0s);
 }
 .dp-mv-rule {
   position: absolute;
@@ -1443,16 +1471,19 @@ html[data-loaded] .dp-scale-in {
   box-shadow:
     0 0 0 1px rgba(226, 240, 255, 0.6),
     0 0 18px 3px rgba(120, 180, 255, 0.55);
-  animation: dp-mv-arrive 6.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  animation:
+    dp-mv-arrive 12s cubic-bezier(0.16, 1, 0.3, 1) infinite,
+    dp-float-a 15s ease-in-out infinite;
 }
 @keyframes dp-mv-arrive {
-  0%   { transform: translate3d(0, -230%, -140px) scale(0.7); opacity: 0; }
-  10%  { opacity: 1; }
-  34%  { transform: translate3d(0, 0, 68px) scale(1); opacity: 1; }
+  0%   { transform: translate3d(0, -260%, -180px) scale(0.62); opacity: 0; }
+  8%   { opacity: 1; }
+  /* Long, and eased almost to a stop rather than snapping into place. */
+  30%  { transform: translate3d(0, 0, 68px) scale(1); opacity: 1; }
   /* The hold is most of the loop. The subject is the seat being FILLED, so the
      filled state is what the picture spends its time showing. */
-  86%  { transform: translate3d(0, 0, 68px) scale(1); opacity: 1; }
-  100% { transform: translate3d(0, -230%, -140px) scale(0.7); opacity: 0; }
+  88%  { transform: translate3d(0, 0, 68px) scale(1); opacity: 1; }
+  100% { transform: translate3d(0, -260%, -180px) scale(0.62); opacity: 0; }
 }
 
 /* ---- markets: the short list rises ---------------------------------------
@@ -1463,6 +1494,7 @@ html[data-loaded] .dp-scale-in {
   inset: 14% 10%;
   transform: rotateX(58deg);
   transform-style: preserve-3d;
+  animation: dp-float-c 23s ease-in-out infinite;
 }
 .dp-mv-cell {
   position: absolute;
@@ -1471,6 +1503,13 @@ html[data-loaded] .dp-scale-in {
   margin: -3px 0 0 -3px;
   border-radius: 1.5px;
   background: rgba(143, 180, 255, 0.2);
+  /* Even the quiet cells breathe, so the field is a living surface rather than
+     a static grid with five animated dots on it. */
+  animation: dp-mv-breathe 11s var(--d, 0s) ease-in-out infinite;
+}
+@keyframes dp-mv-breathe {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
 }
 .dp-mv-cell.is-on {
   width: 9px;
@@ -1478,11 +1517,13 @@ html[data-loaded] .dp-scale-in {
   margin: -4.5px 0 0 -4.5px;
   background: rgba(226, 240, 255, 0.95);
   box-shadow: 0 0 14px 2px rgba(120, 180, 255, 0.6);
-  animation: dp-mv-rise 5.2s var(--d, 0s) cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  animation:
+    dp-mv-rise 9.5s var(--d, 0s) cubic-bezier(0.16, 1, 0.3, 1) infinite,
+    dp-float-b 19s ease-in-out infinite;
 }
 @keyframes dp-mv-rise {
   0%, 100% { transform: translateZ(0) scale(0.5); opacity: 0.25; }
-  26%, 68% { transform: translateZ(42px) scale(1); opacity: 1; }
+  22%, 74% { transform: translateZ(46px) scale(1); opacity: 1; }
 }
 
 /* ---- resources: the record ------------------------------------------------
@@ -1510,7 +1551,9 @@ html[data-loaded] .dp-scale-in {
     inset 1px 1px 0 rgba(226, 238, 255, 0.5),
     inset -1px -1px 0 rgba(120, 150, 210, 0.16),
     0 20px 40px -24px rgba(0, 0, 0, 0.9);
-  animation: dp-mv-leaf 9s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation:
+    dp-mv-leaf 15s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite,
+    dp-float-a 17s ease-in-out infinite;
 }
 .dp-mv-sheet span {
   height: 3px;
@@ -1543,6 +1586,7 @@ html[data-loaded] .dp-scale-in {
   height: 0;
   transform: rotateX(56deg);
   transform-style: preserve-3d;
+  animation: dp-float-b 21s ease-in-out infinite;
 }
 .dp-mv-spoke {
   position: absolute;
@@ -1564,7 +1608,7 @@ html[data-loaded] .dp-scale-in {
   margin-top: -1px;
   border-radius: 2px;
   background: linear-gradient(90deg, transparent, rgba(226, 240, 255, 0.95));
-  animation: dp-mv-signal 3.6s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: dp-mv-signal 6.5s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 @keyframes dp-mv-signal {
   0%   { transform: translateX(0); opacity: 0; }
@@ -1583,7 +1627,9 @@ html[data-loaded] .dp-scale-in {
   border-radius: 2px;
   background: rgba(143, 180, 255, 0.25);
   box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.5);
-  animation: dp-mv-land 3.6s var(--d, 0s) ease-out infinite;
+  animation:
+    dp-mv-land 6.5s var(--d, 0s) ease-out infinite,
+    dp-float-c 17s ease-in-out infinite;
 }
 @keyframes dp-mv-land {
   0%, 62% { background: rgba(143, 180, 255, 0.25); box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.5); }
@@ -1605,16 +1651,25 @@ html[data-loaded] .dp-scale-in {
      nothing with a separate square floating nearby. Depth that breaks the
      drawing is not worth the depth. */
   transform: translateZ(9px);
+  animation: dp-float-a 19s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .dp-mv-scene,
+  .dp-mv-tier,
   .dp-mv-arriving,
+  .dp-mv-plane,
+  .dp-mv-cell,
   .dp-mv-cell.is-on,
   .dp-mv-sheet,
+  .dp-mv-disc,
+  .dp-mv-core,
   .dp-mv-spoke i,
   .dp-mv-spoke b {
     animation: none;
+    /* The float lives on `translate`, which a bare animation:none leaves at
+       whatever the keyframe set it to. It has to be cleared explicitly. */
+    translate: none;
   }
   /* Resting states must be the MEANINGFUL frame, not frame zero. Frame zero of
      the arriving seat is 140px behind the scene and fully transparent, so a

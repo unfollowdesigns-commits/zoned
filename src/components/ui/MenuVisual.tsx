@@ -68,18 +68,29 @@ function Tier({
   width,
   seats,
   vacantAt,
+  float,
+  dur,
+  delay = 0,
 }: {
   z: number;
   top: number;
   width: number;
   seats: number;
   vacantAt?: number;
+  /** Which float curve, and how slow. Different per tier so the structure
+      breathes rather than moving as one rigid object. */
+  float: "a" | "b" | "c";
+  dur: number;
+  delay?: number;
 }) {
   return (
     <div
       className="dp-mv-tier"
       style={{
         ["--z" as string]: `${z}px`,
+        ["--float" as string]: `dp-float-${float}`,
+        ["--fd" as string]: `${dur}s`,
+        ["--fdel" as string]: `${delay}s`,
         top: `${top}%`,
         width: `${width}%`,
       }}
@@ -103,9 +114,9 @@ function Services() {
       {/* Widest and nearest at the bottom, narrowest and furthest at the top:
           an organisation seen from below, which is the right angle for a
           picture about the seat at the top of one. */}
-      <Tier z={0} top={68} width={84} seats={4} />
-      <Tier z={34} top={46} width={58} seats={3} />
-      <Tier z={68} top={24} width={30} seats={1} vacantAt={0} />
+      <Tier z={0} top={68} width={84} seats={4} float="b" dur={21} />
+      <Tier z={34} top={46} width={58} seats={3} float="c" dur={17} delay={-4} />
+      <Tier z={68} top={24} width={30} seats={1} vacantAt={0} float="a" dur={15} delay={-9} />
       {/* Comes from behind the structure and above it, and lands in the gap. */}
       <span className="dp-mv-arriving" />
     </Frame>
@@ -143,7 +154,11 @@ function Resources() {
   return (
     <Frame kind="resources">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="dp-mv-sheet" style={{ ["--d" as string]: `${i * -3}s` }}>
+        /* Evenly spread across the 15s leaf cycle. Negative, so the stack is
+           already mid-cycle on the first frame and never starts empty. Tied to
+           the cycle length: at the old -3s against a 15s loop the three sheets
+           bunched into the first fifth of it and the stack read as two. */
+        <div key={i} className="dp-mv-sheet" style={{ ["--d" as string]: `${i * -5}s` }}>
           <span style={{ width: "72%" }} />
           <span style={{ width: "84%" }} />
           <span style={{ width: "48%" }} />
