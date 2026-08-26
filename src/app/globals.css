@@ -1338,129 +1338,291 @@ html[data-loaded] .dp-scale-in {
 
 /* ---- Menu visuals ----------------------------------------------------------
    See components/ui/MenuVisual.tsx for what each one MEANS. This file holds the
-   material and the motion. The vocabulary is the same two parts used by the
-   house marks: rules are structure, nodes are seats, a filled node is the seat
-   being placed. */
+   material, the depth and the motion.
+
+   EVERY SCENE ORBITS, SLOWLY, FOREVER. One rotation on the parent is what makes
+   depth read: elements at different translateZ shift by different amounts as it
+   turns, so near things travel further than far things without a single value
+   being animated per element. It is also what makes the figures feel alive
+   between events instead of static and then briefly not. 22 seconds and a few
+   degrees: below the threshold where anyone notices it happening, above the one
+   where the picture looks frozen. */
 .dp-mv-frame {
+  perspective: 760px;
+  perspective-origin: 50% 44%;
+  background: radial-gradient(120% 100% at 50% 0%, #0b1226 0%, #05070f 62%);
   isolation: isolate;
 }
-.dp-mv {
-  display: block;
-  width: 100%;
-  height: 100%;
+.dp-mv-scene {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: dp-mv-orbit 22s ease-in-out infinite;
+}
+@keyframes dp-mv-orbit {
+  0%,
+  100% { transform: rotateX(2deg) rotateY(-9deg); }
+  50%  { transform: rotateX(-1deg) rotateY(9deg); }
 }
 
-/* Structure. Quiet: it is the thing the seats sit ON, not the subject. */
-.dp-mv-rules path {
-  fill: none;
-  stroke: rgba(143, 180, 255, 0.30);
-  stroke-width: 1.4;
-  stroke-linecap: round;
-}
-/* Seats already filled. */
-.dp-mv-seats rect {
-  fill: rgba(143, 180, 255, 0.20);
-  stroke: rgba(196, 218, 255, 0.42);
-  stroke-width: 1.2;
+/* The source the scene is lit by. Without something to be lit BY, every element
+   glows on its own and nothing reads as a surface. */
+.dp-mv-lamp {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  height: 74%;
+  width: 86%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(
+    closest-side,
+    rgba(96, 148, 255, 0.28),
+    rgba(56, 120, 235, 0.09) 56%,
+    transparent 78%
+  );
+  filter: blur(24px);
+  pointer-events: none;
 }
 
-/* ---- services: the seat arrives -----------------------------------------
-   The vacancy is a dashed outline, so the gap reads as a gap rather than as a
-   missing shape, and the arriving seat descends into it and settles. The two
-   clocks are the same length and offset so the vacancy is only visible while
-   the seat is genuinely away from it. */
-.dp-mv-vacancy {
-  fill: none;
-  stroke: rgba(143, 180, 255, 0.45);
-  stroke-width: 1.3;
-  stroke-dasharray: 3 3;
+/* ---- shared parts: rules and nodes --------------------------------------- */
+.dp-mv-tier {
+  position: absolute;
+  left: 50%;
+  height: 0;
+  transform: translateX(-50%) translateZ(var(--z));
+  transform-style: preserve-3d;
 }
+.dp-mv-rule {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(143, 180, 255, 0.5) 18%,
+    rgba(143, 180, 255, 0.5) 82%,
+    transparent
+  );
+}
+.dp-mv-node {
+  position: absolute;
+  top: 0;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 2px;
+  background: rgba(143, 180, 255, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.45);
+}
+/* A gap has to read as a gap, not as a missing shape. */
+.dp-mv-node.is-vacant {
+  background: none;
+  box-shadow: none;
+  border: 1px dashed rgba(143, 180, 255, 0.5);
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 3px;
+}
+
+/* ---- services: the seat arrives ------------------------------------------
+   It comes from BEHIND the structure as well as above it, which is the whole
+   reason this is in 3D: an arrival that only moves in Y is a drop, and an
+   arrival that also comes forward through 200px of depth is a placement. */
 .dp-mv-arriving {
-  stroke-width: 1.3;
-  animation: dp-mv-arrive 5.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  position: absolute;
+  left: 50%;
+  top: 24%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 3px;
+  background: linear-gradient(142deg, rgba(226, 238, 255, 0.95), rgba(143, 180, 255, 0.6));
+  box-shadow:
+    0 0 0 1px rgba(226, 240, 255, 0.6),
+    0 0 18px 3px rgba(120, 180, 255, 0.55);
+  animation: dp-mv-arrive 6.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 @keyframes dp-mv-arrive {
-  0%   { transform: translateY(-46px) scale(0.82); opacity: 0; }
-  26%  { transform: translateY(0) scale(1); opacity: 1; }
-  /* The hold is most of the loop. The point is the seat being FILLED, so the
+  0%   { transform: translate3d(0, -230%, -140px) scale(0.7); opacity: 0; }
+  10%  { opacity: 1; }
+  34%  { transform: translate3d(0, 0, 68px) scale(1); opacity: 1; }
+  /* The hold is most of the loop. The subject is the seat being FILLED, so the
      filled state is what the picture spends its time showing. */
-  82%  { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-46px) scale(0.82); opacity: 0; }
+  86%  { transform: translate3d(0, 0, 68px) scale(1); opacity: 1; }
+  100% { transform: translate3d(0, -230%, -140px) scale(0.7); opacity: 0; }
 }
 
-/* ---- markets: the short list resolves ------------------------------------ */
-.dp-mv-field rect {
-  fill: rgba(143, 180, 255, 0.16);
+/* ---- markets: the short list rises ---------------------------------------
+   The field is a real plane laid back in space, so the resolving cells lift OFF
+   it toward the viewer rather than merely getting bigger. */
+.dp-mv-plane {
+  position: absolute;
+  inset: 14% 10%;
+  transform: rotateX(58deg);
+  transform-style: preserve-3d;
 }
-.dp-mv-field rect.is-on {
-  fill: rgba(214, 232, 255, 0.9);
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: dp-mv-resolve 4.6s ease-in-out infinite;
+.dp-mv-cell {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 1.5px;
+  background: rgba(143, 180, 255, 0.2);
 }
-@keyframes dp-mv-resolve {
-  0%, 100% { opacity: 0.18; transform: scale(0.6); }
-  22%, 62% { opacity: 1; transform: scale(1); }
+.dp-mv-cell.is-on {
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  background: rgba(226, 240, 255, 0.95);
+  box-shadow: 0 0 14px 2px rgba(120, 180, 255, 0.6);
+  animation: dp-mv-rise 5.2s var(--d, 0s) cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+@keyframes dp-mv-rise {
+  0%, 100% { transform: translateZ(0) scale(0.5); opacity: 0.25; }
+  26%, 68% { transform: translateZ(42px) scale(1); opacity: 1; }
 }
 
-/* ---- resources: the record ----------------------------------------------
-   Three sheets on one keyframe at staggered NEGATIVE delays, so the cycle is
-   already in progress on the first frame and the stack never starts empty. */
+/* ---- resources: the record ------------------------------------------------
+   Sheets at real depth. Negative delays so the cycle is already under way on
+   the first frame and the stack never starts empty. */
 .dp-mv-sheet {
-  transform-box: view-box;
-  transform-origin: 100px 75px;
-  animation: dp-mv-leaf 7.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  position: absolute;
+  left: 22%;
+  top: 18%;
+  display: flex;
+  width: 56%;
+  height: 62%;
+  flex-direction: column;
+  justify-content: center;
+  gap: 11%;
+  padding: 0 12%;
+  border-radius: 8px;
+  background: linear-gradient(
+    142deg,
+    rgba(214, 230, 255, 0.2) 0%,
+    rgba(150, 185, 255, 0.09) 45%,
+    rgba(90, 130, 220, 0.05) 100%
+  );
+  box-shadow:
+    inset 1px 1px 0 rgba(226, 238, 255, 0.5),
+    inset -1px -1px 0 rgba(120, 150, 210, 0.16),
+    0 20px 40px -24px rgba(0, 0, 0, 0.9);
+  animation: dp-mv-leaf 9s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
-.dp-mv-lines {
-  fill: none;
-  stroke: rgba(180, 208, 255, 0.42);
-  stroke-width: 2.4;
-  stroke-linecap: round;
+.dp-mv-sheet span {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(180, 208, 255, 0.42);
 }
+/* ONLY THE FRONT SHEET IS FULLY PRESENT. With three sheets on one cycle, two
+   of them sit at different depths at the same moment; when both were fully
+   opaque their ruled lines overlapped a few pixels apart and read as a
+   rendering fault rather than as a stack. The one behind is held faint, so
+   depth is carried by opacity as well as by Z, which is how a real stack of
+   paper behaves anyway. */
 @keyframes dp-mv-leaf {
-  0%   { transform: translateY(16px) scale(0.94); opacity: 0; }
-  14%  { transform: translateY(8px) scale(0.97); opacity: 1; }
-  62%  { transform: translateY(0) scale(1); opacity: 1; }
-  86%  { transform: translateY(-30px) scale(1.02); opacity: 0; }
-  100% { transform: translateY(-30px) scale(1.02); opacity: 0; }
+  0%   { transform: translate3d(0, 12%, -130px); opacity: 0; }
+  20%  { transform: translate3d(0, 7%, -70px); opacity: 0.3; }
+  62%  { transform: translate3d(0, 0, 0); opacity: 1; }
+  88%  { transform: translate3d(0, -34%, 90px); opacity: 0; }
+  100% { transform: translate3d(0, -34%, 90px); opacity: 0; }
 }
 
-/* ---- about: partner led --------------------------------------------------
-   pathLength normalises every spoke to 100 units whatever its real length, so
-   one dash rule sends an identical pulse down all five regardless of how far
-   each one reaches. Same trick as the house marks and the stat gauges. */
-.dp-mv-spokes path {
-  fill: none;
-  stroke: rgba(143, 180, 255, 0.28);
-  stroke-width: 1.4;
+/* ---- about: partner led ---------------------------------------------------
+   A disc of seats seen at an angle. Each spoke is one rotated bar, so the
+   signal travelling out is a translate along that bar rather than five
+   separately choreographed paths. */
+.dp-mv-disc {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform: rotateX(56deg);
+  transform-style: preserve-3d;
 }
-.dp-mv-spokes path {
-  stroke-dasharray: 18 100;
-  animation: dp-mv-pulse 3.4s linear infinite;
+.dp-mv-spoke {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 1px;
+  width: 78px;
+  transform-origin: 0 50%;
+  transform: rotate(var(--rot));
+  background: linear-gradient(90deg, rgba(143, 180, 255, 0.42), rgba(143, 180, 255, 0.12));
 }
-@keyframes dp-mv-pulse {
-  0%   { stroke-dashoffset: 18; stroke: rgba(196, 224, 255, 0.85); }
-  70%  { stroke-dashoffset: -100; stroke: rgba(143, 180, 255, 0.18); }
-  100% { stroke-dashoffset: -100; stroke: rgba(143, 180, 255, 0.18); }
+/* The signal. */
+.dp-mv-spoke i {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 16px;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgba(226, 240, 255, 0.95));
+  animation: dp-mv-signal 3.6s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes dp-mv-signal {
+  0%   { transform: translateX(0); opacity: 0; }
+  12%  { opacity: 1; }
+  70%  { transform: translateX(62px); opacity: 1; }
+  86%, 100% { transform: translateX(62px); opacity: 0; }
+}
+/* The seat it arrives at. */
+.dp-mv-spoke b {
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 2px;
+  background: rgba(143, 180, 255, 0.25);
+  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.5);
+  animation: dp-mv-land 3.6s var(--d, 0s) ease-out infinite;
+}
+@keyframes dp-mv-land {
+  0%, 62% { background: rgba(143, 180, 255, 0.25); box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.5); }
+  72% { background: rgba(226, 240, 255, 0.95); box-shadow: 0 0 14px 2px rgba(120, 180, 255, 0.6); }
+  100% { background: rgba(143, 180, 255, 0.25); box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.5); }
 }
 .dp-mv-core {
-  fill: rgba(214, 232, 255, 0.92);
-  stroke: rgba(230, 242, 255, 0.6);
-  stroke-width: 1.4;
+  position: absolute;
+  left: -9px;
+  top: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: linear-gradient(142deg, rgba(232, 242, 255, 0.98), rgba(150, 190, 255, 0.75));
+  box-shadow: 0 0 22px 4px rgba(120, 180, 255, 0.45);
+  /* Lifted off the disc so the centre is nearest the viewer, but only just.
+     At 26px the perspective displaced it visibly up and away from the point
+     where the spokes converge, so the figure read as five lines meeting at
+     nothing with a separate square floating nearby. Depth that breaks the
+     drawing is not worth the depth. */
+  transform: translateZ(9px);
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .dp-mv-scene,
   .dp-mv-arriving,
-  .dp-mv-field rect.is-on,
+  .dp-mv-cell.is-on,
   .dp-mv-sheet,
-  .dp-mv-spokes path {
+  .dp-mv-spoke i,
+  .dp-mv-spoke b {
     animation: none;
   }
-  /* Resting states have to be the MEANINGFUL frame, not frame zero. Frame zero
-     of the arriving seat is off screen and fully transparent, so without this
-     the reduced-motion visitor gets a picture with the subject missing. */
-  .dp-mv-arriving { opacity: 1; transform: none; }
-  .dp-mv-field rect.is-on { opacity: 1; }
-  .dp-mv-sheet { opacity: 1; transform: none; }
-  .dp-mv-spokes path { stroke-dasharray: none; }
+  /* Resting states must be the MEANINGFUL frame, not frame zero. Frame zero of
+     the arriving seat is 140px behind the scene and fully transparent, so a
+     bare animation:none leaves this visitor a picture with its subject
+     missing. */
+  .dp-mv-scene { transform: rotateX(1deg) rotateY(-6deg); }
+  .dp-mv-arriving { transform: translate3d(0, 0, 68px); opacity: 1; }
+  .dp-mv-cell.is-on { transform: translateZ(42px); opacity: 1; }
+  .dp-mv-sheet { transform: none; opacity: 1; }
+  .dp-mv-spoke i { opacity: 0; }
 }
