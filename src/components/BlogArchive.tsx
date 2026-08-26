@@ -66,7 +66,7 @@ export default function BlogArchive({ posts }: { posts: BlogPost[] }) {
             <Reveal delay={Math.min(i * 0.05, 0.25)}>
               <Link href={`/resources/blog/${post.slug}`} className="group block">
                 <div className="v-lift relative aspect-[16/10] overflow-hidden rounded-[var(--radius)]">
-                  <PostArt slug={post.slug} />
+                  <PostArt slug={post.slug} category={post.category} />
                   <span className="absolute left-4 top-4 rounded-full bg-black/35 px-3 py-1 text-[length:var(--t-label)] font-medium uppercase tracking-[0.1em] text-white/80 backdrop-blur-sm">
                     {post.category}
                   </span>

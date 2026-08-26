@@ -9,17 +9,33 @@
  * boardroom is telling the reader it has nothing of its own to show, and every
  * visitor has seen those exact frames on a competitor's site.
  *
- * So each card draws its own figure, seeded by the slug. It is deterministic:
- * a post keeps the same art forever, across builds and machines, which matters
- * because a card that reshuffles on every render reads as decoration rather
- * than as identity. And it is SVG built from the palette tokens: no image
- * bytes, no layout shift, correct at any density, and it cannot go off-brand.
+ * WHAT WAS WRONG WITH THE FIRST VERSION. Every card drew the same figure, a
+ * family of concentric arcs, in the same blue. Seeded variation moved the
+ * centre and the tilt, which is variation a viewer cannot see: six cards in a
+ * grid all read as the same picture slightly rotated, and an archive of them
+ * looked like a template rather than a set of articles.
  *
- * This is scaffolding with a clear replacement path. When there is real
- * photography, `PostArt` becomes an `<Image>` and every card picks it up.
+ * SO FORM AND COLOUR NOW COME FROM THE CATEGORY, AND ONLY THE DETAIL COMES FROM
+ * THE SLUG. Six categories, six genuinely different constructions: contours,
+ * halftone, chevrons, a graduated field, stripes, dashes. That is a difference
+ * in KIND rather than in parameters, which is the only kind the eye registers
+ * across a grid.
+ *
+ * Tying it to the category rather than the slug also makes the colour mean
+ * something. A reader who scrolls the archive twice learns that violet is
+ * market insight without ever being told, and a card is then doing a second
+ * job. Seeded-by-slug colour would have looked identical and taught nothing.
+ *
+ * The palette is wider than the rest of the site on purpose. Elsewhere the blue
+ * family is held to deliberately, because competing hues behind an argument
+ * read as decoration; a taxonomy is the one place where distinct hues are the
+ * content rather than an ornament on it.
+ *
+ * Still deterministic, still SVG: no image bytes, no layout shift, correct at
+ * any density, identical on server and client. This is scaffolding with a clear
+ * replacement path. When there is real photography, `PostArt` becomes an
+ * `<Image>` and every card picks it up.
  */
-
-const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
 /**
  * FNV-1a. A hash, not `Math.random`: the art has to be identical on the server
@@ -47,28 +63,171 @@ function rng(seed: number) {
   };
 }
 
-export default function PostArt({ slug, className = "" }: { slug: string; className?: string }) {
+type Draw = (r: () => number, c: string) => React.ReactNode;
+
+/* Every motif is drawn in a 100 x 56 box, anchored so its weight sits low and
+   right and runs off the edge. Bleeding matters: a figure that stops inside the
+   frame reads as a sticker placed on the card, and one that leaves it reads as
+   a window onto something larger. */
+
+/** Contours. Nested open curves, like a section through a landform. */
+const contours: Draw = (r, c) => {
+  const n = 7;
+  const lean = -14 + r() * 28;
+  return (
+    <g transform={`rotate(${lean} 78 52)`}>
+      {Array.from({ length: n }, (_, i) => {
+        const k = 12 + i * 9;
+        return (
+          <path
+            key={i}
+            d={`M ${100 - k * 1.5} 60 C ${86 - k} ${44 - k * 0.3}, ${96 - k * 0.4} ${30 - k * 0.5}, ${112} ${28 - k * 0.8}`}
+            fill="none"
+            stroke={c}
+            strokeOpacity={0.62 - i * 0.06}
+            strokeWidth={0.7}
+            strokeLinecap="round"
+          />
+        );
+      })}
+    </g>
+  );
+};
+
+/** Halftone. A dot grid whose radius rides a wave, so the field has a crest. */
+const halftone: Draw = (r, c) => {
+  const phase = r() * Math.PI * 2;
+  const dots = [];
+  for (let col = 0; col < 16; col += 1) {
+    for (let row = 0; row < 9; row += 1) {
+      const x = 34 + col * 4.6;
+      const y = 8 + row * 5.4;
+      const wave = Math.sin(col * 0.45 + row * 0.28 + phase);
+      const rad = 0.45 + Math.max(0, wave) * 1.5;
+      if (rad < 0.5) continue;
+      dots.push(
+        <circle key={`${col}-${row}`} cx={x} cy={y} r={rad} fill={c} fillOpacity={0.28 + rad * 0.3} />,
+      );
+    }
+  }
+  return <g>{dots}</g>;
+};
+
+/** Chevrons. Nested angles, thick, pointing out of the corner. */
+const chevrons: Draw = (r, c) => {
+  const n = 6;
+  const gap = 5 + r() * 2;
+  return (
+    <g>
+      {Array.from({ length: n }, (_, i) => {
+        const o = i * gap;
+        return (
+          <path
+            key={i}
+            d={`M ${52 + o} 60 L ${80 + o} ${26 - o * 0.25} L ${108 + o} 60`}
+            fill="none"
+            stroke={c}
+            strokeOpacity={0.7 - i * 0.08}
+            strokeWidth={2.1}
+            strokeLinejoin="round"
+          />
+        );
+      })}
+    </g>
+  );
+};
+
+/** A graduated field. Dots growing across the corner, from dust to mass. */
+const field: Draw = (r, c) => {
+  const jitter = r();
+  const dots = [];
+  for (let i = 0; i < 130; i += 1) {
+    const t = i / 130;
+    const x = 40 + Math.pow(t, 0.6) * 78 + (((i * 7919 + jitter * 1000) % 11) - 5) * 0.9;
+    const y = 4 + ((i * 37) % 56) + (((i * 6151) % 7) - 3) * 0.5;
+    const d = Math.min(1, Math.max(0, (x - 44) / 60));
+    const rad = 0.35 + d * 1.7;
+    dots.push(<circle key={i} cx={x} cy={y} r={rad} fill={c} fillOpacity={0.18 + d * 0.55} />);
+  }
+  return <g>{dots}</g>;
+};
+
+/** Stripes. Dense diagonals, cut off square, the densest of the six. */
+const stripes: Draw = (r, c) => {
+  const n = 22;
+  const angle = 28 + r() * 16;
+  return (
+    <g transform={`rotate(${angle} 82 40)`}>
+      {Array.from({ length: n }, (_, i) => (
+        <rect
+          key={i}
+          x={40 + i * 3.4}
+          y={-14}
+          width={1.5}
+          height={88}
+          fill={c}
+          fillOpacity={Math.max(0.06, 0.6 - i * 0.024)}
+        />
+      ))}
+    </g>
+  );
+};
+
+/** Dashes. Short segments at scattered angles: the loosest of the six. */
+const dashes: Draw = (r, c) => {
+  const segs = [];
+  for (let i = 0; i < 54; i += 1) {
+    const x = 42 + ((i * 29) % 62) + (r() - 0.5) * 4;
+    const y = 4 + ((i * 17) % 50) + (r() - 0.5) * 4;
+    const a = r() * 180;
+    segs.push(
+      <rect
+        key={i}
+        x={x}
+        y={y}
+        width={4.6}
+        height={0.9}
+        rx={0.45}
+        fill={c}
+        fillOpacity={0.25 + r() * 0.45}
+        transform={`rotate(${a} ${x} ${y})`}
+      />,
+    );
+  }
+  return <g>{segs}</g>;
+};
+
+/**
+ * Category to form and colour.
+ *
+ * Six real categories, six constructions, six hues. Mid saturation throughout
+ * so they sit together as a set rather than competing: a taxonomy needs its
+ * members to be distinguishable from each other and equal in weight.
+ */
+const BY_CATEGORY: Record<string, { draw: Draw; colour: string }> = {
+  "Executive Search": { draw: contours, colour: "#5b93ff" },
+  "Interim & Fractional": { draw: chevrons, colour: "#35b0d8" },
+  "Market Insight": { draw: halftone, colour: "#9b7bf0" },
+  "Finance & Accounting": { draw: field, colour: "#43b98e" },
+  "Private Capital": { draw: stripes, colour: "#d9a446" },
+  "Firm News": { draw: dashes, colour: "#e0748c" },
+};
+
+const FALLBACK = { draw: contours, colour: "#5b93ff" };
+
+export default function PostArt({
+  slug,
+  category,
+  className = "",
+}: {
+  slug: string;
+  /** Chooses the form and the colour. See BY_CATEGORY. */
+  category?: string;
+  className?: string;
+}) {
   const seed = hash(slug);
   const random = rng(seed);
-
-  /* The whole figure is one family of arcs around a seeded focus, plus two soft
-     glows. Restrained on purpose: the card's job is to carry a headline, and a
-     busy ground makes the headline harder to read, which is the opposite of
-     what the art is for. */
-  /* THE RANGES ARE NARROW ON PURPOSE. Seeded placement across the full frame
-     produced cards whose focus fell outside it: the arcs entered at one corner
-     and the card read as an almost empty dark rectangle. Variety is worth
-     having only while every draw is still a composition, so the focus stays in
-     the middle half and the glow with it. */
-  const cx = 30 + random() * 40;
-  const cy = 22 + random() * 40;
-  const tilt = -35 + random() * 70;
-  const rings = 6 + Math.floor(random() * 3);
-  const spread = 8 + random() * 5;
-
-  const glowX = 25 + random() * 50;
-  const glowY = 20 + random() * 45;
-
+  const { draw, colour } = (category && BY_CATEGORY[category]) || FALLBACK;
   const gid = `pa-${seed.toString(36)}`;
 
   return (
@@ -80,19 +239,20 @@ export default function PostArt({ slug, className = "" }: { slug: string; classN
     >
       <defs>
         <linearGradient id={`${gid}-bg`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#0b1024" />
-          <stop offset="100%" stopColor="#111a3d" />
+          <stop offset="0%" stopColor="#0a0e20" />
+          <stop offset="100%" stopColor="#0e1430" />
         </linearGradient>
         <radialGradient id={`${gid}-glow`}>
-          <stop offset="0%" stopColor="#3e7bfa" stopOpacity="0.42" />
-          <stop offset="100%" stopColor="#3e7bfa" stopOpacity="0" />
+          <stop offset="0%" stopColor={colour} stopOpacity="0.30" />
+          <stop offset="100%" stopColor={colour} stopOpacity="0" />
         </radialGradient>
-        {/* Fades the arcs out toward the foot of the card so the metadata and
-            the headline sit on quiet ground rather than across a line. */}
-        <linearGradient id={`${gid}-fade`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fff" stopOpacity="1" />
-          <stop offset="70%" stopColor="#fff" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#fff" stopOpacity="0.12" />
+        {/* Fades the figure out toward the top left, so the category chip and
+            anything laid over the card sit on quiet ground rather than across
+            a line. */}
+        <linearGradient id={`${gid}-fade`} x1="0" y1="0" x2="0.75" y2="1">
+          <stop offset="0%" stopColor="#fff" stopOpacity="0.18" />
+          <stop offset="45%" stopColor="#fff" stopOpacity="0.75" />
+          <stop offset="100%" stopColor="#fff" stopOpacity="1" />
         </linearGradient>
         <mask id={`${gid}-mask`}>
           <rect width="100" height="56" fill={`url(#${gid}-fade)`} />
@@ -100,29 +260,8 @@ export default function PostArt({ slug, className = "" }: { slug: string; classN
       </defs>
 
       <rect width="100" height="56" fill={`url(#${gid}-bg)`} />
-      <circle cx={glowX} cy={glowY} r="34" fill={`url(#${gid}-glow)`} />
-
-      <g mask={`url(#${gid}-mask)`} transform={`rotate(${tilt} ${cx} ${cy})`}>
-        {Array.from({ length: rings }, (_, i) => {
-          const r = (i + 1) * spread;
-          /* Nearer rings read brighter, so the family has a front and a back
-             instead of being a flat set of concentric outlines. */
-          const opacity = clamp01(0.55 - i * 0.05);
-          return (
-            <ellipse
-              key={i}
-              cx={cx}
-              cy={cy}
-              rx={r}
-              ry={r * (0.52 + random() * 0.2)}
-              fill="none"
-              stroke="#3e7bfa"
-              strokeOpacity={opacity}
-              strokeWidth={0.5}
-            />
-          );
-        })}
-      </g>
+      <circle cx={78} cy={44} r={40} fill={`url(#${gid}-glow)`} />
+      <g mask={`url(#${gid}-mask)`}>{draw(random, colour)}</g>
     </svg>
   );
 }

@@ -57,7 +57,7 @@ export default function BlogPage() {
                     className="v-lift group block overflow-hidden rounded-[var(--radius)]"
                   >
                     <div className="relative aspect-[16/9] sm:aspect-[21/8]">
-                      <PostArt slug={post.slug} />
+                      <PostArt slug={post.slug} category={post.category} />
 
                       <span className="absolute left-6 top-6 rounded-full bg-black/35 px-3 py-1 text-[length:var(--t-label)] font-medium uppercase tracking-[0.1em] text-white/80 backdrop-blur-sm">
                         {post.category}
