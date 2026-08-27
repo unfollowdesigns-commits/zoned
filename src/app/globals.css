@@ -1565,6 +1565,15 @@ html[data-loaded] .dp-scale-in {
   animation: dp-mv-charge-node 12s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
+/* The head of the chart when the seat being filled is somewhere else. Solid
+   rather than hollow, because a structure with nothing at the top of it is not
+   an organisation, and the picture has to stay true while the subject of it
+   moves down. It still takes the charge, so it lights with everything else. */
+.dp-mv-node.is-set {
+  background: rgba(190, 218, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(226, 240, 255, 0.55);
+}
+
 /* THE CASCADE. These are `animation-delay` values on a shared 12s keyframe, not
    offsets inside it: a positive delay holds an element permanently that far
    behind the loop, which is the only way to give one set of keyframes a
@@ -1602,6 +1611,71 @@ html[data-loaded] .dp-scale-in {
     background: rgba(143, 180, 255, 0.1);
     box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.22);
   }
+}
+
+/* ---- Signal on the wires ---------------------------------------------------
+   TWO CLOCKS, AND THAT IS THE FIX FOR "ONE ANIMATION". The cascade above is the
+   twelve second story: a seat lands, and the charge runs down the structure
+   once. On its own that left the picture doing one thing and then holding still
+   for nine seconds. These pulses are a four second loop underneath it, so the
+   wires carry signal at every moment. Each stem's phase is its own cascade
+   offset scaled down (see pulseDelay in the component), so the flow runs in the
+   same order the charge does and the two never look like they disagree.
+
+   It is a moving background rather than a moving element on purpose: a
+   background position animates without laying anything out, where a travelling
+   child would be fourteen absolutely positioned elements changing `top` every
+   frame inside a 3D subtree. */
+.dp-mv-stem::after {
+  content: "";
+  position: absolute;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 3px rgba(140, 190, 255, 0.9));
+  pointer-events: none;
+}
+.dp-mv-stem.is-v::after {
+  left: -1.5px;
+  right: -1.5px;
+  top: 0;
+  bottom: 0;
+  background-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(226, 240, 255, 0.5) 42%,
+    #eaf3ff 50%,
+    rgba(226, 240, 255, 0.5) 58%,
+    transparent 100%
+  );
+  background-size: 100% 30px;
+  animation: dp-mv-run-v 4s linear var(--pd, 0s) infinite;
+}
+.dp-mv-stem.is-h::after {
+  top: -1.5px;
+  bottom: -1.5px;
+  left: 0;
+  right: 0;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(226, 240, 255, 0.5) 42%,
+    #eaf3ff 50%,
+    rgba(226, 240, 255, 0.5) 58%,
+    transparent 100%
+  );
+  background-size: 30px 100%;
+  animation: dp-mv-run-h 4s linear var(--pd, 0s) infinite;
+}
+@keyframes dp-mv-run-v {
+  0%   { background-position: 50% -30px; opacity: 0; }
+  12%  { opacity: 1; }
+  55%  { opacity: 1; }
+  70%, 100% { background-position: 50% calc(100% + 30px); opacity: 0; }
+}
+@keyframes dp-mv-run-h {
+  0%   { background-position: -30px 50%; opacity: 0; }
+  12%  { opacity: 1; }
+  55%  { opacity: 1; }
+  70%, 100% { background-position: calc(100% + 30px) 50%; opacity: 0; }
 }
 
 /* The gap, drawn for the whole loop. It sits UNDER the seat rather than being
@@ -1873,6 +1947,7 @@ html[data-loaded] .dp-scale-in {
   .dp-mv-scene,
   .dp-mv-org,
   .dp-mv-stem,
+  .dp-mv-stem::after,
   .dp-mv-node,
   .dp-mv-arriving,
   .dp-mv-plane,

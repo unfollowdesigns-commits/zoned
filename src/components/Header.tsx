@@ -60,10 +60,21 @@ const SECTION_PREFIX: Record<NavName, string> = {
  * whole business says. The type still steps aside and the arrow still arrives,
  * because those were right; they now have something to happen alongside.
  */
-function MenuLink({ item }: { item: NavItem }) {
+function MenuLink({
+  item,
+  onFocusItem,
+}: {
+  item: NavItem;
+  /** Reports the row the pointer or keyboard is on, so the panel's picture can
+      answer it. See MenuVisual's `focus`. */
+  onFocusItem?: (key: string | undefined) => void;
+}) {
   const Figure = (item.icon && MARKS[item.icon]) || PlainMark;
+  const key = item.icon ?? item.href;
   return (
     <Link
+      onMouseEnter={() => onFocusItem?.(key)}
+      onFocus={() => onFocusItem?.(key)}
       href={item.href}
       /* The lead column is budgeted, not guessed. The row used to spend
          pl-7 plus pr-3, which is 40px of chrome; the figure column has to come
@@ -127,8 +138,17 @@ export default function Header() {
    * and it costs one measurement taken at the moment of opening.
    */
   const [originPct, setOriginPct] = React.useState(50);
+  /**
+   * The row the pointer is on, as the `icon` key its mark is drawn from.
+   *
+   * The panel's picture reads this. Cleared whenever the panel changes, so a
+   * new menu opens on its own default rather than inheriting a seat position
+   * from the row you happened to leave the last one on.
+   */
+  const [focusItem, setFocusItem] = React.useState<string | undefined>(undefined);
 
   const openFrom = React.useCallback((name: NavName, el: HTMLElement | null) => {
+    setFocusItem(undefined);
     if (el) {
       const r = el.getBoundingClientRect();
       /* The panel is centred and capped at 880, so its left edge is derivable
@@ -455,13 +475,13 @@ export default function Header() {
                           <ColumnHeading>{col.heading}</ColumnHeading>
                           <div className="flex flex-col gap-1">
                             {col.items.map((item) => (
-                              <MenuLink key={item.href} item={item} />
+                              <MenuLink key={item.href} item={item} onFocusItem={setFocusItem} />
                             ))}
                           </div>
                         </div>
                       ))}
                     </div>
-                    <MenuVisual kind="services" />
+                    <MenuVisual kind="services" focus={focusItem} />
                   </div>
                 )}
 
@@ -471,7 +491,7 @@ export default function Header() {
                       <ColumnHeading>Functions</ColumnHeading>
                       <div className="flex flex-col gap-1">
                         {FUNCTIONS.map((item) => (
-                          <MenuLink key={item.href} item={item} />
+                          <MenuLink key={item.href} item={item} onFocusItem={setFocusItem} />
                         ))}
                       </div>
                     </div>
@@ -479,11 +499,11 @@ export default function Header() {
                       <ColumnHeading>Industries</ColumnHeading>
                       <div className="grid grid-cols-2 gap-x-4">
                         {INDUSTRIES.map((item) => (
-                          <MenuLink key={item.label} item={item} />
+                          <MenuLink key={item.label} item={item} onFocusItem={setFocusItem} />
                         ))}
                       </div>
                     </div>
-                    <MenuVisual kind="markets" />
+                    <MenuVisual kind="markets" focus={focusItem} />
                   </div>
                 )}
 
@@ -494,7 +514,7 @@ export default function Header() {
                         <ColumnHeading>Resources</ColumnHeading>
                         <div className="flex flex-col gap-1">
                           {RESOURCES.map((item) => (
-                            <MenuLink key={item.href} item={item} />
+                            <MenuLink key={item.href} item={item} onFocusItem={setFocusItem} />
                           ))}
                         </div>
                       </div>
@@ -502,12 +522,12 @@ export default function Header() {
                         <ColumnHeading>New Tools</ColumnHeading>
                         <div className="flex flex-col gap-1">
                           {NEW_TOOLS.map((item) => (
-                            <MenuLink key={item.href} item={item} />
+                            <MenuLink key={item.href} item={item} onFocusItem={setFocusItem} />
                           ))}
                         </div>
                       </div>
                     </div>
-                    <MenuVisual kind="resources" />
+                    <MenuVisual kind="resources" focus={focusItem} />
                   </div>
                 )}
 
@@ -522,7 +542,7 @@ export default function Header() {
                               was the one column still hand rolled, and it was
                               the one column with nothing but type moving. */}
                           {COMPANY.map((item) => (
-                            <MenuLink key={item.href} item={item} />
+                            <MenuLink key={item.href} item={item} onFocusItem={setFocusItem} />
                           ))}
                         </div>
                         <Link
@@ -590,7 +610,7 @@ export default function Header() {
                           </Link>
                         </div>
                       </div>
-                      <MenuVisual kind="about" />
+                      <MenuVisual kind="about" focus={focusItem} />
                     </div>
                     <div className="v-rule mt-5" />
                     <a
