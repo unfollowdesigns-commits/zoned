@@ -58,17 +58,46 @@ const wordmark = Familjen_Grotesk({
   subsets: ["latin"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dpadvisory.com";
+/**
+ * The origin this deployment advertises itself as.
+ *
+ * THIS IS THE ONE THING THAT SILENTLY BREAKS EVERY SHARE CARD. A share preview
+ * is fetched by somebody else's server, which has no idea what site the link
+ * came from, so `og:image` has to be an absolute URL at an origin that is
+ * actually serving this build. Hardcoding the live domain means every preview
+ * and staging deployment publishes a card pointing at a domain that is not
+ * running this code yet, and the platform fetches it, gets whatever is there,
+ * and shows nothing. No error anywhere: the tags are present and correct, they
+ * just point somewhere else.
+ *
+ * So the origin is derived rather than assumed. An explicit
+ * NEXT_PUBLIC_SITE_URL always wins. Failing that, on Vercel a production
+ * deployment names its production domain and any other deployment names
+ * itself, which is what makes a preview link preview. The live domain is the
+ * last resort, for a build with no deployment environment at all.
+ *
+ * These read without the NEXT_PUBLIC_ prefix on purpose: `metadata` is
+ * evaluated on the server, so the server's own environment is available, and
+ * shipping the deployment URL to the browser would be pointless.
+ */
+function resolveSiteUrl(): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  if (process.env.VERCEL_ENV === "production" && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "https://dpadvisory.com";
+}
+
+const SITE_URL = resolveSiteUrl();
 const TITLE = "District Partners | Executive & Professional Search";
 const DESCRIPTION =
   "District Partners is an independent, partner-led talent advisory firm. Executive search, professional search, interim leadership, fractional and project support.";
 
 export const metadata: Metadata = {
   /* WITHOUT metadataBase, Next resolves the generated og:image to a RELATIVE
-     url and every platform that fetches it fails: a share card is fetched by
-     a server that has no idea what site it came from. It reads an env var so
-     staging and production each advertise themselves rather than pointing
-     previews at the live domain. */
+     url and every platform that fetches it fails. See resolveSiteUrl above for
+     where the absolute origin comes from and why it is derived. */
   metadataBase: new URL(SITE_URL),
   title: TITLE,
   description: DESCRIPTION,
