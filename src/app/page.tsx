@@ -1,5 +1,4 @@
 import CinematicHero from "@/components/CinematicHero";
-import SearchConsole from "@/components/SearchConsole";
 import ClientStripe from "@/components/ClientStripe";
 import Stats from "@/components/Stats";
 import StickyServices from "@/components/StickyServices";
@@ -38,76 +37,52 @@ export default function Home() {
 
       <LightBand>
         <div className="mx-auto max-w-[1280px] px-6 py-24 sm:py-32">
-          {/* No eyebrow, no heading. The second break in the page's template:
-              this section is a statement, the prose that argues it, and the
-              machinery that does it, side by side. An eyebrow-and-heading stack
-              in front of body copy is furniture that delays the reading.
+          {/* No eyebrow, no heading, no grid. The second break in the page's
+              template: this section is two columns of prose with one sentence
+              pulled out above them at display size, because what it has to do
+              is be read, and an eyebrow-and-heading stack in front of body copy
+              is furniture that delays the reading. */}
+          <Reveal>
+            <p
+              className="v-display max-w-[26ch] text-balance"
+              style={{
+                fontSize: "var(--t-display-fluid)",
+                lineHeight: "var(--lh-display-fluid)",
+                letterSpacing: "var(--tr-display-fluid)",
+              }}
+            >
+              When your business evolves,{" "}
+              <span className="text-[var(--v-primary-deep)]">
+                your talent strategy should too.
+              </span>
+            </p>
+          </Reveal>
 
-              THE COPY RUNS IN ONE COLUMN, NOT TWO. It used to be two equal
-              columns across the full width, which reads as a wall: a hundred
-              character measure doubled up guarantees the section is skimmed,
-              and being read is this section's whole job. One column at a sane
-              measure, and the space beside it carries the argument instead of
-              carrying nothing. */}
-          <div className="grid items-start gap-x-20 gap-y-16 lg:grid-cols-[1fr_minmax(0,420px)]">
-            <div>
-              <Reveal>
-                <p
-                  className="v-display max-w-[24ch] text-balance"
-                  style={{
-                    fontSize: "var(--t-display-fluid)",
-                    lineHeight: "var(--lh-display-fluid)",
-                    letterSpacing: "var(--tr-display-fluid)",
-                  }}
-                >
-                  When your business evolves,{" "}
-                  <span className="text-[var(--v-primary-deep)]">
-                    your talent strategy should too.
-                  </span>
-                </p>
-              </Reveal>
+          {/* Wide gutter, narrow columns. Two paragraphs 2rem apart read as one
+              block of text that happens to be broken in half; the reference
+              runs a gutter wide enough that each column is its own object. */}
+          <div className="mt-16 grid max-w-[100ch] gap-x-24 gap-y-12 md:grid-cols-2">
+            <Reveal delay={0.1}>
+              <p className="text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
+                District Partners is an independent, partner-led firm built to serve clients
+                wherever they need us most, bringing deep expertise to solve complex business
+                challenges. Whether you&rsquo;re scaling after an acquisition, building a new
+                function, navigating transformation, or filling a critical leadership gap, you
+                need more than a recruiting firm. You need a talent infrastructure partner that
+                can adapt as your needs evolve.
+              </p>
+            </Reveal>
 
-              <div className="mt-12 grid max-w-[62ch] gap-8">
-                <Reveal delay={0.1}>
-                  <p className="text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
-                    District Partners is an independent, partner-led firm built to serve clients
-                    wherever they need us most, bringing deep expertise to solve complex business
-                    challenges. Whether you&rsquo;re scaling after an acquisition, building a new
-                    function, navigating transformation, or filling a critical leadership gap, you
-                    need more than a recruiting firm. You need a talent infrastructure partner that
-                    can adapt as your needs evolve.
-                  </p>
-                </Reveal>
-
-                <Reveal delay={0.17}>
-                  <p className="text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
-                    We understand that our success isn&rsquo;t measured by the people we place or
-                    the professionals we deploy, but by the outcomes and impact we help our clients
-                    achieve. We&rsquo;re proud to{" "}
-                    <strong className="font-semibold text-[var(--v-ink)]">
-                      partner with teams building something great
-                    </strong>
-                    .
-                  </p>
-                </Reveal>
-              </div>
-            </div>
-
-            {/* The claim, as machinery. The paragraph beside it says the firm
-                adapts as a client's needs evolve; this is the stack that does
-                the adapting, running a search end to end on a loop. See
-                components/SearchConsole: every label in it is the firm's own,
-                off The DP Difference.
-
-                `lg` only, and by measurement rather than taste: everything
-                inside it is sized in container query units, so under about
-                340px of column width its labels fall below nine pixels, and a
-                picture of the work nobody can read is worse than the section
-                without one. */}
-            <Reveal delay={0.24}>
-              <div className="hidden w-full justify-self-end lg:block">
-                <SearchConsole />
-              </div>
+            <Reveal delay={0.17}>
+              <p className="text-[length:var(--t-body)] leading-[1.75] text-[var(--v-muted)]">
+                We understand that our success isn&rsquo;t measured by the people we place or the
+                professionals we deploy, but by the outcomes and impact we help our clients
+                achieve. We&rsquo;re proud to{" "}
+                <strong className="font-semibold text-[var(--v-ink)]">
+                  partner with teams building something great
+                </strong>
+                .
+              </p>
             </Reveal>
           </div>
 

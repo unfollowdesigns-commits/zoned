@@ -3018,15 +3018,19 @@ html[data-loaded] .dp-scale-in {
    See components/SearchConsole for what each module IS and why it carries the
    client's own words. This file holds the geometry, the material and the clock.
 
-   IT IS DRAWN FOR PAPER, BECAUSE THAT IS WHERE IT LIVES. It spent two rounds
-   as frosted glass on the dark hero, and glass was always the wrong material
-   for it: a translucent panel over a moving particle field means every label
-   composites against whatever the field is doing behind it, and at the bottom
-   of the dive the field is at its brightest. On the cream band it is white
-   cards on a tinted ground, which is what the reference this is measured
-   against does and most of why that reference reads as software rather than as
-   an illustration. Nothing here is translucent and nothing needs a backdrop
-   filter.
+   NOTHING IN IT IS TRANSLUCENT, AND THAT IS THE FIX FOR TWO ROUNDS OF TROUBLE.
+   It spent two versions as frosted glass on the dark hero, which meant every
+   label composited against whatever the particle field was doing behind it, and
+   at the bottom of the dive the field is at its brightest. Each round the
+   answer was a darker base under the glass, which is the long way round to an
+   opaque surface. The cards are opaque now.
+
+   IT READS ITS COLOURS OFF THE GROUND IT IS ON. Surfaces, ink, muted text and
+   borders all come from the site tokens, which the cream band already
+   overrides, so the same component is a dark panel set on the hero and a white
+   card set on paper without a variant or a prop. The four things tokens do not
+   cover, the connector colour, the ring around a junction, and the two greens,
+   are declared once below and swapped in one rule for the light band.
 
    ONE CLOCK, AND EVERY SLOT IS CARVED OUT OF IT. Every animation below runs for
    `--loop` and repeats forever, and each element's moment is written as a
@@ -3059,6 +3063,14 @@ html[data-loaded] .dp-scale-in {
    the clock off: stop the animations and the completed picture is already on
    screen, rather than an empty frame nobody ever fills. */
 .dp-sc {
+  /* The four values the site tokens do not carry. Dark ground by default,
+     because that is the ground this component is on. */
+  --sc-line: color-mix(in srgb, var(--v-primary) 62%, transparent);
+  --sc-ground: #060912;
+  --sc-good: #7fe0bb;
+  --sc-good-bg: rgba(67, 185, 142, 0.16);
+  --sc-good-br: rgba(127, 224, 187, 0.28);
+  --sc-lift: 0 2px 6px -3px rgba(0, 0, 0, 0.7), 0 26px 60px -40px rgba(0, 0, 0, 0.95);
   container-type: inline-size;
   position: relative;
   /* The coordinate space, held exactly, so a percentage in the markup and a
@@ -3096,7 +3108,7 @@ html[data-loaded] .dp-scale-in {
 }
 .dp-sc-wire {
   fill: none;
-  stroke: color-mix(in srgb, var(--v-primary-deep) 48%, transparent);
+  stroke: var(--sc-line);
   /* User units, not non-scaling-stroke: see the note in the component for why
      the two cannot be combined with a dash-driven draw. At the widths this
      component renders at, 0.3 units is a hairline of about 1.2 pixels. */
@@ -3108,10 +3120,10 @@ html[data-loaded] .dp-scale-in {
   stroke-dashoffset: 0;
 }
 .dp-sc-junction {
-  fill: var(--v-primary-deep);
-  /* Ringed in the band's own cream, so a node reads as a hole punched in the
+  fill: var(--v-primary);
+  /* Ringed in the ground's own colour, so a node reads as a hole punched in the
      line rather than as a dot sitting on top of it. */
-  stroke: var(--v-cream);
+  stroke: var(--sc-ground);
   stroke-width: 0.5;
 }
 .dp-sc-spark {
@@ -3225,6 +3237,20 @@ html[data-loaded] .dp-scale-in {
 /* The two modules that carry a table of information. White, held off the cream
    by a hairline and a shadow that is mostly a contact shadow: the card has to
    read as a sheet resting on the band, not as a box drawn on it. */
+/* The one rule that moves the whole component onto paper. */
+.v-light .dp-sc {
+  --sc-line: color-mix(in srgb, var(--v-primary-deep) 48%, transparent);
+  --sc-ground: var(--v-cream);
+  --sc-good: #0f7d58;
+  --sc-good-bg: rgba(18, 153, 108, 0.1);
+  --sc-good-br: rgba(18, 153, 108, 0.28);
+  --sc-lift: 0 1px 2px rgba(18, 21, 31, 0.05), 0 18px 40px -26px rgba(18, 21, 31, 0.35);
+}
+
+/* The two modules that carry a table of information. Opaque, held off the
+   ground by a hairline and a shadow: a card has to read as a sheet resting on
+   the band, not as a box drawn on it. The inset highlight along the top edge is
+   what gives it an edge on a dark ground, where a shadow alone does nothing. */
 .dp-sc-panel.is-card {
   flex-direction: column;
   align-items: stretch;
@@ -3232,11 +3258,9 @@ html[data-loaded] .dp-scale-in {
   gap: 0;
   border-radius: 12px;
   padding: 2.6cqw 3cqw;
-  background: #ffffff;
+  background: var(--v-surface);
   border: 1px solid var(--v-border);
-  box-shadow:
-    0 1px 2px rgba(18, 21, 31, 0.05),
-    0 18px 40px -26px rgba(18, 21, 31, 0.35);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--v-ink) 8%, transparent), var(--sc-lift);
 }
 /* The two modules the firm describes as continuous. A pill, not a card: they
    are a state the stack is in rather than a table of anything. */
@@ -3244,10 +3268,10 @@ html[data-loaded] .dp-scale-in {
   justify-content: flex-start;
   border-radius: 999px;
   padding: 0 3.4cqw;
-  background: #ffffff;
+  background: var(--v-surface);
   border: 1px solid var(--v-border);
-  box-shadow: 0 1px 2px rgba(18, 21, 31, 0.05), 0 10px 24px -18px rgba(18, 21, 31, 0.4);
-  color: var(--v-primary-deep);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--v-ink) 8%, transparent), var(--sc-lift);
+  color: var(--v-ink);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -3301,14 +3325,13 @@ html[data-loaded] .dp-scale-in {
   height: 1.6cqw;
   flex-shrink: 0;
   border-radius: 999px;
-  background: #12996c;
-  box-shadow: 0 0 0 0 rgba(18, 153, 108, 0.5);
+  background: var(--sc-good);
   animation: dp-sc-live 2.4s ease-out infinite;
 }
 @keyframes dp-sc-live {
-  0%   { box-shadow: 0 0 0 0 rgba(18, 153, 108, 0.45); }
-  70%  { box-shadow: 0 0 0 1.6cqw rgba(18, 153, 108, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(18, 153, 108, 0); }
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sc-good) 45%, transparent); }
+  70%  { box-shadow: 0 0 0 1.6cqw color-mix(in srgb, var(--sc-good) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sc-good) 0%, transparent); }
 }
 
 /* ---- Type inside the modules ---------------------------------------------- */
@@ -3349,7 +3372,7 @@ html[data-loaded] .dp-scale-in {
   position: relative;
   height: 1.9cqw;
   border-radius: 999px;
-  background: rgba(18, 21, 31, 0.08);
+  background: color-mix(in srgb, var(--v-ink) 12%, transparent);
   overflow: hidden;
 }
 .dp-sc-bar i {
@@ -3398,13 +3421,17 @@ html[data-loaded] .dp-scale-in {
   height: 8.4cqw;
   margin-left: -1.6cqw;
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--v-surface);
   border: 1px solid var(--v-border-strong);
   color: var(--v-ink);
   font-size: 2.3cqw;
   font-weight: 600;
-  /* They overlap, so each one needs its own edge against the one behind it. */
-  box-shadow: 0 2px 6px -2px rgba(18, 21, 31, 0.25);
+  /* They overlap, so each one needs its own edge against the one behind it:
+     a hairline of the ground on its leading edge, then the cast shadow. */
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--v-ink) 8%, transparent),
+    0 1px 2px color-mix(in srgb, var(--sc-ground) 55%, transparent),
+    0 3px 8px -3px color-mix(in srgb, var(--sc-ground) 75%, transparent);
 }
 .dp-sc-discs span:first-child { margin-left: 0; }
 /* They surface one at a time, which is what "candidates others may never find"
@@ -3466,9 +3493,9 @@ html[data-loaded] .dp-scale-in {
   flex-shrink: 0;
   border-radius: 999px;
   padding: 0.9cqw 2.4cqw;
-  background: rgba(18, 153, 108, 0.1);
-  border: 1px solid rgba(18, 153, 108, 0.28);
-  color: #0f7d58;
+  background: var(--sc-good-bg);
+  border: 1px solid var(--sc-good-br);
+  color: var(--sc-good);
   font-size: 2.2cqw;
   font-weight: 600;
   animation: dp-sc-chip var(--loop) linear infinite;
@@ -3485,7 +3512,7 @@ html[data-loaded] .dp-scale-in {
 .dp-sc-stages span {
   border-radius: 999px;
   padding: 1cqw 2.4cqw;
-  background: #ffffff;
+  background: var(--v-surface);
   border: 1px solid var(--v-border);
   color: var(--v-muted);
   font-size: 2.2cqw;
@@ -3500,7 +3527,7 @@ html[data-loaded] .dp-scale-in {
 }
 @keyframes dp-sc-stage {
   0%, 72% {
-    background: #ffffff;
+    background: var(--v-surface);
     color: var(--v-muted);
     animation-timing-function: cubic-bezier(0.34, 1.3, 0.5, 1);
   }

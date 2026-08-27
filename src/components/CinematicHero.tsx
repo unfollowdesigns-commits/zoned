@@ -13,6 +13,7 @@ import {
 import { ArrowRight } from "lucide-react";
 import { useReducedMotion } from "@/lib/motion";
 import ParticleWave, { type WaveSearchApi } from "@/components/ParticleWave";
+import SearchConsole from "@/components/SearchConsole";
 import { SERVICES } from "@/lib/site";
 
 /**
@@ -83,6 +84,31 @@ const LEDE_LANDED =
    leaves the back half of the section dead. Learned here the hard way once
    already. */
 const SCRUB = cubicBezier(0.65, 0, 0.35, 1);
+
+/**
+ * The right hand column the console sits in.
+ *
+ * ITS WIDTH IS SET BY THE VIEWPORT'S HEIGHT, and the arithmetic is the point.
+ * Everything inside the console is sized in container query units, so its
+ * height is a fixed multiple of its width: 1.34, the aspect ratio it declares.
+ * A plain pixel cap made it the same height on every screen, which does not fit
+ * a pinned frame that also has to hold 12vh of head room and a 235px services
+ * row. Solving for what is left gives roughly 0.64H - 180, so that is what the
+ * cap says, and the picture shrinks with the screen instead of pushing the
+ * services row past the bottom edge.
+ *
+ * THERE IS NO MINIMUM HEIGHT GATE. There was one, at 780px, on the argument
+ * that below it the labels fall under nine pixels. The argument is not wrong
+ * and it is beside the point: this is the one thing on the page that shows the
+ * work being done, and hiding it on a short laptop means the people most
+ * likely to be looking at this site on a short laptop never see it at all. It
+ * scales down instead.
+ *
+ * `lg` still gates it, because below that width there is no second column to
+ * put it in at all.
+ */
+const CONSOLE_SLOT =
+  "hidden w-full max-w-[min(430px,calc(64svh-180px))] justify-self-end lg:block";
 
 /**
  * True below the `sm` breakpoint, watched rather than read once.
@@ -166,6 +192,17 @@ export default function CinematicHero() {
      monotonic past b, so a value that has finished stays finished. */
   const ledeAOpacity = useTransform(scrollYProgress, [0.24, 0.44, 1], [1, 0, 0], { ease: SCRUB });
   const ledeBOpacity = useTransform(scrollYProgress, [0.42, 0.62, 1], [0, 1, 1], { ease: SCRUB });
+  /* THE CONSOLE ARRIVES AS THE CAMERA LANDS. The dive ends with the type
+     shrunk into the top left corner and the whole right of the frame empty,
+     which is the one moment on this page with room for a picture of the work.
+     It fades up through the middle of the descent so it is fully there well
+     before the services row, and rises the last few pixels into place rather
+     than switching on. Ends on a hold point at 1 for the reason documented
+     above the lede cross-fade. */
+  const consoleOpacity = useTransform(scrollYProgress, [0.34, 0.62, 1], [0, 1, 1], { ease: SCRUB });
+  const consoleY = useTransform(scrollYProgress, [0.34, 0.62, 1], ["30px", "0px", "0px"], {
+    ease: SCRUB,
+  });
   const tailOpacity = useTransform(scrollYProgress, [0.7, 0.94, 1], [0, 1, 1], { ease: SCRUB });
   const tailY = useTransform(scrollYProgress, [0.7, 0.94, 1], [24, 0, 0], { ease: SCRUB });
 
@@ -183,9 +220,14 @@ export default function CinematicHero() {
         <Shade />
         <div className="relative mx-auto flex min-h-svh max-w-[1280px] flex-col px-6 pt-[13vh]">
           {/* Copy returns a fragment, so it needs a box of its own or its
-              eyebrow, headline and lede become three separate flex items. */}
-          <div>
-            <Copy reduced waveApi={waveApi} />
+              eyebrow, headline and lede become three separate grid items. */}
+          <div className="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+            <div>
+              <Copy reduced waveApi={waveApi} />
+            </div>
+            <div className={CONSOLE_SLOT}>
+              <SearchConsole />
+            </div>
           </div>
           <div className="mt-auto pb-14 sm:pb-12">
             <Tail />
@@ -208,14 +250,20 @@ export default function CinematicHero() {
         <Shade />
 
         <div className="relative mx-auto flex h-full max-w-[1280px] flex-col px-6 pt-[12vh]">
-          <motion.div style={{ y: typeY, scale: typeScale, transformOrigin: "0% 0%" }}>
-            <Copy
-              reduced={false}
-              waveApi={waveApi}
-              ledeAOpacity={ledeAOpacity}
-              ledeBOpacity={ledeBOpacity}
-            />
-          </motion.div>
+          <div className="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+            <motion.div style={{ y: typeY, scale: typeScale, transformOrigin: "0% 0%" }}>
+              <Copy
+                reduced={false}
+                waveApi={waveApi}
+                ledeAOpacity={ledeAOpacity}
+                ledeBOpacity={ledeBOpacity}
+              />
+            </motion.div>
+
+            <motion.div style={{ opacity: consoleOpacity, y: consoleY }} className={CONSOLE_SLOT}>
+              <SearchConsole />
+            </motion.div>
+          </div>
 
           {/* The payoff row: arrives once the camera is down among the
               crests, taking the place the type left. The frame is never
