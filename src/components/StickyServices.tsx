@@ -9,7 +9,7 @@ import { SERVICES } from "@/lib/site";
 import SectionHeading from "@/components/ui/SectionHeading";
 import StickyStack from "@/components/ui/StickyStack";
 import PointerLight from "@/components/ui/PointerLight";
-import DrawIcon from "@/components/ui/DrawIcon";
+import ServicePlate from "@/components/ui/ServicePlate";
 
 /* THE FIVE BESPOKE GLYPHS ARE GONE, and what replaced them is the icon the
    service already carries in lib/site.ts.
@@ -117,44 +117,51 @@ export default function StickyServices() {
                      carries its own listener. */
                   /* Arms the icon redraw. See ui/DrawIcon: the 19px mark is not
                      what anyone is pointing at, so the card is what triggers it. */
-                  data-draw-group=""
-                  className="v-glass v-lift group relative overflow-hidden p-8 sm:p-10"
+                  className="dp-svc v-lift group relative overflow-hidden p-8 sm:p-10"
                 >
                   <PointerLight size={300} />
-                  <div className="relative z-[2] flex items-start justify-between gap-6">
-                    <p className="text-[length:var(--t-small)] font-semibold tabular-nums text-[var(--v-ring)]">
-                      {String(i + 1).padStart(2, "0")}
-                    </p>
-                    {service.icon && (
-                      /* Fills solid on hover, driven by the card's own `group`,
-                         so a pointer and a keyboard focus produce the same
-                         thing. Colour only: no transform, so the mark cannot
-                         jitter against the card's own lift. */
-                      <span
-                        aria-hidden="true"
-                        className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--v-primary)]/14 text-[var(--v-primary)] transition-colors duration-300 group-hover:bg-[var(--v-primary)] group-hover:text-white"
+                  {/* Two columns, and the second one is the reason the card is
+                      this size. It used to hold nothing: an index, a title and
+                      a pill in a 940 by 420 box, with four fifths of it empty
+                      and a 44 pixel icon chip in the corner, which is the most
+                      recognisable move in generated software marketing. The
+                      figure is the card's subject now. See ui/ServicePlate. */}
+                  <div className="relative z-[2] grid items-center gap-8 sm:grid-cols-[1fr_minmax(0,270px)] sm:gap-10">
+                    <div className="min-w-0">
+                      <p className="dp-svc-index tabular-nums">{String(i + 1).padStart(2, "0")}</p>
+
+                      <h3 className="v-display mt-5 max-w-[15ch] text-[length:var(--t-title)] leading-[1.08]">
+                        {service.label}
+                      </h3>
+
+                      {/* The line that says what the service IS, which the
+                          navigation has carried all along and the card did
+                          not. Nothing here is copy written to fill a shape. */}
+                      {service.note && (
+                        <p className="mt-4 max-w-[34ch] text-[length:var(--t-secondary)] leading-[1.6] text-[var(--v-muted)]">
+                          {service.note}
+                        </p>
+                      )}
+
+                      <Link
+                        href={service.href}
+                        className="group/cta mt-8 inline-flex items-center gap-2 rounded-full border border-[var(--v-border-strong)] py-2.5 pl-5 pr-4 text-[length:var(--t-small)] font-medium text-[var(--v-ink)] transition-colors duration-200 hover:border-[var(--v-primary)] hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
                       >
-                        <DrawIcon name={service.icon} size={19} delay={i * 0.06} />
-                      </span>
-                    )}
-                  </div>
+                        <span className="sr-only">{service.label}: </span>
+                        Explore
+                        <ArrowRight
+                          size={15}
+                          strokeWidth={2}
+                          className="transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/cta:translate-x-1"
+                        />
+                      </Link>
+                    </div>
 
-                  <h3 className="v-display relative z-[2] mt-8 max-w-[14ch] text-[length:var(--t-title)] leading-[1.1]">
-                    {service.label}
-                  </h3>
-
-                  <Link
-                    href={service.href}
-                    className="relative z-[2] mt-8 inline-flex items-center gap-2 rounded-full border border-[var(--v-border-strong)] py-2.5 pl-5 pr-4 text-[length:var(--t-small)] font-medium text-[var(--v-ink)] transition-colors duration-200 hover:border-[var(--v-primary)] hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--v-ring)]"
-                  >
-                    <span className="sr-only">{service.label}: </span>
-                    Explore
-                    <ArrowRight
-                      size={15}
-                      strokeWidth={2}
-                      className="transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+                    <ServicePlate
+                      name={service.icon}
+                      className="hidden justify-self-end sm:block"
                     />
-                  </Link>
+                  </div>
                 </motion.article>
               );
             })}

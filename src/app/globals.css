@@ -1427,6 +1427,202 @@ html[data-loaded] .dp-scale-in {
   }
 }
 
+/* ---- A service card --------------------------------------------------------
+   THE MATERIAL, NOT THE LAYOUT. `v-glass` gives every panel on this site the
+   same lit fill; these cards are the largest surfaces on the page and were the
+   flattest, because a fill that reads as a material at card size reads as paint
+   at half a metre across. Three things fix it and none of them is more glow.
+
+   A RULED EDGE, so the card has a top rather than fading into the one behind
+   it. A CORNER GRADIENT that puts the light somewhere: a surface with no
+   direction to its lighting is the definition of flat, and the previous fill
+   ran the same 160 degree wash on every card whatever size it was. And a
+   HAIRLINE GRID at very low contrast, which gives the eye something to measure
+   the surface by. That last one is why paper feels like paper: texture at a
+   scale you do not consciously see. */
+.dp-svc {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--radius);
+  background:
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.022) 0 1px,
+      transparent 1px 46px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.022) 0 1px,
+      transparent 1px 46px
+    ),
+    radial-gradient(120% 90% at 8% 0%, rgba(255, 255, 255, 0.1), transparent 62%),
+    linear-gradient(158deg, #17275f 0%, #101c47 52%, #0a1230 100%);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.16) inset,
+    0 -1px 0 0 rgba(0, 0, 0, 0.3) inset,
+    0 2px 4px -2px rgba(0, 0, 0, 0.5),
+    0 34px 70px -40px rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+/* The rule along the top edge, brighter where the light is. */
+.dp-svc::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.42),
+    rgba(255, 255, 255, 0.06) 46%,
+    transparent
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* The index. Set as a design element rather than as a caption: a rule beside a
+   number is how a numbered thing is set on paper, and it gives the card's top
+   left corner something to be. */
+.dp-svc-index {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: var(--t-small);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--v-ring);
+}
+.dp-svc-index::after {
+  content: "";
+  height: 1px;
+  width: 2.75rem;
+  background: linear-gradient(90deg, var(--v-ring), transparent);
+}
+
+/* ---- The service plate -----------------------------------------------------
+   See components/ui/ServicePlate for what each figure claims and why it is flat
+   rather than lit. This file holds the material and the physics.
+
+   THE MOTION FALLS. Everything that arrives here accelerates in, lands short of
+   its mark and settles, rather than easing politely to a stop. That is the
+   whole difference between a figure that reads as an object and one that reads
+   as an opacity transition, and it costs one curve and one extra keyframe. The
+   curve is deliberately front-loaded: `cubic-bezier(0.55, 0, 0.85, 0.35)` has
+   almost no ease-out in it, which is what gravity does not have either.
+
+   Every part takes its delay from `--i`, so a figure of nineteen parts is
+   nineteen numbers rather than nineteen animations. */
+.dp-pl {
+  width: 100%;
+  height: auto;
+  color: var(--v-ink);
+  overflow: visible;
+}
+.dp-pl :is(rect, line, circle) {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* A seat. Falls in, lands, settles. */
+.dp-pl-node {
+  opacity: 0;
+  animation: dp-pl-fall 640ms cubic-bezier(0.55, 0, 0.85, 0.35) both;
+  animation-delay: calc(var(--dp-pl-base, 0.12s) + var(--i) * 0.055s);
+}
+@keyframes dp-pl-fall {
+  0% { opacity: 0; transform: translateY(-26px) scale(0.9); }
+  62% { opacity: 1; transform: translateY(0) scale(1); }
+  /* The landing. Squashed across and short down, then recovered: an object
+     with mass does not stop dead at its resting size. */
+  76% { transform: translateY(0) scale(1.14, 0.82); }
+  88% { transform: translateY(-2px) scale(0.96, 1.05); }
+  100% { opacity: 1; transform: none; }
+}
+/* The one seat that is filled. It arrives last and it arrives harder. */
+.dp-pl-node.is-on {
+  color: var(--v-primary);
+  animation-duration: 760ms;
+  animation-delay: calc(var(--dp-pl-base, 0.12s) + var(--i) * 0.055s + 0.14s);
+}
+
+/* A rule. Grows out of its centre, or out of its leading end where the figure
+   reads left to right. */
+.dp-pl-rule {
+  opacity: 0;
+  animation: dp-pl-draw 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--dp-pl-base, 0.12s) + var(--i) * 0.055s);
+}
+/* Vertical rules grow downward from their top end; horizontal ones from their
+   left. `scale` rather than `scaleX` so one keyframe covers both, and the
+   origin is what decides which way it draws. */
+.dp-pl-rule.is-start { transform-origin: left top; }
+.dp-pl-rule.is-v { animation-name: dp-pl-draw-v; }
+@keyframes dp-pl-draw-v {
+  0% { opacity: 0; transform: scaleY(0); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes dp-pl-draw {
+  0% { opacity: 0; transform: scaleX(0); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* A boundary. Opens from the middle in both axes, because a scope is a thing
+   that is drawn around something rather than dropped on it. */
+.dp-pl-frame {
+  opacity: 0;
+  animation: dp-pl-open 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--dp-pl-base, 0.12s);
+}
+@keyframes dp-pl-open {
+  0% { opacity: 0; transform: scale(0.42, 0.18); }
+  70% { opacity: 1; transform: scale(1.03, 1.02); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* The committed part of a divided seat. Wipes in from its own corner. */
+.dp-pl-quarter {
+  color: var(--v-primary);
+  transform-origin: left top;
+  animation: dp-pl-wipe 620ms cubic-bezier(0.3, 1, 0.4, 1) both;
+  animation-delay: calc(var(--dp-pl-base, 0.12s) + 0.34s);
+}
+@keyframes dp-pl-wipe {
+  0% { transform: scale(0, 1); }
+  100% { transform: none; }
+}
+
+/* The dashed hold in the interim figure. Drops with the seat it carries. */
+.dp-pl-hold {
+  opacity: 0;
+  transform-origin: center top;
+  animation: dp-pl-hold 560ms cubic-bezier(0.55, 0, 0.85, 0.35) both;
+  animation-delay: calc(var(--dp-pl-base, 0.12s) + 0.1s);
+}
+@keyframes dp-pl-hold {
+  0% { opacity: 0; transform: scaleY(0); }
+  100% { opacity: 0.55; transform: none; }
+}
+
+/* THE HOVER IS A SECOND FALL, NOT A GLOW. Restarting the same physics on
+   pointer is what makes the card feel like it contains something rather than
+   like it lit up. `--dp-pl-base` shifts the whole figure's phase, so one custom
+   property replays the lot. */
+.group:hover .dp-pl :is(.dp-pl-node, .dp-pl-rule, .dp-pl-frame, .dp-pl-quarter, .dp-pl-hold) {
+  animation-play-state: running;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The figure is the point, not its arrival. */
+  .dp-pl :is(.dp-pl-node, .dp-pl-rule, .dp-pl-frame, .dp-pl-quarter, .dp-pl-hold) {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .dp-pl-hold { opacity: 0.55; }
+}
+
 /* ---- Menu visuals ----------------------------------------------------------
    See components/ui/MenuVisual.tsx for what each one MEANS. This file holds the
    material, the depth and the motion.
@@ -1453,11 +1649,9 @@ html[data-loaded] .dp-scale-in {
      comparable across the plane. */
   perspective: 1150px;
   perspective-origin: 50% 46%;
-  background: radial-gradient(
-    120% 100% at 50% 0%,
-    rgba(14, 23, 47, 0.72) 0%,
-    rgba(5, 8, 17, 0.88) 62%
-  );
+  /* Flat and near-neutral. The blue radial was doing the same job as the lamp
+     and doing it twice, which is how a plate ends up reading as a screen. */
+  background: linear-gradient(158deg, rgba(16, 20, 32, 0.94), rgba(8, 10, 18, 0.96));
   border: 1px solid rgba(255, 255, 255, 0.07);
   isolation: isolate;
 }
@@ -1469,9 +1663,9 @@ html[data-loaded] .dp-scale-in {
 }
 @keyframes dp-mv-orbit {
   0%,
-  100% { transform: rotateX(1.6deg) rotateY(-7deg); }
-  33%  { transform: rotateX(-1deg) rotateY(2.5deg); }
-  66%  { transform: rotateX(0.6deg) rotateY(7deg); }
+  100% { transform: rotateX(0.9deg) rotateY(-3.4deg); }
+  33%  { transform: rotateX(-0.6deg) rotateY(1.2deg); }
+  66%  { transform: rotateX(0.3deg) rotateY(3.4deg); }
 }
 
 /* ---- The float ------------------------------------------------------------
@@ -1503,19 +1697,17 @@ html[data-loaded] .dp-scale-in {
    glows on its own and nothing reads as a surface. */
 .dp-mv-lamp {
   position: absolute;
-  left: 50%;
-  top: 12%;
-  height: 74%;
-  width: 86%;
-  transform: translateX(-50%);
-  border-radius: 999px;
+  inset: 0;
+  /* A DIRECTION FOR THE LIGHT, NOT A BLOOM. This was a blurred blue disc in the
+     middle of the frame, which is the single most recognisable thing about a
+     dev-tools marketing page: a glowing orb behind a diagram. A surface still
+     needs its light to come from somewhere, so it comes from one corner now,
+     as a wash rather than a source. */
   background: radial-gradient(
-    closest-side,
-    rgba(96, 148, 255, 0.28),
-    rgba(56, 120, 235, 0.09) 56%,
-    transparent 78%
+    130% 100% at 8% 0%,
+    rgba(255, 255, 255, 0.07),
+    transparent 58%
   );
-  filter: blur(24px);
   pointer-events: none;
 }
 
@@ -1550,7 +1742,7 @@ html[data-loaded] .dp-scale-in {
    animation with a per-element phase rather than nine choreographies. */
 .dp-mv-stem {
   position: absolute;
-  background: rgba(154, 190, 255, 0.26);
+  background: rgba(196, 191, 181, 0.26);
   animation: dp-mv-charge-line 12s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 .dp-mv-stem.is-v {
@@ -1568,8 +1760,8 @@ html[data-loaded] .dp-scale-in {
   height: 11px;
   margin: -5.5px 0 0 -5.5px;
   border-radius: 2.5px;
-  background: rgba(143, 180, 255, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.34);
+  background: rgba(188, 183, 173, 0.14);
+  box-shadow: inset 0;
   animation: dp-mv-charge-node 12s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
@@ -1578,8 +1770,8 @@ html[data-loaded] .dp-scale-in {
    an organisation, and the picture has to stay true while the subject of it
    moves down. It still takes the charge, so it lights with everything else. */
 .dp-mv-node.is-set {
-  background: rgba(190, 218, 255, 0.55);
-  box-shadow: inset 0 0 0 1px rgba(226, 240, 255, 0.55);
+  background: rgba(216, 211, 201, 0.55);
+  box-shadow: inset 0;
 }
 
 /* THE CASCADE. These are `animation-delay` values on a shared 12s keyframe, not
@@ -1597,27 +1789,27 @@ html[data-loaded] .dp-scale-in {
    what the picture is supposed to be about. The lit stops now carry their own
    colour and their own glow. */
 @keyframes dp-mv-charge-line {
-  0%, 2%    { background: rgba(154, 190, 255, 0.26); box-shadow: none; }
-  9%        { background: rgba(206, 230, 255, 0.95); box-shadow: 0 0 7px rgba(120, 180, 255, 0.75); }
-  62%       { background: rgba(178, 210, 255, 0.8); box-shadow: 0 0 6px rgba(120, 180, 255, 0.5); }
-  80%, 100% { background: rgba(154, 190, 255, 0.26); box-shadow: none; }
+  0%, 2%    { background: rgba(196, 191, 181, 0.26); box-shadow: none; }
+  9%        { background: rgba(228, 223, 213, 0.95); box-shadow: none; }
+  62%       { background: rgba(208, 203, 193, 0.8); box-shadow: none; }
+  80%, 100% { background: rgba(196, 191, 181, 0.26); box-shadow: none; }
 }
 @keyframes dp-mv-charge-node {
   0%, 2% {
-    background: rgba(143, 180, 255, 0.14);
-    box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.34);
+    background: rgba(188, 183, 173, 0.14);
+    box-shadow: inset 0;
   }
   9% {
-    background: rgba(214, 234, 255, 0.96);
-    box-shadow: inset 0 0 0 1px rgba(230, 242, 255, 0.9), 0 0 12px 2px rgba(120, 180, 255, 0.6);
+    background: rgba(232, 227, 217, 0.96);
+    box-shadow: inset 0;
   }
   62% {
-    background: rgba(180, 212, 255, 0.88);
-    box-shadow: inset 0 0 0 1px rgba(226, 240, 255, 0.7), 0 0 9px 1px rgba(120, 180, 255, 0.42);
+    background: rgba(210, 205, 195, 0.88);
+    box-shadow: inset 0;
   }
   80%, 100% {
-    background: rgba(143, 180, 255, 0.14);
-    box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.34);
+    background: rgba(188, 183, 173, 0.14);
+    box-shadow: inset 0;
   }
 }
 
@@ -1638,7 +1830,6 @@ html[data-loaded] .dp-scale-in {
   content: "";
   position: absolute;
   background-repeat: no-repeat;
-  filter: drop-shadow(0 0 3px rgba(140, 190, 255, 0.9));
   pointer-events: none;
 }
 .dp-mv-stem.is-v::after {
@@ -1649,9 +1840,9 @@ html[data-loaded] .dp-scale-in {
   background-image: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(226, 240, 255, 0.5) 42%,
-    #eaf3ff 50%,
-    rgba(226, 240, 255, 0.5) 58%,
+    rgba(236, 231, 221, 0.5) 42%,
+    #f0ece4 50%,
+    rgba(236, 231, 221, 0.5) 58%,
     transparent 100%
   );
   background-size: 100% 30px;
@@ -1665,9 +1856,9 @@ html[data-loaded] .dp-scale-in {
   background-image: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(226, 240, 255, 0.5) 42%,
-    #eaf3ff 50%,
-    rgba(226, 240, 255, 0.5) 58%,
+    rgba(236, 231, 221, 0.5) 42%,
+    #f0ece4 50%,
+    rgba(236, 231, 221, 0.5) 58%,
     transparent 100%
   );
   background-size: 30px 100%;
@@ -1694,7 +1885,7 @@ html[data-loaded] .dp-scale-in {
   height: 19px;
   margin: -9.5px 0 0 -9.5px;
   border-radius: 4px;
-  border: 1px dashed rgba(154, 190, 255, 0.55);
+  border: 1px dashed rgba(196, 191, 181, 0.55);
 }
 
 /* It comes from BEHIND the structure as well as above it, which is the whole
@@ -1706,10 +1897,9 @@ html[data-loaded] .dp-scale-in {
   height: 17px;
   margin: -8.5px 0 0 -8.5px;
   border-radius: 4px;
-  background: linear-gradient(142deg, rgba(232, 242, 255, 0.98), rgba(150, 188, 255, 0.7));
+  background: linear-gradient(142deg, rgba(240, 236, 228, 0.98), rgba(192, 187, 177, 0.7));
   box-shadow:
-    0 0 0 1px rgba(226, 240, 255, 0.6),
-    0 0 18px 3px rgba(120, 180, 255, 0.55);
+    0;
   /* No float of its own. It is inside the chart and inherits that one, which is
      what guarantees it lands exactly in the gap rather than near it. */
   animation: dp-mv-arrive 12s cubic-bezier(0.16, 1, 0.3, 1) infinite;
@@ -1737,9 +1927,9 @@ html[data-loaded] .dp-scale-in {
   height: 8px;
   margin: -4px 0 0 -4px;
   border-radius: 2px;
-  background: rgba(170, 202, 255, 0.5);
+  background: rgba(202, 197, 187, 0.5);
   box-shadow:
-    inset 0 0 0 1px rgba(214, 234, 255, 0.5),
+    inset 0,
     0 1px 2px rgba(4, 8, 20, 0.5);
   animation: dp-ts-out 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   animation-delay: calc(2.4s + var(--i) * 0.62s);
@@ -1759,11 +1949,10 @@ html[data-loaded] .dp-scale-in {
   height: 13px;
   margin: -6.5px 0 0 -6.5px;
   border-radius: 3px;
-  background: linear-gradient(142deg, rgba(226, 238, 255, 0.95), rgba(143, 180, 255, 0.6));
+  background: linear-gradient(142deg, rgba(226, 238, 255, 0.95), rgba(188, 183, 173, 0.6));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 0 1px rgba(226, 240, 255, 0.6),
-    0 0 18px 3px rgba(120, 180, 255, 0.55);
+    0;
   animation: dp-ts-drop 12s cubic-bezier(0.5, 0, 0.2, 1) infinite;
 }
 @keyframes dp-ts-drop {
@@ -1783,7 +1972,7 @@ html[data-loaded] .dp-scale-in {
   top: 20%;
   width: 56%;
   height: 28%;
-  border: 1px dashed rgba(143, 180, 255, 0.4);
+  border: 1px dashed rgba(188, 183, 173, 0.4);
   border-bottom: none;
   border-radius: 60% 60% 0 0 / 90% 90% 0 0;
   animation: dp-cs-arc 12s ease-in-out infinite;
@@ -1800,11 +1989,10 @@ html[data-loaded] .dp-scale-in {
   height: 13px;
   margin: -6.5px 0 0 -6.5px;
   border-radius: 3px;
-  background: linear-gradient(142deg, rgba(226, 238, 255, 0.9), rgba(143, 180, 255, 0.5));
+  background: linear-gradient(142deg, rgba(226, 238, 255, 0.9), rgba(188, 183, 173, 0.5));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 0 0 1px rgba(226, 240, 255, 0.5),
-    0 0 14px 2px rgba(120, 180, 255, 0.45);
+    0;
   animation: dp-cs-interim 12s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 @keyframes dp-cs-interim {
@@ -1822,11 +2010,10 @@ html[data-loaded] .dp-scale-in {
   height: 13px;
   margin: -6.5px 0 0 -6.5px;
   border-radius: 3px;
-  background: rgba(190, 218, 255, 0.85);
+  background: rgba(216, 211, 201, 0.85);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 0 0 1px rgba(226, 240, 255, 0.55),
-    0 0 12px 1px rgba(120, 180, 255, 0.35);
+    0;
   animation: dp-cs-perm 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 @keyframes dp-cs-perm {
@@ -1857,7 +2044,7 @@ html[data-loaded] .dp-scale-in {
   right: 0;
   bottom: 0;
   height: 1px;
-  background: rgba(143, 180, 255, 0.16);
+  background: rgba(188, 183, 173, 0.16);
   animation: dp-ss-lit 12s ease-in-out infinite;
   animation-delay: calc(var(--i) * 4s);
 }
@@ -1874,16 +2061,16 @@ html[data-loaded] .dp-scale-in {
      muddy shape: the traveller IS the fill, so the slot's job is to be the
      empty chair it sits in. The rule under it still lights, which is what says
      the commitment is live. */
-  background: rgba(143, 180, 255, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.22);
+  background: rgba(188, 183, 173, 0.08);
+  box-shadow: inset 0;
 }
 @keyframes dp-ss-lit {
-  0% { background: rgba(143, 180, 255, 0.16); box-shadow: none; }
+  0% { background: rgba(188, 183, 173, 0.16); box-shadow: none; }
   6%, 27% {
-    background: rgba(206, 230, 255, 0.9);
-    box-shadow: 0 0 7px rgba(120, 180, 255, 0.7);
+    background: rgba(228, 223, 213, 0.9);
+    box-shadow: none;
   }
-  34%, 100% { background: rgba(143, 180, 255, 0.16); box-shadow: none; }
+  34%, 100% { background: rgba(188, 183, 173, 0.16); box-shadow: none; }
 }
 
 .dp-ss-who {
@@ -1896,11 +2083,10 @@ html[data-loaded] .dp-scale-in {
   height: 15px;
   margin: -7.5px 0 0 -7.5px;
   border-radius: 3px;
-  background: linear-gradient(142deg, rgba(226, 238, 255, 0.95), rgba(143, 180, 255, 0.6));
+  background: linear-gradient(142deg, rgba(226, 238, 255, 0.95), rgba(188, 183, 173, 0.6));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 0 1px rgba(226, 240, 255, 0.55),
-    0 0 16px 3px rgba(120, 180, 255, 0.5);
+    0;
   animation: dp-ss-move 12s cubic-bezier(0.5, 0, 0.3, 1) infinite;
 }
 @keyframes dp-ss-move {
@@ -1922,7 +2108,7 @@ html[data-loaded] .dp-scale-in {
   top: 22%;
   width: 76%;
   height: 62%;
-  border: 1px solid rgba(143, 180, 255, 0.4);
+  border: 1px solid rgba(188, 183, 173, 0.4);
   border-radius: 6px;
   animation: dp-sc-bound 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
@@ -1940,11 +2126,10 @@ html[data-loaded] .dp-scale-in {
   height: 11px;
   margin: -5.5px 0 0 -5.5px;
   border-radius: 3px;
-  background: linear-gradient(142deg, rgba(214, 234, 255, 0.9), rgba(143, 180, 255, 0.55));
+  background: linear-gradient(142deg, rgba(232, 227, 217, 0.9), rgba(188, 183, 173, 0.55));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 0 0 1px rgba(226, 240, 255, 0.5),
-    0 0 12px 2px rgba(120, 180, 255, 0.4);
+    0;
   animation: dp-sco-seat 12s cubic-bezier(0.34, 1.3, 0.5, 1) infinite;
   /* A tenth of a second apart, not a second: they are a team, and a team
      arrives together. The stagger is only enough to stop it reading as one
@@ -1972,10 +2157,9 @@ html[data-loaded] .dp-scale-in {
   width: 9px;
   margin-left: -4.5px;
   border-radius: 2px 2px 0 0;
-  background: linear-gradient(180deg, rgba(150, 190, 255, 0.85), rgba(90, 140, 235, 0.35));
+  background: linear-gradient(180deg, rgba(236, 231, 221, 0.9), rgba(236, 231, 221, 0.34));
   box-shadow:
-    inset 0 1px 0 rgba(226, 240, 255, 0.5),
-    0 0 8px rgba(110, 170, 255, 0.3);
+    inset 0 1px 0 rgba(236, 231, 221, 0.5);
   transform-origin: 50% 100%;
   animation: dp-fx-col 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
   animation-delay: calc(2.2s + var(--i) * 0.4s);
@@ -1991,11 +2175,10 @@ html[data-loaded] .dp-scale-in {
   height: 15px;
   margin: -7.5px 0 0 -7.5px;
   border-radius: 4px;
-  background: linear-gradient(142deg, rgba(232, 242, 255, 0.98), rgba(150, 188, 255, 0.7));
+  background: linear-gradient(142deg, rgba(240, 236, 228, 0.98), rgba(192, 187, 177, 0.7));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 0 1px rgba(226, 240, 255, 0.55),
-    0 0 18px 3px rgba(120, 180, 255, 0.5);
+    0;
   animation: dp-fx-crown 12s cubic-bezier(0.34, 1.3, 0.5, 1) infinite;
 }
 @keyframes dp-fx-crown {
@@ -2010,8 +2193,8 @@ html[data-loaded] .dp-scale-in {
   top: 26%;
   width: 12%;
   height: 48%;
-  border: 1px solid rgba(154, 190, 255, 0.7);
-  box-shadow: 0 0 8px rgba(110, 170, 255, 0.25);
+  border: 1px solid rgba(196, 191, 181, 0.7);
+  box-shadow: none;
   animation: dp-bx-jaw 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 .dp-bx-jaw.is-l {
@@ -2044,11 +2227,10 @@ html[data-loaded] .dp-scale-in {
   height: 17px;
   margin: -8.5px 0 0 -8.5px;
   border-radius: 4px;
-  background: linear-gradient(142deg, rgba(232, 242, 255, 0.98), rgba(150, 188, 255, 0.7));
+  background: linear-gradient(142deg, rgba(240, 236, 228, 0.98), rgba(192, 187, 177, 0.7));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 0 1px rgba(226, 240, 255, 0.55),
-    0 0 18px 3px rgba(120, 180, 255, 0.5);
+    0;
   animation: dp-bx-held 12s cubic-bezier(0.34, 1.3, 0.5, 1) infinite;
 }
 @keyframes dp-bx-held {
@@ -2063,8 +2245,8 @@ html[data-loaded] .dp-scale-in {
   height: 11px;
   margin: -5.5px 0 0 -5.5px;
   border-radius: 2.5px;
-  background: rgba(143, 180, 255, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.34);
+  background: rgba(188, 183, 173, 0.14);
+  box-shadow: inset 0;
   animation: dp-bx-out 12s ease-in-out infinite;
   animation-delay: calc(var(--i) * 0.09s);
 }
@@ -2097,7 +2279,7 @@ html[data-loaded] .dp-scale-in {
   width: 76%;
   height: 52%;
   border-radius: 2px;
-  background: rgba(143, 180, 255, 0.16);
+  background: rgba(188, 183, 173, 0.16);
   animation: dp-fd-idle 12s ease-in-out infinite;
   animation-delay: calc(var(--i) * 0.12s);
 }
@@ -2106,11 +2288,10 @@ html[data-loaded] .dp-scale-in {
   50% { opacity: 0.78; }
 }
 .dp-fd-cell.is-on {
-  background: linear-gradient(142deg, rgba(232, 242, 255, 0.98), rgba(150, 188, 255, 0.7));
+  background: linear-gradient(142deg, rgba(240, 236, 228, 0.98), rgba(192, 187, 177, 0.7));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 0 0 1px rgba(226, 240, 255, 0.4),
-    0 0 14px 2px rgba(120, 180, 255, 0.45);
+    0;
   animation: dp-fd-on 12s cubic-bezier(0.34, 1.25, 0.5, 1) infinite;
   animation-delay: calc(2.2s + var(--i) * 0.18s);
 }
@@ -2128,8 +2309,8 @@ html[data-loaded] .dp-scale-in {
   position: absolute;
   height: 2px;
   border-radius: 1px;
-  background: linear-gradient(90deg, rgba(198, 224, 255, 0.95), rgba(120, 165, 245, 0.35));
-  box-shadow: 0 0 7px rgba(110, 170, 255, 0.3);
+  background: linear-gradient(90deg, rgba(236, 231, 221, 0.92), rgba(236, 231, 221, 0.3));
+  box-shadow: none;
   transform-origin: 0 50%;
   animation: dp-rw 12s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) infinite;
 }
@@ -2146,7 +2327,7 @@ html[data-loaded] .dp-scale-in {
   top: 16%;
   width: 76%;
   height: 68%;
-  border: 1px solid rgba(154, 190, 255, 0.4);
+  border: 1px solid rgba(196, 191, 181, 0.4);
   border-radius: 6px;
   animation: dp-rc-frame 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
@@ -2171,7 +2352,7 @@ html[data-loaded] .dp-scale-in {
   height: 13px;
   margin: -6.5px 0 0 -6.5px;
   border-radius: 3px;
-  border: 1px dashed rgba(154, 190, 255, 0.75);
+  border: 1px dashed rgba(196, 191, 181, 0.75);
   animation: dp-bd-slot 12s cubic-bezier(0.34, 1.3, 0.5, 1) infinite;
   animation-delay: calc(2.1s + var(--i) * 0.3s);
 }
@@ -2186,11 +2367,10 @@ html[data-loaded] .dp-scale-in {
   position: absolute;
   height: 15%;
   border-radius: 4px;
-  background: linear-gradient(160deg, rgba(150, 190, 255, 0.4), rgba(90, 140, 235, 0.16));
+  background: linear-gradient(160deg, rgba(236, 231, 221, 0.16), rgba(236, 231, 221, 0.05));
   box-shadow:
-    inset 0 1px 0 rgba(226, 240, 255, 0.35),
-    0 0 0 1px rgba(154, 190, 255, 0.35),
-    0 0 12px rgba(110, 170, 255, 0.2);
+    inset 0 1px 0 rgba(236, 231, 221, 0.35),
+    0;
   animation: dp-sp-block 12s cubic-bezier(0.3, 1.5, 0.5, 1) infinite;
   animation-delay: calc(2.2s + var(--i) * 0.42s);
 }
@@ -2219,8 +2399,8 @@ html[data-loaded] .dp-scale-in {
   height: 46%;
   margin: -23% 0 0 -23%;
   border-radius: 50%;
-  border: 1px solid rgba(154, 190, 255, 0.65);
-  box-shadow: 0 0 14px rgba(110, 170, 255, 0.25);
+  border: 1px solid rgba(196, 191, 181, 0.65);
+  box-shadow: none;
   animation: dp-aw-ring 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 .dp-aw-ring.is-two {
@@ -2228,7 +2408,7 @@ html[data-loaded] .dp-scale-in {
   height: 66%;
   margin: -33% 0 0 -33%;
   border-style: dashed;
-  border-color: rgba(154, 190, 255, 0.4);
+  border-color: rgba(196, 191, 181, 0.4);
   animation-delay: 0.5s;
 }
 @keyframes dp-aw-ring {
@@ -2245,8 +2425,8 @@ html[data-loaded] .dp-scale-in {
   height: 19px;
   margin: -9.5px 0 0 -9.5px;
   border-radius: 4px;
-  border: 1px dashed rgba(154, 190, 255, 0.8);
-  box-shadow: 0 0 16px rgba(110, 170, 255, 0.3);
+  border: 1px dashed rgba(196, 191, 181, 0.8);
+  box-shadow: none;
   animation: dp-op-gap 12s ease-in-out infinite;
 }
 @keyframes dp-op-gap {
@@ -2273,7 +2453,7 @@ html[data-loaded] .dp-scale-in {
   border-radius: 1.5px;
   /* Bright enough to read as a field at rest. The picks only mean something
      against a visible market to be picked FROM. */
-  background: rgba(143, 180, 255, 0.34);
+  background: rgba(188, 183, 173, 0.34);
   /* Even the quiet cells breathe, so the field is a living surface rather than
      a static grid with five animated dots on it. */
   animation: dp-mv-breathe 11s var(--d, 0s) ease-in-out infinite;
@@ -2306,8 +2486,8 @@ html[data-loaded] .dp-scale-in {
   height: 9px;
   margin: -4.5px 0 0 -4.5px;
   border-radius: 2px;
-  background: rgba(226, 240, 255, 0.95);
-  box-shadow: 0 0 14px 2px rgba(120, 180, 255, 0.6);
+  background: rgba(236, 231, 221, 0.95);
+  box-shadow: none;
 }
 @keyframes dp-mv-recruit {
   0%       { transform: translate3d(0, 0, 0) scale(0.5); opacity: 0.25; }
@@ -2335,7 +2515,7 @@ html[data-loaded] .dp-scale-in {
   width: 1px;
   margin-left: 7px;
   transform: translateZ(34px);
-  background: linear-gradient(180deg, transparent, rgba(143, 180, 255, 0.55) 14%, rgba(143, 180, 255, 0.55) 86%, transparent);
+  background: linear-gradient(180deg, transparent, rgba(188, 183, 173, 0.55) 14%, rgba(188, 183, 173, 0.55) 86%, transparent);
   animation: dp-mv-listline 9.5s ease-in-out infinite;
 }
 @keyframes dp-mv-listline {
@@ -2414,7 +2594,7 @@ html[data-loaded] .dp-scale-in {
   width: 78px;
   transform-origin: 0 50%;
   transform: rotate(var(--rot));
-  background: linear-gradient(90deg, rgba(143, 180, 255, 0.42), rgba(143, 180, 255, 0.12));
+  background: linear-gradient(90deg, rgba(188, 183, 173, 0.42), rgba(188, 183, 173, 0.12));
 }
 /* The signal. */
 .dp-mv-spoke i {
@@ -2425,7 +2605,7 @@ html[data-loaded] .dp-scale-in {
   height: 2px;
   margin-top: -1px;
   border-radius: 2px;
-  background: linear-gradient(90deg, transparent, rgba(226, 240, 255, 0.95));
+  background: linear-gradient(90deg, transparent, rgba(236, 231, 221, 0.95));
   animation: dp-mv-signal 6.5s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 /* The signal spends a sixth of the loop travelling, not two thirds. It exists
@@ -2446,8 +2626,8 @@ html[data-loaded] .dp-scale-in {
   height: 8px;
   margin-top: -4px;
   border-radius: 2px;
-  background: rgba(143, 180, 255, 0.25);
-  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.5);
+  background: rgba(188, 183, 173, 0.25);
+  box-shadow: inset 0;
   animation:
     dp-mv-land 6.5s var(--d, 0s) ease-out infinite,
     dp-float-c 17s ease-in-out infinite;
@@ -2459,9 +2639,9 @@ html[data-loaded] .dp-scale-in {
    loop, the ring visibly COMPLETES, and only then does it let go. Coverage
    builds; it does not twinkle. */
 @keyframes dp-mv-land {
-  0%, 14% { background: rgba(143, 180, 255, 0.25); box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.5); }
-  20%, 84% { background: rgba(226, 240, 255, 0.95); box-shadow: 0 0 14px 2px rgba(120, 180, 255, 0.6); }
-  96%, 100% { background: rgba(143, 180, 255, 0.25); box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.5); }
+  0%, 14% { background: rgba(188, 183, 173, 0.25); box-shadow: inset 0; }
+  20%, 84% { background: rgba(236, 231, 221, 0.95); box-shadow: none; }
+  96%, 100% { background: rgba(188, 183, 173, 0.25); box-shadow: inset 0; }
 }
 .dp-mv-core {
   position: absolute;
@@ -2470,8 +2650,8 @@ html[data-loaded] .dp-scale-in {
   width: 18px;
   height: 18px;
   border-radius: 4px;
-  background: linear-gradient(142deg, rgba(232, 242, 255, 0.98), rgba(150, 190, 255, 0.75));
-  box-shadow: 0 0 22px 4px rgba(120, 180, 255, 0.45);
+  background: linear-gradient(142deg, rgba(240, 236, 228, 0.98), rgba(194, 189, 179, 0.75));
+  box-shadow: none;
   /* Lifted off the disc so the centre is nearest the viewer, but only just.
      At 26px the perspective displaced it visibly up and away from the point
      where the spokes converge, so the figure read as five lines meeting at
@@ -2534,8 +2714,8 @@ html[data-loaded] .dp-scale-in {
   .dp-mv-sheet { transform: none; opacity: 1; }
   .dp-mv-spoke i { opacity: 0; }
   .dp-mv-spoke b {
-    background: rgba(226, 240, 255, 0.95);
-    box-shadow: 0 0 14px 2px rgba(120, 180, 255, 0.6);
+    background: rgba(236, 231, 221, 0.95);
+    box-shadow: none;
   }
 }
 
@@ -3216,7 +3396,7 @@ html[data-loaded] .dp-scale-in {
   margin-left: -9px;
   border-radius: 4px;
   background: linear-gradient(142deg, #fff, var(--c));
-  box-shadow: 0 0 0 3px rgba(6, 10, 24, 0.55), 0 0 16px 2px color-mix(in srgb, var(--c) 60%, transparent);
+  box-shadow: 0, 0 0 16px 2px color-mix(in srgb, var(--c) 60%, transparent);
   opacity: 0;
   transform: scale(0.4);
   transition:
@@ -3265,10 +3445,10 @@ html[data-loaded] .dp-scale-in {
 .dp-tl-key-mark.is-search {
   background: repeating-linear-gradient(
     -45deg,
-    rgba(143, 180, 255, 0.5) 0 3px,
+    rgba(188, 183, 173, 0.5) 0 3px,
     transparent 3px 7px
   );
-  box-shadow: inset 0 0 0 1px rgba(143, 180, 255, 0.3);
+  box-shadow: inset 0;
 }
 .dp-tl-key-mark.is-hold {
   margin-left: 14px;
@@ -3526,8 +3706,8 @@ html[data-loaded] .dp-scale-in {
   height: 7px;
   width: 7px;
   border-radius: 1.5px;
-  background: rgba(143, 180, 255, 0.34);
-  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.42);
+  background: rgba(188, 183, 173, 0.34);
+  box-shadow: inset 0;
   transform: scale(0.4);
   opacity: 0;
   transition:
