@@ -1478,7 +1478,7 @@ html[data-loaded] .dp-scale-in {
 .dp-mv-stem {
   position: absolute;
   background: rgba(143, 180, 255, 0.16);
-  animation: dp-mv-charge 12s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: dp-mv-charge-line 12s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 .dp-mv-stem.is-v {
   width: 1px;
@@ -1497,7 +1497,7 @@ html[data-loaded] .dp-scale-in {
   border-radius: 2px;
   background: rgba(143, 180, 255, 0.1);
   box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.22);
-  animation: dp-mv-charge 12s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: dp-mv-charge-node 12s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* THE CASCADE. These are `animation-delay` values on a shared 12s keyframe, not
@@ -1506,11 +1506,37 @@ html[data-loaded] .dp-scale-in {
    per-element phase without writing one set per element. The seat lands at
    2.4s and every --d in components/ui/MenuVisual.tsx is later than that, so
    nothing in the structure can light before the seat is in it. */
-@keyframes dp-mv-charge {
-  0%, 2%   { opacity: 0.5; filter: none; }
-  9%       { opacity: 1; filter: brightness(2.6); }
-  62%      { opacity: 1; filter: brightness(2.6); }
-  80%, 100% { opacity: 0.5; filter: none; }
+/* THE LIT STATE HAS TO CHANGE THE ALPHA, NOT THE BRIGHTNESS, and that was the
+   whole bug. This ran `filter: brightness(2.6)` on colours at 10 and 16 percent
+   alpha; brightness multiplies the colour channels and leaves alpha exactly
+   where it was, so a hairline that is 84 percent transparent stays 84 percent
+   transparent however bright the 16 percent gets. Measured by eye across the
+   loop: the seat landed and then nothing legible happened, which is precisely
+   what the picture is supposed to be about. The lit stops now carry their own
+   colour and their own glow. */
+@keyframes dp-mv-charge-line {
+  0%, 2%    { background: rgba(143, 180, 255, 0.14); box-shadow: none; }
+  9%        { background: rgba(206, 230, 255, 0.95); box-shadow: 0 0 7px rgba(120, 180, 255, 0.75); }
+  62%       { background: rgba(178, 210, 255, 0.8); box-shadow: 0 0 6px rgba(120, 180, 255, 0.5); }
+  80%, 100% { background: rgba(143, 180, 255, 0.14); box-shadow: none; }
+}
+@keyframes dp-mv-charge-node {
+  0%, 2% {
+    background: rgba(143, 180, 255, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.22);
+  }
+  9% {
+    background: rgba(214, 234, 255, 0.96);
+    box-shadow: inset 0 0 0 1px rgba(230, 242, 255, 0.9), 0 0 12px 2px rgba(120, 180, 255, 0.6);
+  }
+  62% {
+    background: rgba(180, 212, 255, 0.88);
+    box-shadow: inset 0 0 0 1px rgba(226, 240, 255, 0.7), 0 0 9px 1px rgba(120, 180, 255, 0.42);
+  }
+  80%, 100% {
+    background: rgba(143, 180, 255, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.22);
+  }
 }
 
 /* The gap, drawn for the whole loop. It sits UNDER the seat rather than being
