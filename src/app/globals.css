@@ -1362,6 +1362,71 @@ html[data-loaded] .dp-scale-in {
   }
 }
 
+/* ---- The mark on a menu row ------------------------------------------------
+   See Header.MenuLink for why there is a figure here at all and why it is a
+   house mark rather than an icon. This is the choreography.
+
+   THE FIGURE ASSEMBLES, IN THE ORDER THE BUSINESS DOES. The rules widen into
+   place from their own centre, and then the seat lands in them. That ordering
+   is the whole content of the animation: a structure exists, and a seat is
+   filled in it. Doing both at once would be a fade, and a fade says nothing.
+
+   `transform-box: fill-box` is what makes that possible at all. Without it an
+   SVG child transforms about the origin of the viewBox, so a scale about
+   "centre" throws every part of the figure toward the top left corner instead
+   of growing it in place. With it, each element scales about the centre of its
+   own bounding box.
+
+   IT IS TRANSITIONS, NOT KEYFRAMES, because the pointer can leave halfway. A
+   transition reverses from wherever it got to; a keyframe animation restarts
+   from its first frame, which is what makes a hover that is interrupted look
+   broken. */
+.dp-mm {
+  color: var(--v-muted);
+  transition: color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dp-mm svg :is(path, rect, circle) {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+/* The structure. Held slightly narrow and dim until the row is pointed at. */
+.dp-mm svg :is(path, rect):not(.m-node) {
+  opacity: 0.6;
+  transform: scaleX(0.8);
+  transition:
+    opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* The seat. Lands after the structure it lands in, with the small overshoot
+   that reads as weight rather than as a fade. */
+.dp-mm .m-node {
+  opacity: 0.62;
+  transform: scale(0.62);
+  transition:
+    opacity 260ms cubic-bezier(0.34, 1.3, 0.5, 1) 90ms,
+    transform 380ms cubic-bezier(0.34, 1.4, 0.5, 1) 90ms;
+}
+.group:hover .dp-mm,
+.group:focus-visible .dp-mm {
+  color: var(--v-primary);
+}
+.group:hover .dp-mm svg :is(path, rect):not(.m-node),
+.group:focus-visible .dp-mm svg :is(path, rect):not(.m-node),
+.group:hover .dp-mm .m-node,
+.group:focus-visible .dp-mm .m-node {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The figure is legible in its resting state, so the preference gets the
+     colour change and none of the movement. */
+  .dp-mm svg :is(path, rect) {
+    transform: none;
+    transition: opacity 1ms, color 1ms;
+  }
+}
+
 /* ---- Menu visuals ----------------------------------------------------------
    See components/ui/MenuVisual.tsx for what each one MEANS. This file holds the
    material, the depth and the motion.

@@ -47,6 +47,11 @@ const S = {
 function Node({ x, y, on = false }: { x: number; y: number; on?: boolean }) {
   return (
     <rect
+      /* Classed so a mark can animate its seats separately from its structure
+         without anything having to know which mark it is. See .dp-mm in
+         globals.css: the rules widen into place and then the seat lands, which
+         is the same order of events every figure on this site uses. */
+      className="m-node"
       x={x - 1.5}
       y={y - 1.5}
       width={3}
@@ -191,4 +196,28 @@ export const MARKS: Record<string, () => React.ReactElement> = {
 
 export function hasMark(name?: string): boolean {
   return Boolean(name && MARKS[name]);
+}
+
+/**
+ * The fallback, for a row whose entry has no mark of its own.
+ *
+ * NOT A TENTH MARK. The set is deliberately closed: the industries, the
+ * resources and the company pages carry no mark because nine more arrangements
+ * of two parts would stop being distinguishable and the set would lose the
+ * thing that makes it a set. But a menu row needs SOMETHING in its lead column
+ * or the column is a ragged gap, and it needs something that can animate or
+ * half the panel is dead on hover.
+ *
+ * So this is the grammar's atom on its own: one seat, on one rule. It says
+ * nothing specific, which is correct, because the entries it stands in for are
+ * not distinguished by anything a two-part figure could draw. It animates
+ * exactly like the real marks, so every row in every panel answers the pointer.
+ */
+export function PlainMark() {
+  return (
+    <svg viewBox="0 0 24 24" width="100%" height="100%" aria-hidden="true">
+      <path d="M6 17.5h12" {...S} />
+      <Node x={12} y={9} on />
+    </svg>
+  );
 }

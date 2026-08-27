@@ -9,6 +9,7 @@ import { EASE, SPRING_SOFT, useReducedMotion } from "@/lib/motion";
 import LinkedInIcon from "./LinkedInIcon";
 import Logo from "./Logo";
 import MenuVisual from "@/components/ui/MenuVisual";
+import { MARKS, PlainMark } from "@/components/ui/Mark";
 import BubbleBackground from "@/components/ui/BubbleBackground";
 import {
   WHAT_WE_DO_MENU,
@@ -37,53 +38,64 @@ const SECTION_PREFIX: Record<NavName, string> = {
 /**
  * A row in a menu panel.
  *
- * NO ICON, AND THAT IS THE FIX RATHER THAN A SIMPLIFICATION. Each row used to
- * carry a rounded tile with a stock line glyph in it: a magnifier for search, a
- * briefcase for professional, a stopwatch for interim. Those glyphs are not
- * drawn for this firm and they are not drawn for each other, so the set reads as
- * a stock icon pack rather than as one house, and a magnifier next to the word
- * "Search" adds nothing a reader did not already have.
+ * EVERY ROW ANSWERS THE POINTER, and that is the change. The panel used to have
+ * exactly one animated thing in it, the picture on the right, and the rows
+ * themselves only moved type. Hovering any of eight links produced the same
+ * nothing, so seven eighths of the panel was inert at the moment somebody was
+ * actually looking at it.
  *
- * What replaces it is the line of copy that says what the service IS, which was
- * already there and was being crowded by a picture of a briefcase.
+ * THE MARK IS A HOUSE MARK, NOT AN ICON, and the difference is the whole reason
+ * one is allowed back. There was a stock line glyph here once: a magnifier for
+ * search, a briefcase for professional, a stopwatch for interim. Those are not
+ * drawn for this firm and they are not drawn for each other, so the set read as
+ * assorted clip art however consistent the stroke weight was. What sits here
+ * now is ui/Mark: nine figures built from exactly two parts, rules for the
+ * structure of an organisation and nodes for seats in it, with the filled node
+ * being the seat this firm is hired to fill. A row with no mark of its own gets
+ * the grammar's atom rather than a tenth invented figure. See Mark.PlainMark.
  *
- * THE HOVER IS THE TYPE, NOT A SHAPE BEHIND IT. Two shapes were tried and both
- * were wrong for the same reason: a tinted rounded rectangle and a rule down
- * the left edge are both a decoration ABOUT the row rather than anything
- * happening to it, and they are what every generated menu reaches for first.
- *
- * Instead the row steps aside. The title slides right into a gutter that was
- * already reserved, an arrow takes the space it vacated, and the description
- * comes up from muted to readable. Nothing is drawn that was not already
- * there; the only new mark is the arrow, and an arrow beside a link is a
- * statement of where it goes rather than an ornament. It also means the row
- * has no edges to get wrong at any width.
+ * WHAT HAPPENS ON HOVER IS THE FIGURE ASSEMBLING. The rules widen into place
+ * from their own centre and then the seat lands, which is the same order of
+ * events every other figure on this site uses, and it says the same thing the
+ * whole business says. The type still steps aside and the arrow still arrives,
+ * because those were right; they now have something to happen alongside.
  */
 function MenuLink({ item }: { item: NavItem }) {
+  const Figure = (item.icon && MARKS[item.icon]) || PlainMark;
   return (
     <Link
       href={item.href}
-      className="group relative flex flex-col py-3 pl-7 pr-3"
+      /* The lead column is budgeted, not guessed. The row used to spend
+         pl-7 plus pr-3, which is 40px of chrome; the figure column has to come
+         out of that same 40 or the labels lose width and start wrapping. Six
+         plus sixteen plus ten plus eight is the same forty. Measured after:
+         "Technology | Digital | AI" holds one line again. */
+      className="group relative grid grid-cols-[16px_1fr] items-start gap-x-2.5 rounded-lg py-2.5 pl-1.5 pr-2"
     >
-      {/* Sits in the gutter the title is about to move out of. */}
-      <ArrowRight
-        aria-hidden="true"
-        size={13}
-        className="pointer-events-none absolute left-1 top-[1.05rem] -translate-x-1.5 text-[var(--v-primary)] opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100"
-      />
-      <span className="flex items-center gap-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1.5">
-        {item.label}
-        {item.badge && (
-          <span className="rounded-full bg-[var(--v-primary)]/15 px-2 py-0.5 text-[length:var(--t-label)] font-semibold uppercase tracking-wide text-[var(--v-ring)]">
-            {item.badge}
+      <span className="dp-mm mt-[0.2rem] block h-4 w-4" aria-hidden="true">
+        <Figure />
+      </span>
+
+      <span className="min-w-0">
+        <span className="flex items-center gap-2 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1">
+          {item.label}
+          <ArrowRight
+            aria-hidden="true"
+            size={13}
+            className="pointer-events-none -translate-x-1.5 text-[var(--v-primary)] opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100"
+          />
+          {item.badge && (
+            <span className="rounded-full bg-[var(--v-primary)]/15 px-2 py-0.5 text-[length:var(--t-label)] font-semibold uppercase tracking-wide text-[var(--v-ring)]">
+              {item.badge}
+            </span>
+          )}
+        </span>
+        {item.note && (
+          <span className="mt-1 block text-[length:var(--t-small)] leading-snug text-[var(--v-muted)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:text-[var(--v-ink)]/80">
+            {item.note}
           </span>
         )}
       </span>
-      {item.note && (
-        <span className="mt-1 text-[length:var(--t-small)] leading-snug text-[var(--v-muted)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1.5 group-hover:text-[var(--v-ink)]/80">
-          {item.note}
-        </span>
-      )}
     </Link>
   );
 }
@@ -505,21 +517,12 @@ export default function Header() {
                       <div className="flex flex-col">
                         <ColumnHeading>Company</ColumnHeading>
                         <div className="flex flex-col gap-1">
+                          {/* The same row as every other panel, so the About
+                              menu answers the pointer the way the rest do. It
+                              was the one column still hand rolled, and it was
+                              the one column with nothing but type moving. */}
                           {COMPANY.map((item) => (
-                            <Link
-                              key={item.href}
-                              href={item.href}
-                              className="group relative py-2 pl-7 pr-3 text-[length:var(--t-secondary)] font-medium text-[var(--v-ink)]"
-                            >
-                              <ArrowRight
-                                aria-hidden="true"
-                                size={13}
-                                className="pointer-events-none absolute left-1 top-[0.72rem] -translate-x-1.5 text-[var(--v-primary)] opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100"
-                              />
-                              <span className="block transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1.5">
-                                {item.label}
-                              </span>
-                            </Link>
+                            <MenuLink key={item.href} item={item} />
                           ))}
                         </div>
                         <Link
