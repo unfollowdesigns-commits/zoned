@@ -70,7 +70,10 @@ function MenuLink({
   onFocusItem?: (key: string | undefined) => void;
 }) {
   const Figure = (item.icon && MARKS[item.icon]) || PlainMark;
-  const key = item.icon ?? item.href;
+  /* The href, not the icon. Icons repeat across the navigation (two entries
+     share `trending`) and several rows have none at all, so an icon key cannot
+     address a row uniquely and the picture would answer the wrong one. */
+  const key = item.href;
   return (
     <Link
       onMouseEnter={() => onFocusItem?.(key)}

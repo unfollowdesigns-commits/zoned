@@ -1446,12 +1446,17 @@ html[data-loaded] .dp-scale-in {
    through it instead of stopping at its edge. The hairline is what keeps it a
    pane rather than a smudge. */
 .dp-mv-frame {
-  perspective: 760px;
-  perspective-origin: 50% 44%;
+  /* A LONGER LENS. At 760 the tilt foreshortened the far side of every figure
+     hard enough that a node there was visibly smaller and dimmer than its twin
+     on the near side, which made ordered sets read as ragged. 1150 keeps the
+     depth doing its job on the connectors while leaving the shapes themselves
+     comparable across the plane. */
+  perspective: 1150px;
+  perspective-origin: 50% 46%;
   background: radial-gradient(
     120% 100% at 50% 0%,
-    rgba(11, 18, 38, 0.7) 0%,
-    rgba(5, 7, 15, 0.86) 62%
+    rgba(14, 23, 47, 0.72) 0%,
+    rgba(5, 8, 17, 0.88) 62%
   );
   border: 1px solid rgba(255, 255, 255, 0.07);
   isolation: isolate;
@@ -1464,9 +1469,9 @@ html[data-loaded] .dp-scale-in {
 }
 @keyframes dp-mv-orbit {
   0%,
-  100% { transform: rotateX(2.5deg) rotateY(-11deg); }
-  33%  { transform: rotateX(-1.5deg) rotateY(4deg); }
-  66%  { transform: rotateX(1deg) rotateY(11deg); }
+  100% { transform: rotateX(1.6deg) rotateY(-7deg); }
+  33%  { transform: rotateX(-1deg) rotateY(2.5deg); }
+  66%  { transform: rotateX(0.6deg) rotateY(7deg); }
 }
 
 /* ---- The float ------------------------------------------------------------
@@ -1531,7 +1536,10 @@ html[data-loaded] .dp-scale-in {
    nothing. */
 .dp-mv-org {
   position: absolute;
-  inset: 9% 12% 11%;
+  /* The figures were floating in a lot of nothing. Ten points of margin all
+     round is enough to keep them off the frame's edge; eighteen was a picture
+     printed small in the middle of a card. */
+  inset: 7% 9% 9%;
   transform: rotateY(-15deg) rotateX(5deg);
   transform-style: preserve-3d;
   animation: dp-float-b 19s ease-in-out infinite;
@@ -1542,7 +1550,7 @@ html[data-loaded] .dp-scale-in {
    animation with a per-element phase rather than nine choreographies. */
 .dp-mv-stem {
   position: absolute;
-  background: rgba(143, 180, 255, 0.16);
+  background: rgba(154, 190, 255, 0.26);
   animation: dp-mv-charge-line 12s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 .dp-mv-stem.is-v {
@@ -1556,12 +1564,12 @@ html[data-loaded] .dp-scale-in {
 
 .dp-mv-node {
   position: absolute;
-  width: 9px;
-  height: 9px;
-  margin: -4.5px 0 0 -4.5px;
-  border-radius: 2px;
-  background: rgba(143, 180, 255, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.22);
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  border-radius: 2.5px;
+  background: rgba(143, 180, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.34);
   animation: dp-mv-charge-node 12s var(--d, 0s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
@@ -1589,15 +1597,15 @@ html[data-loaded] .dp-scale-in {
    what the picture is supposed to be about. The lit stops now carry their own
    colour and their own glow. */
 @keyframes dp-mv-charge-line {
-  0%, 2%    { background: rgba(143, 180, 255, 0.14); box-shadow: none; }
+  0%, 2%    { background: rgba(154, 190, 255, 0.26); box-shadow: none; }
   9%        { background: rgba(206, 230, 255, 0.95); box-shadow: 0 0 7px rgba(120, 180, 255, 0.75); }
   62%       { background: rgba(178, 210, 255, 0.8); box-shadow: 0 0 6px rgba(120, 180, 255, 0.5); }
-  80%, 100% { background: rgba(143, 180, 255, 0.14); box-shadow: none; }
+  80%, 100% { background: rgba(154, 190, 255, 0.26); box-shadow: none; }
 }
 @keyframes dp-mv-charge-node {
   0%, 2% {
-    background: rgba(143, 180, 255, 0.1);
-    box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.22);
+    background: rgba(143, 180, 255, 0.14);
+    box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.34);
   }
   9% {
     background: rgba(214, 234, 255, 0.96);
@@ -1608,8 +1616,8 @@ html[data-loaded] .dp-scale-in {
     box-shadow: inset 0 0 0 1px rgba(226, 240, 255, 0.7), 0 0 9px 1px rgba(120, 180, 255, 0.42);
   }
   80%, 100% {
-    background: rgba(143, 180, 255, 0.1);
-    box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.22);
+    background: rgba(143, 180, 255, 0.14);
+    box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.34);
   }
 }
 
@@ -1682,11 +1690,11 @@ html[data-loaded] .dp-scale-in {
    replaced by it, so the picture keeps the evidence of what was filled. */
 .dp-mv-vacancy {
   position: absolute;
-  width: 16px;
-  height: 16px;
-  margin: -8px 0 0 -8px;
-  border-radius: 3px;
-  border: 1px dashed rgba(143, 180, 255, 0.45);
+  width: 19px;
+  height: 19px;
+  margin: -9.5px 0 0 -9.5px;
+  border-radius: 4px;
+  border: 1px dashed rgba(154, 190, 255, 0.55);
 }
 
 /* It comes from BEHIND the structure as well as above it, which is the whole
@@ -1694,11 +1702,11 @@ html[data-loaded] .dp-scale-in {
    arrival that also comes forward through 200px of depth is a placement. */
 .dp-mv-arriving {
   position: absolute;
-  width: 14px;
-  height: 14px;
-  margin: -7px 0 0 -7px;
-  border-radius: 3px;
-  background: linear-gradient(142deg, rgba(226, 238, 255, 0.95), rgba(143, 180, 255, 0.6));
+  width: 17px;
+  height: 17px;
+  margin: -8.5px 0 0 -8.5px;
+  border-radius: 4px;
+  background: linear-gradient(142deg, rgba(232, 242, 255, 0.98), rgba(150, 188, 255, 0.7));
   box-shadow:
     0 0 0 1px rgba(226, 240, 255, 0.6),
     0 0 18px 3px rgba(120, 180, 255, 0.55);
@@ -1746,7 +1754,7 @@ html[data-loaded] .dp-scale-in {
 
 .dp-ts-pick {
   position: absolute;
-  top: 22%;
+  top: 16%;
   width: 13px;
   height: 13px;
   margin: -6.5px 0 0 -6.5px;
@@ -1760,9 +1768,9 @@ html[data-loaded] .dp-scale-in {
 }
 @keyframes dp-ts-drop {
   /* Holds while the field is being narrowed, then takes the chair. */
-  0%, 52% { top: 22%; opacity: 1; }
-  66%, 92% { top: 70%; opacity: 1; }
-  100% { top: 22%; opacity: 1; }
+  0%, 52% { top: 16%; opacity: 1; }
+  66%, 92% { top: 74%; opacity: 1; }
+  100% { top: 16%; opacity: 1; }
 }
 
 /* ---- Interim Solutions: cover, then handover -------------------------------
@@ -1771,10 +1779,10 @@ html[data-loaded] .dp-scale-in {
    then lifts out, and a solid seat comes in along the rule and stays. */
 .dp-cs-arc {
   position: absolute;
-  left: 26%;
-  top: 26%;
-  width: 48%;
-  height: 26%;
+  left: 22%;
+  top: 20%;
+  width: 56%;
+  height: 28%;
   border: 1px dashed rgba(143, 180, 255, 0.4);
   border-bottom: none;
   border-radius: 60% 60% 0 0 / 90% 90% 0 0;
@@ -1825,10 +1833,10 @@ html[data-loaded] .dp-scale-in {
   /* Travels in along the rule, which is what makes it read as a hire coming
      through the organisation rather than dropping out of the sky like the
      cover did. */
-  0%, 58% { left: 14%; opacity: 0; }
-  66% { left: 24%; opacity: 1; }
+  0%, 58% { left: 8%; opacity: 0; }
+  66% { left: 20%; opacity: 1; }
   80%, 94% { left: 50%; opacity: 1; }
-  100% { left: 14%; opacity: 0; }
+  100% { left: 8%; opacity: 0; }
 }
 
 /* ---- Fractional: one person, several places --------------------------------
@@ -1838,10 +1846,10 @@ html[data-loaded] .dp-scale-in {
    moving between commitments, not three part-time strangers. */
 .dp-ss-cell {
   position: absolute;
-  top: 42%;
-  width: 22%;
-  margin-left: -11%;
-  height: 26%;
+  top: 38%;
+  width: 26%;
+  margin-left: -13%;
+  height: 32%;
 }
 .dp-ss-rule {
   position: absolute;
@@ -1877,15 +1885,16 @@ html[data-loaded] .dp-scale-in {
   }
   34%, 100% { background: rgba(143, 180, 255, 0.16); box-shadow: none; }
 }
+
 .dp-ss-who {
   position: absolute;
   /* On the rule, not floating above it. The cells' own slots sit at 68% (42
      top plus 26 height), and a traveller hovering somewhere above them reads as
      a second, separate marker rather than as the person who is IN each one. */
-  top: 68%;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
+  top: 70%;
+  width: 15px;
+  height: 15px;
+  margin: -7.5px 0 0 -7.5px;
   border-radius: 3px;
   background: linear-gradient(142deg, rgba(226, 238, 255, 0.95), rgba(143, 180, 255, 0.6));
   box-shadow:
@@ -1897,10 +1906,10 @@ html[data-loaded] .dp-scale-in {
 @keyframes dp-ss-move {
   /* Over each cell in turn, with a real dwell in each: a seat that never stops
      moving is a shuttle, and a fractional hire is not a shuttle. */
-  0%, 22% { left: 18%; }
+  0%, 22% { left: 14%; }
   33%, 55% { left: 50%; }
-  66%, 88% { left: 82%; }
-  100% { left: 18%; }
+  66%, 88% { left: 86%; }
+  100% { left: 14%; }
 }
 
 /* ---- Project Support: a scope opens and closes -----------------------------
@@ -1909,10 +1918,10 @@ html[data-loaded] .dp-scale-in {
    a time, they work, and then it releases them. */
 .dp-sc-bound {
   position: absolute;
-  left: 18%;
-  top: 28%;
-  width: 64%;
-  height: 52%;
+  left: 12%;
+  top: 22%;
+  width: 76%;
+  height: 62%;
   border: 1px solid rgba(143, 180, 255, 0.4);
   border-radius: 6px;
   animation: dp-sc-bound 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
@@ -1950,6 +1959,300 @@ html[data-loaded] .dp-scale-in {
   68% { opacity: 1; transform: scale(1.16); }
   74%, 80% { opacity: 1; transform: none; }
   100% { opacity: 0; transform: scale(0.4); }
+}
+
+/* ---- Practice scenes -------------------------------------------------------
+   Four verbs taken from the four marks: a ledger, a branch, a boundary and an
+   ascent. See components/ui/MenuVisual for what each one claims. */
+
+/* Finance and Accounting: columns measured onto a baseline, one at a time. */
+.dp-fx-col {
+  position: absolute;
+  bottom: 14%;
+  width: 9px;
+  margin-left: -4.5px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(180deg, rgba(150, 190, 255, 0.85), rgba(90, 140, 235, 0.35));
+  box-shadow:
+    inset 0 1px 0 rgba(226, 240, 255, 0.5),
+    0 0 8px rgba(110, 170, 255, 0.3);
+  transform-origin: 50% 100%;
+  animation: dp-fx-col 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  animation-delay: calc(2.2s + var(--i) * 0.4s);
+}
+@keyframes dp-fx-col {
+  0% { height: 0; opacity: 0; }
+  8%, 88% { height: var(--h); opacity: 1; }
+  100% { height: 0; opacity: 0; }
+}
+.dp-fx-crown {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  margin: -7.5px 0 0 -7.5px;
+  border-radius: 4px;
+  background: linear-gradient(142deg, rgba(232, 242, 255, 0.98), rgba(150, 188, 255, 0.7));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 0 1px rgba(226, 240, 255, 0.55),
+    0 0 18px 3px rgba(120, 180, 255, 0.5);
+  animation: dp-fx-crown 12s cubic-bezier(0.34, 1.3, 0.5, 1) infinite;
+}
+@keyframes dp-fx-crown {
+  0%, 34% { opacity: 0; transform: translateY(-10px) scale(0.5); }
+  42%, 88% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-10px) scale(0.5); }
+}
+
+/* Risk and Compliance: two jaws close on what they are there to hold. */
+.dp-bx-jaw {
+  position: absolute;
+  top: 26%;
+  width: 12%;
+  height: 48%;
+  border: 1px solid rgba(154, 190, 255, 0.7);
+  box-shadow: 0 0 8px rgba(110, 170, 255, 0.25);
+  animation: dp-bx-jaw 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+.dp-bx-jaw.is-l {
+  left: 4%;
+  border-right: none;
+  border-radius: 5px 0 0 5px;
+}
+.dp-bx-jaw.is-r {
+  right: 4%;
+  border-left: none;
+  border-radius: 0 5px 5px 0;
+  animation-name: dp-bx-jaw-r;
+}
+@keyframes dp-bx-jaw {
+  0% { transform: translateX(-24px); opacity: 0; }
+  22%, 86% { transform: translateX(26%); opacity: 1; }
+  100% { transform: translateX(-24px); opacity: 0; }
+}
+@keyframes dp-bx-jaw-r {
+  0% { transform: translateX(24px); opacity: 0; }
+  22%, 86% { transform: translateX(-26%); opacity: 1; }
+  100% { transform: translateX(24px); opacity: 0; }
+}
+/* Inside the jaws, and lit because it is the thing being controlled. */
+.dp-bx-held {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 17px;
+  height: 17px;
+  margin: -8.5px 0 0 -8.5px;
+  border-radius: 4px;
+  background: linear-gradient(142deg, rgba(232, 242, 255, 0.98), rgba(150, 188, 255, 0.7));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 0 1px rgba(226, 240, 255, 0.55),
+    0 0 18px 3px rgba(120, 180, 255, 0.5);
+  animation: dp-bx-held 12s cubic-bezier(0.34, 1.3, 0.5, 1) infinite;
+}
+@keyframes dp-bx-held {
+  0%, 18% { opacity: 0.35; transform: scale(0.7); }
+  30%, 86% { opacity: 1; transform: none; }
+  100% { opacity: 0.35; transform: scale(0.7); }
+}
+/* Outside them, and dark, because that is what a boundary is FOR. */
+.dp-bx-out {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  border-radius: 2.5px;
+  background: rgba(143, 180, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.34);
+  animation: dp-bx-out 12s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.09s);
+}
+@keyframes dp-bx-out {
+  0%, 14% { opacity: 0.9; }
+  30%, 86% { opacity: 0.16; }
+  100% { opacity: 0.9; }
+}
+
+/* ---- The market, as regions ------------------------------------------------
+   One field, and the sector being pointed at is the part of it that resolves.
+   Laid back in the plane so it reads as ground rather than as a table. */
+.dp-fd {
+  position: absolute;
+  inset: 4% 2%;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 8% 4%;
+  /* Laid back far enough to read as ground, not so far that the back rows
+     collapse into a smear. At 46 degrees the top two rows were four pixels
+     tall and the cluster that lit up there could not be told from the one
+     below it. */
+  transform: rotateX(32deg) translateZ(-20px);
+  transform-style: preserve-3d;
+}
+.dp-fd-cell {
+  align-self: center;
+  justify-self: center;
+  width: 76%;
+  height: 52%;
+  border-radius: 2px;
+  background: rgba(143, 180, 255, 0.16);
+  animation: dp-fd-idle 12s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.12s);
+}
+@keyframes dp-fd-idle {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.78; }
+}
+.dp-fd-cell.is-on {
+  background: linear-gradient(142deg, rgba(232, 242, 255, 0.98), rgba(150, 188, 255, 0.7));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 0 1px rgba(226, 240, 255, 0.4),
+    0 0 14px 2px rgba(120, 180, 255, 0.45);
+  animation: dp-fd-on 12s cubic-bezier(0.34, 1.25, 0.5, 1) infinite;
+  animation-delay: calc(2.2s + var(--i) * 0.18s);
+}
+@keyframes dp-fd-on {
+  0% { opacity: 0.2; transform: translateZ(0) scale(0.8); }
+  16%, 86% { opacity: 1; transform: translateZ(26px) scale(1); }
+  100% { opacity: 0.2; transform: translateZ(0) scale(0.8); }
+}
+
+/* ---- Documents and lists ---------------------------------------------------
+   Resources and About are pages and records rather than organisations, so they
+   are built from rules alone. A rule draws itself from its leading edge, which
+   is how a line of anything is actually written. */
+.dp-rw {
+  position: absolute;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, rgba(198, 224, 255, 0.95), rgba(120, 165, 245, 0.35));
+  box-shadow: 0 0 7px rgba(110, 170, 255, 0.3);
+  transform-origin: 0 50%;
+  animation: dp-rw 12s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) infinite;
+}
+@keyframes dp-rw {
+  0% { transform: scaleX(0); opacity: 0; }
+  7%, 86% { transform: none; opacity: 1; }
+  100% { transform: scaleX(0); opacity: 0; }
+}
+
+/* The frame a record or a draft is written into. */
+.dp-rc-frame {
+  position: absolute;
+  left: 12%;
+  top: 16%;
+  width: 76%;
+  height: 68%;
+  border: 1px solid rgba(154, 190, 255, 0.4);
+  border-radius: 6px;
+  animation: dp-rc-frame 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+.dp-rc-frame.is-tall {
+  left: 18%;
+  top: 12%;
+  width: 64%;
+  height: 76%;
+}
+@keyframes dp-rc-frame {
+  0% { opacity: 0; transform: scale(0.9); }
+  10%, 88% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: scale(0.9); }
+}
+
+/* An open chair on the opportunities board. Dashed, because it is a vacancy:
+   every other scene in this menu fills a seat, and this page is the one that
+   advertises them. */
+.dp-bd-slot {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  border-radius: 3px;
+  border: 1px dashed rgba(154, 190, 255, 0.75);
+  animation: dp-bd-slot 12s cubic-bezier(0.34, 1.3, 0.5, 1) infinite;
+  animation-delay: calc(2.1s + var(--i) * 0.3s);
+}
+@keyframes dp-bd-slot {
+  0% { opacity: 0; transform: scale(0.5); }
+  6%, 88% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+/* A block of a spec, snapping into place. */
+.dp-sp-block {
+  position: absolute;
+  height: 15%;
+  border-radius: 4px;
+  background: linear-gradient(160deg, rgba(150, 190, 255, 0.4), rgba(90, 140, 235, 0.16));
+  box-shadow:
+    inset 0 1px 0 rgba(226, 240, 255, 0.35),
+    0 0 0 1px rgba(154, 190, 255, 0.35),
+    0 0 12px rgba(110, 170, 255, 0.2);
+  animation: dp-sp-block 12s cubic-bezier(0.3, 1.5, 0.5, 1) infinite;
+  animation-delay: calc(2.2s + var(--i) * 0.42s);
+}
+@keyframes dp-sp-block {
+  /* In from the side it belongs on, so four blocks do not all arrive from the
+     same place and read as one shape splitting. */
+  0% { opacity: 0; transform: translateX(-26px) scale(0.92); }
+  8%, 86% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateX(-26px) scale(0.92); }
+}
+.dp-sp-block:nth-child(even) {
+  animation-name: dp-sp-block-r;
+}
+@keyframes dp-sp-block-r {
+  0% { opacity: 0; transform: translateX(26px) scale(0.92); }
+  8%, 86% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateX(26px) scale(0.92); }
+}
+
+/* Accolades: a ring that closes and holds. An award completes. */
+.dp-aw-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46%;
+  height: 46%;
+  margin: -23% 0 0 -23%;
+  border-radius: 50%;
+  border: 1px solid rgba(154, 190, 255, 0.65);
+  box-shadow: 0 0 14px rgba(110, 170, 255, 0.25);
+  animation: dp-aw-ring 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+.dp-aw-ring.is-two {
+  width: 66%;
+  height: 66%;
+  margin: -33% 0 0 -33%;
+  border-style: dashed;
+  border-color: rgba(154, 190, 255, 0.4);
+  animation-delay: 0.5s;
+}
+@keyframes dp-aw-ring {
+  0% { opacity: 0; transform: scale(1.35) rotate(-40deg); }
+  16%, 86% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: scale(1.35) rotate(-40deg); }
+}
+
+/* Careers: the inverse of every other scene here. A seat EMPTIES and stays
+   lit, waiting. */
+.dp-op-gap {
+  position: absolute;
+  width: 19px;
+  height: 19px;
+  margin: -9.5px 0 0 -9.5px;
+  border-radius: 4px;
+  border: 1px dashed rgba(154, 190, 255, 0.8);
+  box-shadow: 0 0 16px rgba(110, 170, 255, 0.3);
+  animation: dp-op-gap 12s ease-in-out infinite;
+}
+@keyframes dp-op-gap {
+  0%, 22% { opacity: 0.25; transform: scale(0.75); }
+  34%, 78% { opacity: 1; transform: none; }
+  86%, 100% { opacity: 0.25; transform: scale(0.75); }
 }
 
 /* ---- markets: the short list rises ---------------------------------------
@@ -2194,6 +2497,18 @@ html[data-loaded] .dp-scale-in {
   .dp-ss-who,
   .dp-sc-bound,
   .dp-sco-seat,
+  .dp-fx-col,
+  .dp-fx-crown,
+  .dp-bx-jaw,
+  .dp-bx-held,
+  .dp-bx-out,
+  .dp-fd-cell,
+  .dp-rw,
+  .dp-rc-frame,
+  .dp-bd-slot,
+  .dp-sp-block,
+  .dp-aw-ring,
+  .dp-op-gap,
   .dp-mv-plane,
   .dp-mv-cell,
   .dp-mv-pick,

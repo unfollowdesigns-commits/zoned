@@ -56,6 +56,8 @@
  * Still no image and no JavaScript. A nav panel has to open on the first frame.
  */
 
+import * as React from "react";
+
 type Kind = "services" | "markets" | "resources" | "about";
 
 function Frame({
@@ -91,10 +93,10 @@ function Frame({
  * child. Drawing the real convention is what buys instant legibility here. The
  * previous figure invented its own and got nothing for it.
  */
-const ROW = { top: 14, mid: 50, base: 86 };
-const BUS = { upper: 32, lower: 68 };
-const MID_X = [26, 50, 74];
-const BASE_X = [12, 31, 50, 69, 88];
+const ROW = { top: 10, mid: 48, base: 88 };
+const BUS = { upper: 29, lower: 68 };
+const MID_X = [18, 50, 82];
+const BASE_X = [6, 28, 50, 72, 94];
 
 /**
  * When each part lights, in seconds into the 12s loop.
@@ -177,43 +179,49 @@ function H({ x, y, w, d }: { x: number; y: number; w: number; d: number }) {
    nodes for seats in it, and every one runs inside the same tilted plane under
    the same slow orbit. What differs is the VERB. */
 
+/** The tilted plane the structural scenes live in. Its inset and its float are
+    what make every one of them sit in the same space at the same size. */
+function Org({ children }: { children: React.ReactNode }) {
+  return <div className="dp-mv-org">{children}</div>;
+}
+
 /** Executive Search: a seat arrives at the top and the structure under it
     comes alive. One hire, and the thing underneath it lights. */
 function ExecScene() {
   return (
-    <>
-      <V x={50} y={ROW.top} h={BUS.upper - ROW.top} d={CHARGE.stemTop} />
-      <H x={MID_X[0]} y={BUS.upper} w={MID_X[2] - MID_X[0]} d={CHARGE.busUpper} />
-      {MID_X.map((x) => (
-        <V key={`a${x}`} x={x} y={BUS.upper} h={ROW.mid - BUS.upper} d={CHARGE.stemMid} />
-      ))}
-      {MID_X.map((x) => (
-        <V key={`b${x}`} x={x} y={ROW.mid} h={BUS.lower - ROW.mid} d={CHARGE.stemLower} />
-      ))}
-      <H x={BASE_X[0]} y={BUS.lower} w={BASE_X[4] - BASE_X[0]} d={CHARGE.busLower} />
-      {BASE_X.map((x) => (
-        <V key={`c${x}`} x={x} y={BUS.lower} h={ROW.base - BUS.lower} d={CHARGE.stemBase} />
-      ))}
-      {MID_X.map((x, i) => (
+    <Org>
+        <V x={50} y={ROW.top} h={BUS.upper - ROW.top} d={CHARGE.stemTop} />
+        <H x={MID_X[0]} y={BUS.upper} w={MID_X[2] - MID_X[0]} d={CHARGE.busUpper} />
+        {MID_X.map((x) => (
+          <V key={`a${x}`} x={x} y={BUS.upper} h={ROW.mid - BUS.upper} d={CHARGE.stemMid} />
+        ))}
+        {MID_X.map((x) => (
+          <V key={`b${x}`} x={x} y={ROW.mid} h={BUS.lower - ROW.mid} d={CHARGE.stemLower} />
+        ))}
+        <H x={BASE_X[0]} y={BUS.lower} w={BASE_X[4] - BASE_X[0]} d={CHARGE.busLower} />
+        {BASE_X.map((x) => (
+          <V key={`c${x}`} x={x} y={BUS.lower} h={ROW.base - BUS.lower} d={CHARGE.stemBase} />
+        ))}
+        {MID_X.map((x, i) => (
+          <span
+            key={`m${x}`}
+            className="dp-mv-node"
+            style={{ left: `${x}%`, top: `${ROW.mid}%`, ["--d" as string]: `${CHARGE.nodeMid + i * 0.08}s` }}
+          />
+        ))}
+        {BASE_X.map((x, i) => (
+          <span
+            key={`n${x}`}
+            className="dp-mv-node"
+            style={{ left: `${x}%`, top: `${ROW.base}%`, ["--d" as string]: `${CHARGE.nodeBase + i * 0.07}s` }}
+          />
+        ))}
+        <span className="dp-mv-vacancy" style={{ left: "50%", top: `${ROW.top}%` }} />
         <span
-          key={`m${x}`}
-          className="dp-mv-node"
-          style={{ left: `${x}%`, top: `${ROW.mid}%`, ["--d" as string]: `${CHARGE.nodeMid + i * 0.08}s` }}
+          className="dp-mv-arriving"
+          style={{ left: "50%", top: `${ROW.top}%`, ["--d" as string]: `${CHARGE.seat}s` }}
         />
-      ))}
-      {BASE_X.map((x, i) => (
-        <span
-          key={`n${x}`}
-          className="dp-mv-node"
-          style={{ left: `${x}%`, top: `${ROW.base}%`, ["--d" as string]: `${CHARGE.nodeBase + i * 0.07}s` }}
-        />
-      ))}
-      <span className="dp-mv-vacancy" style={{ left: "50%", top: `${ROW.top}%` }} />
-      <span
-        className="dp-mv-arriving"
-        style={{ left: "50%", top: `${ROW.top}%`, ["--d" as string]: `${CHARGE.seat}s` }}
-      />
-    </>
+    </Org>
   );
 }
 
@@ -222,35 +230,35 @@ function ExecScene() {
    is left, and that one takes the chair. Manager through director hiring is a
    volume of candidates narrowed to a choice, which is a different picture from
    a single appointment at the top of a company. */
-const TIER_X = [12, 27, 42, 57, 72, 87];
-const GAP = 42;
+const TIER_X = [6, 23, 40, 57, 74, 91];
+const GAP = 40;
 
 function TierScene() {
   return (
-    <>
-      <H x={TIER_X[0]} y={70} w={TIER_X[5] - TIER_X[0]} d={2.6} />
-      {TIER_X.filter((x) => x !== GAP).map((x, i) => (
-        <span
-          key={x}
-          className="dp-mv-node"
-          style={{ left: `${x}%`, top: "70%", ["--d" as string]: `${2.8 + i * 0.1}s` }}
-        />
-      ))}
-      <span className="dp-mv-vacancy" style={{ left: `${GAP}%`, top: "70%" }} />
+    <Org>
+        <H x={TIER_X[0]} y={74} w={TIER_X[5] - TIER_X[0]} d={2.6} />
+        {TIER_X.filter((x) => x !== GAP).map((x, i) => (
+          <span
+            key={x}
+            className="dp-mv-node"
+            style={{ left: `${x}%`, top: "74%", ["--d" as string]: `${2.8 + i * 0.1}s` }}
+          />
+        ))}
+        <span className="dp-mv-vacancy" style={{ left: `${GAP}%`, top: "74%" }} />
 
-      {/* The field under consideration. Five are ruled out on a stagger. */}
-      {TIER_X.filter((x) => x !== GAP).map((x, i) => (
-        <span
-          key={`c${x}`}
-          className="dp-ts-cand"
-          style={{ left: `${x}%`, top: "22%", ["--i" as string]: i }}
-        />
-      ))}
-      {/* The one that is not. It sits above the chair it will take, so the
-          journey is a straight drop and reads as a placement rather than as a
-          shape sliding across a diagram. */}
-      <span className="dp-ts-pick" style={{ left: `${GAP}%` }} />
-    </>
+        {/* The field under consideration. Five are ruled out on a stagger. */}
+        {TIER_X.filter((x) => x !== GAP).map((x, i) => (
+          <span
+            key={`c${x}`}
+            className="dp-ts-cand"
+            style={{ left: `${x}%`, top: "16%", ["--i" as string]: i }}
+          />
+        ))}
+        {/* The one that is not. It sits above the chair it will take, so the
+            journey is a straight drop and reads as a placement rather than as a
+            shape sliding across a diagram. */}
+        <span className="dp-ts-pick" style={{ left: `${GAP}%` }} />
+    </Org>
   );
 }
 
@@ -261,25 +269,25 @@ function TierScene() {
    the one scene where something departs. */
 function CoverScene() {
   return (
-    <>
-      <H x={14} y={72} w={72} d={2.4} />
-      {[20, 50, 80].map((x, i) => (
-        <V key={x} x={x} y={52} h={20} d={2.6 + i * 0.12} />
-      ))}
-      {[20, 80].map((x, i) => (
-        <span
-          key={x}
-          className="dp-mv-node"
-          style={{ left: `${x}%`, top: "52%", ["--d" as string]: `${2.9 + i * 0.12}s` }}
-        />
-      ))}
-      <span className="dp-cs-arc" />
-      <span className="dp-mv-vacancy" style={{ left: "50%", top: "52%" }} />
-      {/* Arrives at 2.4s, holds, lifts away at 7.2s. */}
-      <span className="dp-cs-interim" style={{ left: "50%", top: "52%" }} />
-      {/* Comes in along the rule once the cover has gone, and stays. */}
-      <span className="dp-cs-perm" style={{ top: "52%" }} />
-    </>
+    <Org>
+        <H x={8} y={76} w={84} d={2.4} />
+        {[14, 50, 86].map((x, i) => (
+          <V key={x} x={x} y={48} h={28} d={2.6 + i * 0.12} />
+        ))}
+        {[14, 86].map((x, i) => (
+          <span
+            key={x}
+            className="dp-mv-node"
+            style={{ left: `${x}%`, top: "48%", ["--d" as string]: `${2.9 + i * 0.12}s` }}
+          />
+        ))}
+        <span className="dp-cs-arc" />
+        <span className="dp-mv-vacancy" style={{ left: "50%", top: "48%" }} />
+        {/* Arrives at 2.4s, holds, lifts away at 7.2s. */}
+        <span className="dp-cs-interim" style={{ left: "50%", top: "48%" }} />
+        {/* Comes in along the rule once the cover has gone, and stays. */}
+        <span className="dp-cs-perm" style={{ top: "48%" }} />
+    </Org>
   );
 }
 
@@ -287,21 +295,21 @@ function CoverScene() {
    It travels between the three and each lights only while it is there, which is
    the actual proposition: senior expertise, part time and ongoing, not a
    fraction of a person but a person across several places. */
-const CELLS = [18, 50, 82];
+const CELLS = [14, 50, 86];
 
 function SplitScene() {
   return (
-    <>
-      {CELLS.map((x, i) => (
-        <span key={`g${x}`} className="dp-ss-cell" style={{ left: `${x}%`, ["--i" as string]: i }}>
-          <span className="dp-ss-rule" />
-          <span className="dp-ss-seat" />
-        </span>
-      ))}
-      {/* The one person. Its whole journey is the point, so it is one element
-          moving continuously rather than three that blink in turn. */}
-      <span className="dp-ss-who" />
-    </>
+    <Org>
+        {CELLS.map((x, i) => (
+          <span key={`g${x}`} className="dp-ss-cell" style={{ left: `${x}%`, ["--i" as string]: i }}>
+            <span className="dp-ss-rule" />
+            <span className="dp-ss-seat" />
+          </span>
+        ))}
+        {/* The one person. Its whole journey is the point, so it is one element
+            moving continuously rather than three that blink in turn. */}
+        <span className="dp-ss-who" />
+    </Org>
   );
 }
 
@@ -310,49 +318,508 @@ function SplitScene() {
    boundary releases them. Scoped teams for defined programmes: the subject is
    the SCOPE, so the scope is the thing that opens and closes. */
 const TEAM = [
-  { x: 32, y: 40 },
-  { x: 68, y: 40 },
-  { x: 32, y: 68 },
-  { x: 68, y: 68 },
+  { x: 26, y: 34 },
+  { x: 74, y: 34 },
+  { x: 26, y: 72 },
+  { x: 74, y: 72 },
 ];
 
 function ScopeScene() {
   return (
-    <>
-      <span className="dp-sc-bound" />
-      <H x={32} y={54} w={36} d={3.4} />
-      <V x={50} y={40} h={28} d={3.5} />
-      {TEAM.map((t, i) => (
+    <Org>
+        <span className="dp-sc-bound" />
+        <H x={26} y={53} w={48} d={3.4} />
+        <V x={50} y={34} h={38} d={3.5} />
+        {TEAM.map((t, i) => (
+          <span
+            key={`${t.x}-${t.y}`}
+            className="dp-sco-seat"
+            style={{ left: `${t.x}%`, top: `${t.y}%`, ["--i" as string]: i }}
+          />
+        ))}
+    </Org>
+  );
+}
+
+/* ---- Who We Serve: the four practices --------------------------------------
+   Four verbs taken straight from the four marks in ui/Mark, because those marks
+   are already the firm's own statement of how the practices differ: a ledger, a
+   branch, a boundary and an ascent. */
+
+/** Finance and Accounting. Columns measured onto a baseline, one at a time, and
+    the one that matters crowned. Nothing in this practice happens before the
+    numbers are counted, so the counting IS the animation. */
+const LEDGER = [22, 52, 40, 74, 34, 60];
+
+function LedgerScene() {
+  return (
+    <Org>
+        <H x={6} y={86} w={88} d={2.2} />
+        {LEDGER.map((h, i) => (
+          <span
+            key={i}
+            className="dp-fx-col"
+            style={{ left: `${12 + i * 15.2}%`, ["--h" as string]: `${h}%`, ["--i" as string]: i }}
+          />
+        ))}
+        <span className="dp-fx-crown" style={{ left: `${12 + 3 * 15.2}%`, top: `${86 - 74}%` }} />
+    </Org>
+  );
+}
+
+/** Technology, Digital and AI. One seat divides into two and then into four:
+    the practice whose whole subject is a thing that scales by dividing. */
+function BranchScene() {
+  return (
+    <Org>
+        <V x={50} y={10} h={18} d={2.4} />
+        <H x={26} y={28} w={48} d={2.7} />
+        {[26, 74].map((x, i) => (
+          <V key={x} x={x} y={28} h={20} d={2.9 + i * 0.06} />
+        ))}
+        {[26, 74].map((x) => (
+          <H key={`h${x}`} x={x - 14} y={62} w={28} d={3.4} />
+        ))}
+        {[26, 74].map((x, i) => (
+          <V key={`s${x}`} x={x} y={48} h={14} d={3.2 + i * 0.06} />
+        ))}
+        {[12, 40, 60, 88].map((x, i) => (
+          <V key={`t${x}`} x={x} y={62} h={20} d={3.7 + i * 0.05} />
+        ))}
+        {[26, 74].map((x, i) => (
+          <span
+            key={`n${x}`}
+            className="dp-mv-node"
+            style={{ left: `${x}%`, top: "48%", ["--d" as string]: `${3.1 + i * 0.08}s` }}
+          />
+        ))}
+        {[12, 40, 60, 88].map((x, i) => (
+          <span
+            key={`b${x}`}
+            className="dp-mv-node"
+            style={{ left: `${x}%`, top: "82%", ["--d" as string]: `${4 + i * 0.07}s` }}
+          />
+        ))}
         <span
-          key={`${t.x}-${t.y}`}
-          className="dp-sco-seat"
-          style={{ left: `${t.x}%`, top: `${t.y}%`, ["--i" as string]: i }}
+          className="dp-mv-arriving"
+          style={{ left: "50%", top: "10%", ["--d" as string]: `${CHARGE.seat}s` }}
+        />
+    </Org>
+  );
+}
+
+/** Risk and Compliance. Two brackets close in from the edges until the thing in
+    the middle is inside them, and what is left outside goes dark. Control is not
+    an ornament here: it is the practice. */
+function BoundaryScene() {
+  return (
+    <Org>
+        {[16, 38, 62, 84].map((x, i) => (
+          <span
+            key={x}
+            className="dp-bx-out"
+            style={{ left: `${x}%`, top: "50%", ["--i" as string]: i }}
+          />
+        ))}
+        <span className="dp-bx-jaw is-l" />
+        <span className="dp-bx-jaw is-r" />
+        <span className="dp-bx-held" />
+    </Org>
+  );
+}
+
+/** Marketing and Revenue. A stepped climb, each tread lighting as it is reached,
+    arriving at a seat at the top. The one practice measured by a line going up. */
+const STEPS = [
+  { x: 8, y: 84 },
+  { x: 30, y: 68 },
+  { x: 52, y: 50 },
+  { x: 74, y: 30 },
+];
+
+function AscentScene() {
+  return (
+    <Org>
+        {STEPS.map((st, i) => (
+          <React.Fragment key={st.x}>
+            <H x={st.x} y={st.y} w={18} d={2.4 + i * 0.42} />
+            {i < STEPS.length - 1 && (
+              <V x={st.x + 18} y={STEPS[i + 1].y} h={st.y - STEPS[i + 1].y} d={2.6 + i * 0.42} />
+            )}
+          </React.Fragment>
+        ))}
+        <span
+          className="dp-mv-arriving"
+          style={{ left: "92%", top: "30%", ["--d" as string]: "4.4s" }}
+        />
+        <span className="dp-mv-vacancy" style={{ left: "92%", top: "30%" }} />
+    </Org>
+  );
+}
+
+/* ---- The industries --------------------------------------------------------
+   ONE FIELD, EIGHT REGIONS, AND THAT IS AN HONEST ANSWER RATHER THAN A LAZY
+   ONE. Eight bespoke figures would be eight more arrangements of two parts, and
+   past about nine those stop being distinguishable and the set stops being a
+   set. The site's own position is that these are sectors of one talent market,
+   so the picture is one market and the sector being pointed at is the part of
+   it that lights and resolves. Each industry lights a different region, so the
+   picture does change, and it changes in the way the argument says it should. */
+const FIELD_COLS = 9;
+const FIELD_ROWS = 5;
+
+/**
+ * The eight regions, written out rather than computed.
+ *
+ * A formula produced collisions: with nine columns and five rows there is no
+ * arithmetic that lands eight distinct two-by-three clusters without two of
+ * them coinciding, and two industries lighting the identical cells is the exact
+ * failure this is here to avoid. Eight pairs is shorter than the arithmetic
+ * that would have been wrong.
+ */
+const REGIONS: Array<{ c: number; r: number }> = [
+  { c: 0, r: 0 },
+  { c: 3, r: 0 },
+  { c: 6, r: 0 },
+  { c: 0, r: 2 },
+  { c: 3, r: 3 },
+  { c: 6, r: 2 },
+  { c: 1, r: 1 },
+  { c: 5, r: 3 },
+];
+
+function FieldScene({ region }: { region: number }) {
+  const { c: col0, r: row0 } = REGIONS[region % REGIONS.length];
+  const picked = new Set<number>();
+  for (let r = 0; r < 2; r++) {
+    for (let c = 0; c < 3; c++) {
+      picked.add((row0 + r) * FIELD_COLS + col0 + c);
+    }
+  }
+  return (
+    <div className="dp-fd">
+      {Array.from({ length: FIELD_COLS * FIELD_ROWS }, (_, i) => (
+        <span
+          key={i}
+          className={picked.has(i) ? "dp-fd-cell is-on" : "dp-fd-cell"}
+          style={{ ["--i" as string]: i % FIELD_COLS }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ---- Resources -------------------------------------------------------------
+   These are documents and lists rather than organisations, so they are built
+   from rules alone: a rule is a line of a thing, and a seat only appears where
+   an actual seat is the subject. */
+
+/** Rows that draw themselves in sequence. The shared part of four of these. */
+function Rows({
+  ys,
+  widths,
+  x = 14,
+  base = 2.2,
+  step = 0.34,
+}: {
+  ys: number[];
+  widths: number[];
+  x?: number;
+  base?: number;
+  step?: number;
+}) {
+  return (
+    <>
+      {ys.map((y, i) => (
+        <span
+          key={y}
+          className="dp-rw"
+          style={{
+            left: `${x}%`,
+            top: `${y}%`,
+            width: `${widths[i]}%`,
+            ["--d" as string]: `${base + i * step}s`,
+          }}
         />
       ))}
     </>
   );
 }
 
-/** Keyed by the same `icon` strings lib/site.ts already carries. */
-const SERVICE_SCENE: Record<string, () => React.ReactElement> = {
-  search: ExecScene,
-  briefcase: TierScene,
-  timer: CoverScene,
-  brackets: SplitScene,
-  presentation: ScopeScene,
+/** Blog. Sheets in depth, the top one lifting away and the stack stepping up. */
+function StackScene() {
+  return (
+    <>
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="dp-mv-sheet" style={{ ["--d" as string]: `${i * -5}s` }}>
+          <span style={{ width: "72%" }} />
+          <span style={{ width: "84%" }} />
+          <span style={{ width: "48%" }} />
+          <span style={{ width: "66%" }} />
+        </div>
+      ))}
+    </>
+  );
+}
+
+/** Case Studies. A record opens: the frame widens and the account fills in
+    under it, which is what a case study is. */
+function RecordScene() {
+  return (
+    <Org>
+        <span className="dp-rc-frame" />
+        <Rows ys={[30, 44, 58, 72]} widths={[64, 52, 70, 40]} x={18} base={2.6} step={0.4} />
+        <span className="dp-mv-node is-set" style={{ left: "82%", top: "30%", ["--d" as string]: "2.4s" }} />
+    </Org>
+  );
+}
+
+/** Current Opportunities. Open seats appear on a board, one after another, and
+    each one is an empty chair rather than a filled one. That is the whole
+    difference between this page and every other page in the menu. */
+const BOARD = [
+  { x: 22, y: 26 },
+  { x: 56, y: 26 },
+  { x: 22, y: 54 },
+  { x: 56, y: 54 },
+  { x: 22, y: 82 },
+  { x: 56, y: 82 },
+];
+
+function BoardScene() {
+  return (
+    <Org>
+        {BOARD.map((b, i) => (
+          <React.Fragment key={`${b.x}-${b.y}`}>
+            <span
+              className="dp-bd-slot"
+              style={{ left: `${b.x}%`, top: `${b.y}%`, ["--i" as string]: i }}
+            />
+            <span
+              className="dp-rw"
+              style={{
+                left: `${b.x + 8}%`,
+                top: `${b.y}%`,
+                width: "26%",
+                ["--d" as string]: `${2.3 + i * 0.3}s`,
+              }}
+            />
+          </React.Fragment>
+        ))}
+    </Org>
+  );
+}
+
+/** Resume Builder. A page assembles line by line, and the last line is short
+    the way a last line is. */
+function DraftScene() {
+  return (
+    <Org>
+        <span className="dp-rc-frame is-tall" />
+        <Rows ys={[26, 38, 50, 62, 74]} widths={[38, 62, 56, 66, 30]} x={22} base={2.4} step={0.36} />
+    </Org>
+  );
+}
+
+/** Job Description Engine. Blocks snap into place and lock together, because
+    what the tool does is compose a spec out of parts. */
+const SPEC = [
+  { x: 16, y: 22, w: 30 },
+  { x: 54, y: 22, w: 30 },
+  { x: 16, y: 46, w: 68 },
+  { x: 16, y: 70, w: 44 },
+];
+
+function SpecScene() {
+  return (
+    <Org>
+        {SPEC.map((b, i) => (
+          <span
+            key={`${b.x}-${b.y}`}
+            className="dp-sp-block"
+            style={{ left: `${b.x}%`, top: `${b.y}%`, width: `${b.w}%`, ["--i" as string]: i }}
+          />
+        ))}
+    </Org>
+  );
+}
+
+/* ---- About ----------------------------------------------------------------- */
+
+/** About Us. Coverage building out from the centre and staying built: each seat
+    the signal reaches stays lit, so the ring completes over the loop instead of
+    twinkling forever. */
+function WebScene() {
+  return (
+    <div className="dp-mv-disc">
+      {[0, 72, 144, 216, 288].map((deg, i) => (
+        <span
+          key={deg}
+          className="dp-mv-spoke"
+          style={{ ["--rot" as string]: `${deg}deg`, ["--d" as string]: `${i * 0.35}s` }}
+        >
+          <i />
+          <b />
+        </span>
+      ))}
+      <span className="dp-mv-core" />
+    </div>
+  );
+}
+
+/** The DP Difference. A stack of capabilities coming up one at a time, which is
+    literally what that page is: eight things this firm has that others do not. */
+function StackBarsScene() {
+  return (
+    <Org>
+      <Rows
+        ys={[18, 34, 50, 66, 82]}
+        widths={[74, 58, 82, 46, 66]}
+        x={13}
+        base={2.2}
+        step={0.44}
+      />
+    </Org>
+  );
+}
+
+/** Meet Our Team. A row of seats, every one of them filled, arriving together
+    enough to read as a team and staggered enough not to read as one shape. */
+const TEAM_X = [12, 31, 50, 69, 88];
+
+function TeamScene() {
+  return (
+    <Org>
+        <H x={12} y={62} w={76} d={2.2} />
+        {TEAM_X.map((x, i) => (
+          <React.Fragment key={x}>
+            <V x={x} y={62} h={14} d={2.4 + i * 0.08} />
+            <span
+              className="dp-sco-seat"
+              style={{ left: `${x}%`, top: "42%", ["--i" as string]: i }}
+            />
+          </React.Fragment>
+        ))}
+    </Org>
+  );
+}
+
+/** Accolades. A ring closes around a seat and holds. An award is a thing that
+    completes, so the figure completes. */
+function AwardScene() {
+  return (
+    <Org>
+        <span className="dp-aw-ring" />
+        <span className="dp-aw-ring is-two" />
+        <span
+          className="dp-mv-arriving"
+          style={{ left: "50%", top: "50%", ["--d" as string]: "2.6s" }}
+        />
+    </Org>
+  );
+}
+
+/** Careers at DP. Every other scene in this menu fills a seat. This one opens
+    one: a full structure, and a chair that empties and stays lit waiting. */
+function OpeningScene() {
+  return (
+    <Org>
+        <H x={12} y={40} w={76} d={2.2} />
+        {TEAM_X.map((x, i) => (
+          <V key={x} x={x} y={40} h={18} d={2.4 + i * 0.07} />
+        ))}
+        {TEAM_X.map((x, i) =>
+          x === 50 ? null : (
+            <span
+              key={`s${x}`}
+              className="dp-mv-node is-set"
+              style={{ left: `${x}%`, top: "58%", ["--d" as string]: `${2.7 + i * 0.08}s` }}
+            />
+          )
+        )}
+        <span className="dp-op-gap" style={{ left: "50%", top: "58%" }} />
+    </Org>
+  );
+}
+
+/**
+ * Every row in the navigation, keyed by href.
+ *
+ * By href and not by icon: icons repeat across the navigation and several rows
+ * have none, so an icon could not address a row uniquely. See Header.MenuLink.
+ */
+const SCENE: Record<string, () => React.ReactElement> = {
+  "/what-we-do/executive-search": ExecScene,
+  "/what-we-do/professional-search": TierScene,
+  "/what-we-do/interim-solutions": CoverScene,
+  "/what-we-do/fractional": SplitScene,
+  "/what-we-do/project-support": ScopeScene,
+
+  "/who-we-serve/finance-accounting": LedgerScene,
+  "/who-we-serve/technology-digital-ai": BranchScene,
+  "/who-we-serve/risk-compliance": BoundaryScene,
+  "/who-we-serve/marketing-revenue": AscentScene,
+
+  "/resources/blog": StackScene,
+  "/resources/case-studies": RecordScene,
+  "/resources/current-opportunities": BoardScene,
+  "/resources/resume-builder": DraftScene,
+  "/resources/job-description-engine": SpecScene,
+
+  "/about": WebScene,
+  "/the-dp-difference": StackBarsScene,
+  "/about/team": TeamScene,
+  "/about/accolades": AwardScene,
+  "/about/careers": OpeningScene,
+};
+
+/** The eight industries, each lighting its own region of the one market. */
+const INDUSTRY_REGION: Record<string, number> = {
+  "/who-we-serve/professional-business-services": 0,
+  "/who-we-serve/private-capital": 1,
+  "/who-we-serve/tech-ai-digital-platforms": 2,
+  "/who-we-serve/govcon-public-sector": 3,
+  "/who-we-serve/financial-services": 4,
+  "/who-we-serve/wealth-management": 5,
+  "/who-we-serve/real-estate-construction-manufacturing": 6,
+  "/who-we-serve/healthcare": 7,
 };
 
 function Services({ focus }: { focus?: string }) {
-  const Scene = (focus && SERVICE_SCENE[focus]) || ExecScene;
+  return <Panel kind="services" focus={focus} fallback={ExecScene} />;
+}
+
+/**
+ * The one panel body.
+ *
+ * Keyed on the row, so changing rows swaps the scene AND restarts it from its
+ * first frame. A cross-fade would show two figures at once; a remount plays one
+ * story. The frame, its lamp and the slow orbit are outside the key and do not
+ * restart, so the stage never jumps.
+ */
+function Panel({
+  kind,
+  focus,
+  fallback: Fallback,
+}: {
+  kind: Kind;
+  focus?: string;
+  fallback: () => React.ReactElement;
+}) {
+  const region = focus ? INDUSTRY_REGION[focus] : undefined;
+  const Scene = focus ? SCENE[focus] : undefined;
   return (
-    <Frame kind="services">
+    <Frame kind={kind}>
       {/* Keyed on the row, so changing rows swaps the scene AND restarts it
           from its first frame. A cross-fade would show two figures at once; a
           remount plays one story. The frame, its lamp and the slow orbit are
-          outside the key and do not restart, so the stage never jumps. */}
-      <div className="dp-mv-org" key={focus ?? "search"}>
-        <Scene />
-      </div>
+          outside the key and do not restart, so the stage never jumps. Each
+          scene brings its own plane, because they are not all the same plane:
+          the structural ones stand in the tilted org space, the market lies
+          back flat, and the sheets are a stack in depth. */}
+      <React.Fragment key={focus ?? "-"}>
+        {Scene ? <Scene /> : region !== undefined ? <FieldScene region={region} /> : <Fallback />}
+      </React.Fragment>
     </Frame>
   );
 }
@@ -369,117 +836,70 @@ const PICKED = [10, 21, 27, 44];
 const LIST_X = 88;
 const LIST_Y = (rank: number) => 34 + rank * 20;
 
-function Markets({ focus }: { focus?: string }) {
+/** Who We Serve, by default: a scatter of candidates that becomes a shortlist. */
+function MarketScene() {
   return (
-    <Frame kind="markets">
-      <div className="dp-mv-plane" key={focus ?? "-"}>
-        {Array.from({ length: COLS * ROWS }, (_, i) => {
-          const x = ((i % COLS) + 0.5) * (100 / COLS);
-          const y = (Math.floor(i / COLS) + 0.5) * (100 / ROWS);
-          const rank = PICKED.indexOf(i);
+    <div className="dp-mv-plane">
+      {Array.from({ length: COLS * ROWS }, (_, i) => {
+        const x = ((i % COLS) + 0.5) * (100 / COLS);
+        const y = (Math.floor(i / COLS) + 0.5) * (100 / ROWS);
+        const rank = PICKED.indexOf(i);
 
-          if (rank === -1) {
-            return (
-              <span
-                key={i}
-                className="dp-mv-cell"
-                style={{ left: `${x}%`, top: `${y}%`, ["--d" as string]: `${(i % 5) * 0.85}s` }}
-              />
-            );
-          }
-
-          /* The travel is on a WRAPPER that spans the whole plane, not on the
-             dot. A percentage translate resolves against the element's own box,
-             so a 6px dot can only move 6px worth; a wrapper the size of the
-             plane can move a share of the plane, which is the only way to aim
-             at a target expressed in the same units as the grid. */
+        if (rank === -1) {
           return (
             <span
               key={i}
-              className="dp-mv-pick"
-              style={{
-                ["--dx" as string]: `${LIST_X - x}%`,
-                ["--dy" as string]: `${LIST_Y(rank) - y}%`,
-                ["--d" as string]: `${rank * 0.5}s`,
-              }}
-            >
-              <i style={{ left: `${x}%`, top: `${y}%` }} />
-            </span>
+              className="dp-mv-cell"
+              style={{ left: `${x}%`, top: `${y}%`, ["--d" as string]: `${(i % 5) * 0.85}s` }}
+            />
           );
-        })}
-        {/* The rule the shortlist lands against. Without something to line up
-            ON, four bright dots in a row are four bright dots; with it they are
-            a list. Overhung slightly past the first and last rank so the ends
-            of the gradient fade clear of the dots rather than dying on them. */}
-        <span
-          className="dp-mv-listline"
-          style={{
-            left: `${LIST_X}%`,
-            top: `${LIST_Y(0) - 7}%`,
-            height: `${LIST_Y(3) - LIST_Y(0) + 14}%`,
-          }}
-        />
-      </div>
-    </Frame>
-  );
-}
+        }
 
-/* ---- resources: the record ----------------------------------------------- */
-function Resources({ focus }: { focus?: string }) {
-  return (
-    <Frame kind="resources">
-      {/* Keyed so moving between rows restarts the stack from its first frame,
-          the same replay every other scene gets. */}
-      {[0, 1, 2].map((i) => (
-        /* Evenly spread across the 15s leaf cycle. Negative, so the stack is
-           already mid-cycle on the first frame and never starts empty. Tied to
-           the cycle length: at the old -3s against a 15s loop the three sheets
-           bunched into the first fifth of it and the stack read as two. */
-        <div key={`${focus ?? "-"}-${i}`} className="dp-mv-sheet" style={{ ["--d" as string]: `${i * -5}s` }}>
-          <span style={{ width: "72%" }} />
-          <span style={{ width: "84%" }} />
-          <span style={{ width: "48%" }} />
-          <span style={{ width: "66%" }} />
-        </div>
-      ))}
-    </Frame>
-  );
-}
-
-/* ---- about: coverage building ---------------------------------------------
-   The seats used to blink as the signal reached them, which is the single most
-   generic thing a diagram can do: a blink has no memory, so after five of them
-   the picture is exactly where it started and the loop has said nothing. Each
-   seat now STAYS lit once it is reached, the ring completes, and only then does
-   the whole thing reset. Same elements, and now there is a story in it. */
-function About({ focus }: { focus?: string }) {
-  const spokes = [0, 72, 144, 216, 288];
-  return (
-    <Frame kind="about">
-      <div className="dp-mv-disc" key={focus ?? "-"}>
-        {spokes.map((deg, i) => (
+        /* The travel is on a WRAPPER that spans the whole plane, not on the
+           dot. A percentage translate resolves against the element's own box,
+           so a 6px dot can only move 6px worth; a wrapper the size of the
+           plane can move a share of the plane, which is the only way to aim
+           at a target expressed in the same units as the grid. */
+        return (
           <span
-            key={deg}
-            className="dp-mv-spoke"
+            key={i}
+            className="dp-mv-pick"
             style={{
-              ["--rot" as string]: `${deg}deg`,
-              /* Tight enough that all five overlap for a beat at the end of the
-                 loop. A delay shifts the whole cycle, so a wide stagger means
-                 the first seat is already draining before the last one lights
-                 and the ring is never once complete. */
-              ["--d" as string]: `${i * 0.35}s`,
+              ["--dx" as string]: `${LIST_X - x}%`,
+              ["--dy" as string]: `${LIST_Y(rank) - y}%`,
+              ["--d" as string]: `${rank * 0.5}s`,
             }}
           >
-            {/* The signal, travelling out along the spoke. */}
-            <i />
-            {/* The seat at the far end of it. */}
-            <b />
+            <i style={{ left: `${x}%`, top: `${y}%` }} />
           </span>
-        ))}
-        <span className="dp-mv-core" />
-      </div>
-    </Frame>
+        );
+      })}
+      {/* The rule the shortlist lands against. Without something to line up
+          ON, four bright dots in a row are four bright dots; with it they are
+          a list. Overhung slightly past the first and last rank so the ends
+          of the gradient fade clear of the dots rather than dying on them. */}
+      <span
+        className="dp-mv-listline"
+        style={{
+          left: `${LIST_X}%`,
+          top: `${LIST_Y(0) - 7}%`,
+          height: `${LIST_Y(3) - LIST_Y(0) + 14}%`,
+        }}
+      />
+    </div>
   );
+}
+
+function Markets({ focus }: { focus?: string }) {
+  return <Panel kind="markets" focus={focus} fallback={MarketScene} />;
+}
+
+function Resources({ focus }: { focus?: string }) {
+  return <Panel kind="resources" focus={focus} fallback={StackScene} />;
+}
+
+function About({ focus }: { focus?: string }) {
+  return <Panel kind="about" focus={focus} fallback={WebScene} />;
 }
 
 const BY_KIND: Record<Kind, (p: { focus?: string }) => React.ReactElement> = {
