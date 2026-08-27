@@ -164,89 +164,194 @@ function H({ x, y, w, d }: { x: number; y: number; w: number; d: number }) {
   );
 }
 
-/**
- * Where the arriving seat lands, per service, keyed by the same `icon` strings
- * lib/site.ts already carries.
- *
- * THIS IS THE POINT OF DRIVING THE PICTURE FROM THE ROW. The panel used to show
- * one scene however you moved through it, so five links shared one animation
- * and the picture said the same thing about all of them. The house grammar
- * already distinguishes them, and it distinguishes them by WHERE THE FILLED
- * SEAT IS: Executive Search is the seat at the top of the structure,
- * Professional Search is the same structure a level down, and the rest sit
- * where their own mark puts them. Hovering a row now lands the seat in that
- * row's place and re-runs the charge from it. Same figure, five true
- * statements, rather than one figure and a caption.
- */
-const SEATS: Record<string, { x: number; y: number }> = {
-  search: { x: 50, y: ROW.top },
-  briefcase: { x: 50, y: ROW.mid },
-  timer: { x: MID_X[0], y: ROW.mid },
-  brackets: { x: BASE_X[1], y: ROW.base },
-  presentation: { x: BASE_X[3], y: ROW.base },
+/* ---- The five services, five scenes ----------------------------------------
+   FIVE SCENES, NOT ONE SCENE WITH THE SEAT MOVED. The first attempt at making
+   the panel answer the pointer played the same org chart for every row and only
+   changed where the arriving seat landed. That is one animation with a
+   parameter, and it reads as one animation, because it is. Each service does a
+   materially different thing to a client, so each one gets a figure that does a
+   materially different thing.
+
+   They are still one family. Every scene is built from the same two parts the
+   whole site is built from, rules for the structure of an organisation and
+   nodes for seats in it, and every one runs inside the same tilted plane under
+   the same slow orbit. What differs is the VERB. */
+
+/** Executive Search: a seat arrives at the top and the structure under it
+    comes alive. One hire, and the thing underneath it lights. */
+function ExecScene() {
+  return (
+    <>
+      <V x={50} y={ROW.top} h={BUS.upper - ROW.top} d={CHARGE.stemTop} />
+      <H x={MID_X[0]} y={BUS.upper} w={MID_X[2] - MID_X[0]} d={CHARGE.busUpper} />
+      {MID_X.map((x) => (
+        <V key={`a${x}`} x={x} y={BUS.upper} h={ROW.mid - BUS.upper} d={CHARGE.stemMid} />
+      ))}
+      {MID_X.map((x) => (
+        <V key={`b${x}`} x={x} y={ROW.mid} h={BUS.lower - ROW.mid} d={CHARGE.stemLower} />
+      ))}
+      <H x={BASE_X[0]} y={BUS.lower} w={BASE_X[4] - BASE_X[0]} d={CHARGE.busLower} />
+      {BASE_X.map((x) => (
+        <V key={`c${x}`} x={x} y={BUS.lower} h={ROW.base - BUS.lower} d={CHARGE.stemBase} />
+      ))}
+      {MID_X.map((x, i) => (
+        <span
+          key={`m${x}`}
+          className="dp-mv-node"
+          style={{ left: `${x}%`, top: `${ROW.mid}%`, ["--d" as string]: `${CHARGE.nodeMid + i * 0.08}s` }}
+        />
+      ))}
+      {BASE_X.map((x, i) => (
+        <span
+          key={`n${x}`}
+          className="dp-mv-node"
+          style={{ left: `${x}%`, top: `${ROW.base}%`, ["--d" as string]: `${CHARGE.nodeBase + i * 0.07}s` }}
+        />
+      ))}
+      <span className="dp-mv-vacancy" style={{ left: "50%", top: `${ROW.top}%` }} />
+      <span
+        className="dp-mv-arriving"
+        style={{ left: "50%", top: `${ROW.top}%`, ["--d" as string]: `${CHARGE.seat}s` }}
+      />
+    </>
+  );
+}
+
+/* Professional Search. A wide tier with one empty chair in it, and a holding
+   row of six above. The six are considered and go dark one at a time until one
+   is left, and that one takes the chair. Manager through director hiring is a
+   volume of candidates narrowed to a choice, which is a different picture from
+   a single appointment at the top of a company. */
+const TIER_X = [12, 27, 42, 57, 72, 87];
+const GAP = 42;
+
+function TierScene() {
+  return (
+    <>
+      <H x={TIER_X[0]} y={70} w={TIER_X[5] - TIER_X[0]} d={2.6} />
+      {TIER_X.filter((x) => x !== GAP).map((x, i) => (
+        <span
+          key={x}
+          className="dp-mv-node"
+          style={{ left: `${x}%`, top: "70%", ["--d" as string]: `${2.8 + i * 0.1}s` }}
+        />
+      ))}
+      <span className="dp-mv-vacancy" style={{ left: `${GAP}%`, top: "70%" }} />
+
+      {/* The field under consideration. Five are ruled out on a stagger. */}
+      {TIER_X.filter((x) => x !== GAP).map((x, i) => (
+        <span
+          key={`c${x}`}
+          className="dp-ts-cand"
+          style={{ left: `${x}%`, top: "22%", ["--i" as string]: i }}
+        />
+      ))}
+      {/* The one that is not. It sits above the chair it will take, so the
+          journey is a straight drop and reads as a placement rather than as a
+          shape sliding across a diagram. */}
+      <span className="dp-ts-pick" style={{ left: `${GAP}%` }} />
+    </>
+  );
+}
+
+/* Interim Solutions. A structure with a gap in it, a dashed arc holding the
+   space, and a seat that arrives fast, holds, and then LEAVES, at which point a
+   solid seat slides in underneath it and stays. Leadership in the seat while
+   you hire, which is the one service here whose subject is temporary, so it is
+   the one scene where something departs. */
+function CoverScene() {
+  return (
+    <>
+      <H x={14} y={72} w={72} d={2.4} />
+      {[20, 50, 80].map((x, i) => (
+        <V key={x} x={x} y={52} h={20} d={2.6 + i * 0.12} />
+      ))}
+      {[20, 80].map((x, i) => (
+        <span
+          key={x}
+          className="dp-mv-node"
+          style={{ left: `${x}%`, top: "52%", ["--d" as string]: `${2.9 + i * 0.12}s` }}
+        />
+      ))}
+      <span className="dp-cs-arc" />
+      <span className="dp-mv-vacancy" style={{ left: "50%", top: "52%" }} />
+      {/* Arrives at 2.4s, holds, lifts away at 7.2s. */}
+      <span className="dp-cs-interim" style={{ left: "50%", top: "52%" }} />
+      {/* Comes in along the rule once the cover has gone, and stays. */}
+      <span className="dp-cs-perm" style={{ top: "52%" }} />
+    </>
+  );
+}
+
+/* Fractional. Three separate structures, and one seat that is in all of them.
+   It travels between the three and each lights only while it is there, which is
+   the actual proposition: senior expertise, part time and ongoing, not a
+   fraction of a person but a person across several places. */
+const CELLS = [18, 50, 82];
+
+function SplitScene() {
+  return (
+    <>
+      {CELLS.map((x, i) => (
+        <span key={`g${x}`} className="dp-ss-cell" style={{ left: `${x}%`, ["--i" as string]: i }}>
+          <span className="dp-ss-rule" />
+          <span className="dp-ss-seat" />
+        </span>
+      ))}
+      {/* The one person. Its whole journey is the point, so it is one element
+          moving continuously rather than three that blink in turn. */}
+      <span className="dp-ss-who" />
+    </>
+  );
+}
+
+/* Project Support and Expertise. A boundary draws itself around nothing, a team
+   arrives inside it together rather than one at a time, they work, and then the
+   boundary releases them. Scoped teams for defined programmes: the subject is
+   the SCOPE, so the scope is the thing that opens and closes. */
+const TEAM = [
+  { x: 32, y: 40 },
+  { x: 68, y: 40 },
+  { x: 32, y: 68 },
+  { x: 68, y: 68 },
+];
+
+function ScopeScene() {
+  return (
+    <>
+      <span className="dp-sc-bound" />
+      <H x={32} y={54} w={36} d={3.4} />
+      <V x={50} y={40} h={28} d={3.5} />
+      {TEAM.map((t, i) => (
+        <span
+          key={`${t.x}-${t.y}`}
+          className="dp-sco-seat"
+          style={{ left: `${t.x}%`, top: `${t.y}%`, ["--i" as string]: i }}
+        />
+      ))}
+    </>
+  );
+}
+
+/** Keyed by the same `icon` strings lib/site.ts already carries. */
+const SERVICE_SCENE: Record<string, () => React.ReactElement> = {
+  search: ExecScene,
+  briefcase: TierScene,
+  timer: CoverScene,
+  brackets: SplitScene,
+  presentation: ScopeScene,
 };
 
 function Services({ focus }: { focus?: string }) {
-  const seat = (focus && SEATS[focus]) || SEATS.search;
-  const headFilled = seat.y === ROW.top;
+  const Scene = (focus && SERVICE_SCENE[focus]) || ExecScene;
   return (
     <Frame kind="services">
-      {/* Keyed on the seat, so changing rows remounts the chart and every
-          animation in it starts again. A cross-fade would show two charts; a
-          remount replays the one story from its first frame, which is what
-          makes the hover read as "this one" rather than as a transition. The
-          frame, its lamp and the slow orbit are outside the key and do not
-          restart, so the scene never jumps. */}
-      <div className="dp-mv-org" key={`${seat.x}-${seat.y}`}>
-        {/* Top seat down to the upper bus, the bus, and down to each of three. */}
-        <V x={50} y={ROW.top} h={BUS.upper - ROW.top} d={CHARGE.stemTop} />
-        <H x={MID_X[0]} y={BUS.upper} w={MID_X[2] - MID_X[0]} d={CHARGE.busUpper} />
-        {MID_X.map((x) => (
-          <V key={`a${x}`} x={x} y={BUS.upper} h={ROW.mid - BUS.upper} d={CHARGE.stemMid} />
-        ))}
-
-        {/* The middle tier down to the lower bus, and out to five. */}
-        {MID_X.map((x) => (
-          <V key={`b${x}`} x={x} y={ROW.mid} h={BUS.lower - ROW.mid} d={CHARGE.stemLower} />
-        ))}
-        <H x={BASE_X[0]} y={BUS.lower} w={BASE_X[4] - BASE_X[0]} d={CHARGE.busLower} />
-        {BASE_X.map((x) => (
-          <V key={`c${x}`} x={x} y={BUS.lower} h={ROW.base - BUS.lower} d={CHARGE.stemBase} />
-        ))}
-
-        {MID_X.map((x, i) => (
-          <span
-            key={`m${x}`}
-            className="dp-mv-node"
-            style={{ left: `${x}%`, top: `${ROW.mid}%`, ["--d" as string]: `${CHARGE.nodeMid + i * 0.08}s` }}
-          />
-        ))}
-        {BASE_X.map((x, i) => (
-          <span
-            key={`n${x}`}
-            className="dp-mv-node"
-            style={{ left: `${x}%`, top: `${ROW.base}%`, ["--d" as string]: `${CHARGE.nodeBase + i * 0.07}s` }}
-          />
-        ))}
-
-        {/* The head of the chart, drawn solid whenever the seat being filled is
-            somewhere else. A structure with nothing at the top of it is not an
-            organisation, and the picture has to stay true while the subject
-            moves down it. */}
-        {!headFilled && (
-          <span
-            className="dp-mv-node is-set"
-            style={{ left: "50%", top: `${ROW.top}%`, ["--d" as string]: `${CHARGE.stemTop}s` }}
-          />
-        )}
-
-        {/* The gap. It stays drawn under the seat for the whole loop, so the
-            picture never loses the evidence of what was filled. */}
-        <span className="dp-mv-vacancy" style={{ left: `${seat.x}%`, top: `${seat.y}%` }} />
-        <span
-          className="dp-mv-arriving"
-          style={{ left: `${seat.x}%`, top: `${seat.y}%`, ["--d" as string]: `${CHARGE.seat}s` }}
-        />
+      {/* Keyed on the row, so changing rows swaps the scene AND restarts it
+          from its first frame. A cross-fade would show two figures at once; a
+          remount plays one story. The frame, its lamp and the slow orbit are
+          outside the key and do not restart, so the stage never jumps. */}
+      <div className="dp-mv-org" key={focus ?? "search"}>
+        <Scene />
       </div>
     </Frame>
   );

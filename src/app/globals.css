@@ -1717,6 +1717,241 @@ html[data-loaded] .dp-scale-in {
   100% { transform: translate3d(0, -86px, -200px) scale(0.6); opacity: 0; }
 }
 
+/* ---- Professional Search: a field narrowed to one --------------------------
+   Six under consideration in a holding row, ruled out one at a time on a
+   stagger until one is left, and that one drops into the empty chair below it.
+   The drop is vertical because the candidate sits directly above the seat it
+   takes: a shape sliding diagonally across a diagram reads as a shape moving,
+   where a shape falling into a gap reads as a placement. */
+.dp-ts-cand {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 2px;
+  background: rgba(170, 202, 255, 0.5);
+  box-shadow:
+    inset 0 0 0 1px rgba(214, 234, 255, 0.5),
+    0 1px 2px rgba(4, 8, 20, 0.5);
+  animation: dp-ts-out 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: calc(2.4s + var(--i) * 0.62s);
+}
+@keyframes dp-ts-out {
+  0%, 6% { opacity: 0.85; transform: none; }
+  /* Ruled out: it dims and drops back into the plane rather than vanishing, so
+     the row visibly empties instead of flickering. */
+  14%, 92% { opacity: 0.13; transform: translateY(4px) scale(0.8); }
+  100% { opacity: 0.85; transform: none; }
+}
+
+.dp-ts-pick {
+  position: absolute;
+  top: 22%;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  border-radius: 3px;
+  background: linear-gradient(142deg, rgba(226, 238, 255, 0.95), rgba(143, 180, 255, 0.6));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 0 1px rgba(226, 240, 255, 0.6),
+    0 0 18px 3px rgba(120, 180, 255, 0.55);
+  animation: dp-ts-drop 12s cubic-bezier(0.5, 0, 0.2, 1) infinite;
+}
+@keyframes dp-ts-drop {
+  /* Holds while the field is being narrowed, then takes the chair. */
+  0%, 52% { top: 22%; opacity: 1; }
+  66%, 92% { top: 70%; opacity: 1; }
+  100% { top: 22%; opacity: 1; }
+}
+
+/* ---- Interim Solutions: cover, then handover -------------------------------
+   The one service here whose subject is temporary, so it is the one scene where
+   something leaves. A seat arrives fast and holds the gap under a dashed arc,
+   then lifts out, and a solid seat comes in along the rule and stays. */
+.dp-cs-arc {
+  position: absolute;
+  left: 26%;
+  top: 26%;
+  width: 48%;
+  height: 26%;
+  border: 1px dashed rgba(143, 180, 255, 0.4);
+  border-bottom: none;
+  border-radius: 60% 60% 0 0 / 90% 90% 0 0;
+  animation: dp-cs-arc 12s ease-in-out infinite;
+}
+@keyframes dp-cs-arc {
+  0%, 12% { opacity: 0; }
+  22%, 58% { opacity: 1; }
+  70%, 100% { opacity: 0; }
+}
+
+.dp-cs-interim {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  border-radius: 3px;
+  background: linear-gradient(142deg, rgba(226, 238, 255, 0.9), rgba(143, 180, 255, 0.5));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 0 0 1px rgba(226, 240, 255, 0.5),
+    0 0 14px 2px rgba(120, 180, 255, 0.45);
+  animation: dp-cs-interim 12s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+@keyframes dp-cs-interim {
+  /* In fast, because that is the product: days, not a considered process. */
+  0% { transform: translate3d(0, -70px, -120px) scale(0.6); opacity: 0; }
+  14% { transform: none; opacity: 1; }
+  52% { transform: none; opacity: 1; }
+  /* Out again, once the permanent seat is on its way. */
+  64%, 100% { transform: translate3d(0, -70px, -120px) scale(0.6); opacity: 0; }
+}
+
+.dp-cs-perm {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  border-radius: 3px;
+  background: rgba(190, 218, 255, 0.85);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 0 1px rgba(226, 240, 255, 0.55),
+    0 0 12px 1px rgba(120, 180, 255, 0.35);
+  animation: dp-cs-perm 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+@keyframes dp-cs-perm {
+  /* Travels in along the rule, which is what makes it read as a hire coming
+     through the organisation rather than dropping out of the sky like the
+     cover did. */
+  0%, 58% { left: 14%; opacity: 0; }
+  66% { left: 24%; opacity: 1; }
+  80%, 94% { left: 50%; opacity: 1; }
+  100% { left: 14%; opacity: 0; }
+}
+
+/* ---- Fractional: one person, several places --------------------------------
+   Three separate structures and one seat that is in all of them. Each lights
+   only while the seat is there. It is one element travelling continuously
+   rather than three blinking in turn, because the proposition is a person
+   moving between commitments, not three part-time strangers. */
+.dp-ss-cell {
+  position: absolute;
+  top: 42%;
+  width: 22%;
+  margin-left: -11%;
+  height: 26%;
+}
+.dp-ss-rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: rgba(143, 180, 255, 0.16);
+  animation: dp-ss-lit 12s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 4s);
+}
+.dp-ss-seat {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 9px;
+  height: 9px;
+  margin: 0 0 -4.5px -4.5px;
+  border-radius: 2px;
+  /* Stays a hollow slot. It used to light along with its rule, which put a lit
+     square directly under the travelling seat and made the two read as one
+     muddy shape: the traveller IS the fill, so the slot's job is to be the
+     empty chair it sits in. The rule under it still lights, which is what says
+     the commitment is live. */
+  background: rgba(143, 180, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(196, 218, 255, 0.22);
+}
+@keyframes dp-ss-lit {
+  0% { background: rgba(143, 180, 255, 0.16); box-shadow: none; }
+  6%, 27% {
+    background: rgba(206, 230, 255, 0.9);
+    box-shadow: 0 0 7px rgba(120, 180, 255, 0.7);
+  }
+  34%, 100% { background: rgba(143, 180, 255, 0.16); box-shadow: none; }
+}
+.dp-ss-who {
+  position: absolute;
+  /* On the rule, not floating above it. The cells' own slots sit at 68% (42
+     top plus 26 height), and a traveller hovering somewhere above them reads as
+     a second, separate marker rather than as the person who is IN each one. */
+  top: 68%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 3px;
+  background: linear-gradient(142deg, rgba(226, 238, 255, 0.95), rgba(143, 180, 255, 0.6));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 0 1px rgba(226, 240, 255, 0.55),
+    0 0 16px 3px rgba(120, 180, 255, 0.5);
+  animation: dp-ss-move 12s cubic-bezier(0.5, 0, 0.3, 1) infinite;
+}
+@keyframes dp-ss-move {
+  /* Over each cell in turn, with a real dwell in each: a seat that never stops
+     moving is a shuttle, and a fractional hire is not a shuttle. */
+  0%, 22% { left: 18%; }
+  33%, 55% { left: 50%; }
+  66%, 88% { left: 82%; }
+  100% { left: 18%; }
+}
+
+/* ---- Project Support: a scope opens and closes -----------------------------
+   The subject is the SCOPE, so the boundary is the thing that acts. It draws
+   itself around nothing, the team arrives inside it together rather than one at
+   a time, they work, and then it releases them. */
+.dp-sc-bound {
+  position: absolute;
+  left: 18%;
+  top: 28%;
+  width: 64%;
+  height: 52%;
+  border: 1px solid rgba(143, 180, 255, 0.4);
+  border-radius: 6px;
+  animation: dp-sc-bound 12s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+@keyframes dp-sc-bound {
+  0% { opacity: 0; transform: scale(0.86); }
+  14%, 78% { opacity: 1; transform: none; }
+  /* Releases by opening outward, not by fading: a scope that ends has let go of
+     something. */
+  100% { opacity: 0; transform: scale(1.1); }
+}
+
+.dp-sco-seat {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  border-radius: 3px;
+  background: linear-gradient(142deg, rgba(214, 234, 255, 0.9), rgba(143, 180, 255, 0.55));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 0 0 1px rgba(226, 240, 255, 0.5),
+    0 0 12px 2px rgba(120, 180, 255, 0.4);
+  animation: dp-sco-seat 12s cubic-bezier(0.34, 1.3, 0.5, 1) infinite;
+  /* A tenth of a second apart, not a second: they are a team, and a team
+     arrives together. The stagger is only enough to stop it reading as one
+     four-part shape appearing. */
+  animation-delay: calc(2.2s + var(--i) * 0.1s);
+}
+@keyframes dp-sco-seat {
+  0% { opacity: 0; transform: scale(0.4); }
+  6%, 62% { opacity: 1; transform: none; }
+  /* The working beat, all four together, because that is what a scoped team
+     looks like from outside. */
+  68% { opacity: 1; transform: scale(1.16); }
+  74%, 80% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: scale(0.4); }
+}
+
 /* ---- markets: the short list rises ---------------------------------------
    The field is a real plane laid back in space, so the resolving cells lift OFF
    it toward the viewer rather than merely getting bigger. */
@@ -1950,6 +2185,15 @@ html[data-loaded] .dp-scale-in {
   .dp-mv-stem::after,
   .dp-mv-node,
   .dp-mv-arriving,
+  .dp-ts-cand,
+  .dp-ts-pick,
+  .dp-cs-arc,
+  .dp-cs-interim,
+  .dp-cs-perm,
+  .dp-ss-rule,
+  .dp-ss-who,
+  .dp-sc-bound,
+  .dp-sco-seat,
   .dp-mv-plane,
   .dp-mv-cell,
   .dp-mv-pick,
