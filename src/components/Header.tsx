@@ -67,17 +67,15 @@ function MenuLink({
   item: NavItem;
   /** Reports the row the pointer or keyboard is on, so the panel's picture can
       answer it. See MenuVisual's `focus`. */
-  onFocusItem?: (key: string | undefined) => void;
+  onFocusItem?: (item: NavItem | undefined) => void;
 }) {
   const Figure = (item.icon && MARKS[item.icon]) || PlainMark;
-  /* The href, not the icon. Icons repeat across the navigation (two entries
-     share `trending`) and several rows have none at all, so an icon key cannot
-     address a row uniquely and the picture would answer the wrong one. */
-  const key = item.href;
+  /* The item, not a key. The plate sets the row's own note and its own mark,
+     so it needs the row rather than a string that has to be looked back up. */
   return (
     <Link
-      onMouseEnter={() => onFocusItem?.(key)}
-      onFocus={() => onFocusItem?.(key)}
+      onMouseEnter={() => onFocusItem?.(item)}
+      onFocus={() => onFocusItem?.(item)}
       href={item.href}
       /* The lead column is budgeted, not guessed. The row used to spend
          pl-7 plus pr-3, which is 40px of chrome; the figure column has to come
@@ -142,13 +140,13 @@ export default function Header() {
    */
   const [originPct, setOriginPct] = React.useState(50);
   /**
-   * The row the pointer is on, as the `icon` key its mark is drawn from.
+   * The row the pointer is on.
    *
-   * The panel's picture reads this. Cleared whenever the panel changes, so a
-   * new menu opens on its own default rather than inheriting a seat position
-   * from the row you happened to leave the last one on.
+   * The panel's plate reads this for its claim and its device. Cleared whenever
+   * the panel changes, so a new menu opens on its own section line rather than
+   * inheriting the row you happened to leave the last one on.
    */
-  const [focusItem, setFocusItem] = React.useState<string | undefined>(undefined);
+  const [focusItem, setFocusItem] = React.useState<NavItem | undefined>(undefined);
 
   const openFrom = React.useCallback((name: NavName, el: HTMLElement | null) => {
     setFocusItem(undefined);
@@ -484,7 +482,7 @@ export default function Header() {
                         </div>
                       ))}
                     </div>
-                    <MenuVisual kind="services" focus={focusItem} />
+                    <MenuVisual kind="services" item={focusItem} />
                   </div>
                 )}
 
@@ -506,7 +504,7 @@ export default function Header() {
                         ))}
                       </div>
                     </div>
-                    <MenuVisual kind="markets" focus={focusItem} />
+                    <MenuVisual kind="markets" item={focusItem} />
                   </div>
                 )}
 
@@ -530,7 +528,7 @@ export default function Header() {
                         </div>
                       </div>
                     </div>
-                    <MenuVisual kind="resources" focus={focusItem} />
+                    <MenuVisual kind="resources" item={focusItem} />
                   </div>
                 )}
 
@@ -613,7 +611,7 @@ export default function Header() {
                           </Link>
                         </div>
                       </div>
-                      <MenuVisual kind="about" focus={focusItem} />
+                      <MenuVisual kind="about" item={focusItem} />
                     </div>
                     <div className="v-rule mt-5" />
                     <a
