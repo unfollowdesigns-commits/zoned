@@ -156,3 +156,112 @@ export interface UserProfile {
   /** Hours of sleep this person needs. Defaults to 8. */
   sleepNeedHours?: number;
 }
+
+// ---------------------------------------------------------------------------
+// Stress channels
+//
+// Heart rate alone cannot separate "excited" from "stressed". These are the
+// signals that can: electrodermal activity is a direct readout of sympathetic
+// nervous system drive, skin temperature tracks peripheral vasoconstriction,
+// and cortisol is the hormone itself.
+// ---------------------------------------------------------------------------
+
+/**
+ * Electrodermal activity — skin conductance in microsiemens.
+ *
+ * Sweat glands are driven exclusively by the sympathetic branch of the nervous
+ * system, with no parasympathetic input at all. That makes EDA the cleanest
+ * non-invasive window onto arousal there is: when conductance rises, something
+ * has switched you on.
+ *
+ * Requires two skin-contact electrodes and an impedance front end — see
+ * docs/HARDWARE.md. A chest strap cannot produce this.
+ */
+export interface EdaSample {
+  t: EpochMs;
+  /** Skin conductance, microsiemens. Typical resting range 1-20 µS. */
+  microSiemens: number;
+}
+
+/** Skin temperature, which falls as stress constricts peripheral blood flow. */
+export interface TemperatureSample {
+  t: EpochMs;
+  celsius: number;
+}
+
+/**
+ * A cortisol measurement.
+ *
+ * As of now this comes from a lab, not from your wrist: a saliva kit, a blood
+ * draw, or a hair segment. `sweat` exists so that a future biosensor strip
+ * needs no schema change — the electrochemical front end in the recommended
+ * build can already drive one.
+ */
+export interface CortisolReading {
+  t: EpochMs;
+  /** Concentration in nmol/L. Saliva and serum differ by ~20x — see cortisol.ts. */
+  nmolPerL: number;
+  source: 'saliva' | 'serum' | 'hair' | 'sweat';
+  /** When you woke that day. Cortisol means nothing without it. */
+  wakeTime?: EpochMs;
+  note?: string;
+}
+
+/** Electrodermal activity summarised over a window. */
+export interface EdaMetrics {
+  /** Tonic skin conductance level, µS — the slow baseline. */
+  meanScl: number;
+  /**
+   * Skin conductance responses per minute — discrete bursts of sympathetic
+   * activity. The headline arousal number; more responses means more drive.
+   */
+  scrPerMin: number;
+  /** Mean height of those bursts, µS. */
+  meanScrAmplitude: number;
+  scrCount: number;
+  /** Share of the window discarded as electrode noise or lost contact, 0..1. */
+  artifactRate: number;
+  durationMin: number;
+}
+
+export interface StressScore {
+  /** 0..100, higher means more sympathetic load. The inverse of recovery. */
+  score: number;
+  band: 'calm' | 'moderate' | 'elevated' | 'high';
+  /** Deviation from your own normal, in standard deviations, per channel. */
+  contributions: {
+    eda?: number;
+    hrv?: number;
+    heartRate?: number;
+    skinTemperature?: number;
+  };
+  /** Which channels were actually available. */
+  channels: string[];
+  /** False while baselines are still filling. */
+  confident: boolean;
+}
+
+/** A day's worth of cortisol samples, interpreted against the diurnal rhythm. */
+export interface CortisolProfile {
+  day: string;
+  /**
+   * Cortisol awakening response: the rise from waking to roughly 30 minutes
+   * later, as a fraction of the waking value. The most validated single marker
+   * of HPA-axis function. Null unless both samples exist.
+   */
+  car: number | null;
+  /**
+   * Diurnal slope: regression of ln(cortisol) against hours since waking.
+   * Healthy is steeply negative. A flattened slope is the signature associated
+   * with chronic stress. Null with fewer than three samples.
+   */
+  diurnalSlope: number | null;
+  /** Total exposure across the day, area under the curve. */
+  auc: number | null;
+  /**
+   * How far each sample sat from the population reference curve, as ln(ratio).
+   * Positive means higher than typical for that time of day.
+   */
+  deviations: Array<{ t: EpochMs; hoursSinceWake: number; lnRatio: number }>;
+  readings: CortisolReading[];
+}

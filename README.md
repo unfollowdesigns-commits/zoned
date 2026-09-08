@@ -5,13 +5,17 @@ a dashboard that scores it. Recovery, strain and sleep, computed from raw
 beat-to-beat intervals — and every formula is in this repository, readable and
 changeable.
 
-> **Is this possible if you have never built anything like it?**
-> Yes. The physics is a chest strap that already speaks a public Bluetooth
-> standard, and the maths is well documented. The parts that are genuinely hard
-> — the beat-timing analysis, the personal baselines, the sleep scoring — are
-> already written and tested here. What is left for you is buying a strap and
-> wearing it. Building your own *bracelet* is a much bigger project; it is
-> stage 4, not stage 1, and `docs/HARDWARE.md` is honest about what it costs.
+> **On cortisol, before anything else.** There is no cortisol bracelet on sale,
+> from anyone, at any price. Continuous cortisol sensing works in labs and is
+> close to market, but any product sold to you today as a "cortisol watch" is an
+> HRV algorithm wearing a hormone's name. This project does the two things that
+> are real instead: it measures **electrodermal activity**, the channel that
+> actually separates stress from exertion, and its recommended front end is an
+> electrochemical AFE, so a cortisol strip drops in when strips ship rather than
+> needing a new board. Real hormone numbers come from saliva kits, and the app
+> already computes the two measures that carry the signal — the awakening
+> response and the diurnal slope. Full detail in
+> [docs/HARDWARE.md](docs/HARDWARE.md).
 
 ## Try it in two minutes, with no hardware
 
@@ -33,6 +37,8 @@ mockup.
 | **Resting heart rate** | The lowest *sustained* rate overnight, not the single slowest beat |
 | **Respiratory rate** | Extracted from the way your heart rate rises and falls as you breathe |
 | **Sleep** | Cole-Kripke wake detection from motion; stages estimated from heart rate and stillness |
+| **Stress, 0–100** | Skin conductance responses, HRV, heart rate and skin temperature fused against your own baseline. The EDA channel is what makes this stress rather than effort |
+| **Cortisol** | Awakening response and diurnal slope from saliva samples, read against the reference curve for hours since waking |
 | **Recovery, 0–100** | HRV, resting heart rate, breathing rate and sleep, each weighed against *your own* rolling baseline |
 | **Strain, 0–21** | Banister TRIMP over heart rate reserve, on a logarithmic scale |
 
@@ -43,12 +49,22 @@ is about exactly that.
 
 ## What you need to buy
 
-One thing, to start: a **Polar H10** chest strap, about £70–90. It reports the
-beat-to-beat timing that HRV depends on, over a public Bluetooth standard.
+[docs/HARDWARE.md](docs/HARDWARE.md) is the complete bill of materials — every
+part, with prices, sources and the reason each was chosen. In summary:
 
-Not a wrist band, not yet. `docs/HARDWARE.md` explains why the strap comes
-first, what building your own band actually involves, and what is not possible
-at all.
+**The bracelet, built** — roughly £60–90 in parts plus a small PCB run. The
+sensors are an nRF5340 for the radio and the maths, a MAXM86161 optical module
+for heart rate and HRV, an **AD5941 for skin conductance and, later, cortisol**,
+a TMP117 for skin temperature and an LSM6DSV16X for motion. Nothing on sale has
+all four channels, which is the actual reason to build rather than buy.
+
+**Cortisol, today** — a four-sample salivary panel, £50–90, posted to a lab. The
+app expects exactly that protocol.
+
+**To develop against first** — a **Polar H10** chest strap, £70–90. It gives
+better beat timing than any optical sensor and lets the whole software chain be
+finished and validated while the board is in fabrication. It is also what you
+check your finished band against.
 
 ## Layout
 
@@ -78,9 +94,13 @@ later without touching a line of physiology code.
 - **Sleep staging without EEG is an estimate.** Wake-versus-sleep from motion is
   well validated; splitting sleep into light, deep and REM from heart rate is
   not. Read the shape of your night, not the individual minutes.
-- **Recovery needs about a week before it means anything.** It is a comparison
-  against your own normal. The app says so rather than showing a confident
-  number built on two nights.
+- **Recovery and stress need about a week before they mean anything.** Both are
+  comparisons against your own normal. The app says so rather than showing a
+  confident number built on two nights.
+- **Without EDA electrodes, the stress score is heart rate wearing a different
+  name.** The app labels it as such rather than pretending otherwise.
+- **Cortisol is not measured by any wearable**, this one included. Saliva kits
+  until biosensor strips exist.
 - **This is not a medical device** and nothing here diagnoses anything.
 
 ## Licence

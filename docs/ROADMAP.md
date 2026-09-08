@@ -14,6 +14,8 @@ The foundation, in this repository already:
 - [x] Local-first storage that survives a dead network
 - [x] Web dashboard with demo data
 - [x] Database schema with row level security
+- [x] Electrodermal activity analysis and a fused stress score
+- [x] Cortisol interpretation: awakening response, diurnal slope, reference curve
 
 ## Stage 1 — get real data (week 1)
 
@@ -65,16 +67,29 @@ Also worth tuning:
 - [ ] Push notification with your recovery score in the morning
 - [ ] Strain target: "to hit a strain of 14 today, spend 40 minutes in zone 3"
 
-## Stage 4 — your own hardware (months)
+## Stage 4 — the bracelet
 
-Only worth starting once stages 1–3 are boring. Detail in `docs/HARDWARE.md`.
+The complete bill of materials is in `docs/HARDWARE.md`. The software is already
+written for every channel on it, so the board is the only thing missing.
 
-- [ ] Buy a PineTime or Bangle.js 2 and flash firmware that advertises the
-      standard Heart Rate Service — the app connects with zero changes
-- [ ] Get the accelerometer streaming so sleep staging stops running blind
-- [ ] Compare your band against the H10 on the same night, and be honest about
-      the difference
-- [ ] Only then: custom nRF52840 board, battery, case
+- [ ] Order the parts and an nRF5340 DK
+- [ ] Firmware on the DK advertising Heart Rate Service `0x180D` — the app
+      connects with zero changes, which proves the chain before you solder
+- [ ] Each sensor breadboarded separately: optical, then EDA, then IMU and temp
+- [ ] PCB designed, ordered assembled, case printed and re-printed
+- [ ] Validate against the H10 over a night; RMSSD within ~10% means the optical
+      chain works
+- [ ] Calibrate `countScale` for your accelerometer
+
+## Stage 4b — cortisol, when it becomes possible
+
+- [ ] Saliva panels monthly, entered against the day you wore the band
+- [ ] Correlate your continuous stress score against the measured awakening
+      response and diurnal slope — this is what tells you whether the proxy is
+      tracking the hormone for *you*
+- [ ] Watch for commercially available cortisol biosensor strips. The AD5941 in
+      the build already does the electrochemistry; adding them is electrodes and
+      firmware, not a new board
 
 ## Stage 5 — things a commercial product cannot do for you
 

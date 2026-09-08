@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { dayKey, summarizeDays } from '../daily';
-import { syntheticHistory, syntheticNight, syntheticWorkout } from '../synthetic';
+import {
+  syntheticCortisol,
+  syntheticHistory,
+  syntheticNight,
+  syntheticWorkout,
+  withStressChannels,
+} from '../synthetic';
 import type { UserProfile } from '../types';
 
 const profile: UserProfile = { age: 32, restingHr: 54, sex: 'male', sleepNeedHours: 8 };
@@ -103,5 +109,85 @@ describe('summarizeDays', () => {
 
   it('returns nothing for no sessions', () => {
     expect(summarizeDays([], profile)).toEqual([]);
+  });
+});
+
+describe('summarizeDays with stress channels', () => {
+  const endingAt = Date.parse('2026-03-01T12:00:00Z');
+  const base = syntheticHistory(20, { endingAt });
+  const withEda = withStressChannels(base);
+  const cortisol = syntheticCortisol(20, { endingAt });
+
+  it('scores stress once EDA is present', () => {
+    const days = summarizeDays(withEda, profile);
+    const scored = days.filter((d) => d.stress !== null);
+    expect(scored.length).toBeGreaterThan(15);
+    for (const day of scored) {
+      expect(day.stress!.score).toBeGreaterThanOrEqual(0);
+      expect(day.stress!.score).toBeLessThanOrEqual(100);
+    }
+  });
+
+  it('uses the EDA channel when the hardware provides it', () => {
+    const days = summarizeDays(withEda, profile);
+    const withChannel = days.filter((d) => d.stress?.channels.includes('eda'));
+    expect(withChannel.length).toBeGreaterThan(15);
+    expect(withChannel[0]!.eda).not.toBeNull();
+    expect(withChannel[0]!.eda!.scrPerMin).toBeGreaterThan(0);
+  });
+
+  it('falls back to heart rate channels without EDA hardware', () => {
+    const days = summarizeDays(base, profile);
+    const scored = days.filter((d) => d.stress !== null);
+    for (const day of scored) {
+      expect(day.stress!.channels).not.toContain('eda');
+      expect(day.eda).toBeNull();
+    }
+  });
+
+  it('separates stressful days from calm ones', () => {
+    const days = summarizeDays(withEda, profile).filter((d) => d.eda !== null);
+    const rates = days.map((d) => d.eda!.scrPerMin);
+    expect(Math.max(...rates)).toBeGreaterThan(Math.min(...rates) * 2);
+
+    const busiest = days.reduce((a, b) => (a.eda!.scrPerMin > b.eda!.scrPerMin ? a : b));
+    const calmest = days.reduce((a, b) => (a.eda!.scrPerMin < b.eda!.scrPerMin ? a : b));
+    expect(busiest.stress!.score).toBeGreaterThan(calmest.stress!.score);
+  });
+
+  it('records skin temperature alongside', () => {
+    const days = summarizeDays(withEda, profile).filter((d) => d.skinTemperature !== null);
+    expect(days.length).toBeGreaterThan(15);
+    for (const day of days) {
+      expect(day.skinTemperature!).toBeGreaterThan(28);
+      expect(day.skinTemperature!).toBeLessThan(38);
+    }
+  });
+
+  it('attaches cortisol to the days it was collected on', () => {
+    const days = summarizeDays(withEda, profile, cortisol);
+    const withCortisol = days.filter((d) => d.cortisol !== null);
+    expect(withCortisol.length).toBeGreaterThan(2);
+    for (const day of withCortisol) {
+      expect(day.cortisol!.readings.length).toBe(4);
+      expect(day.cortisol!.car).not.toBeNull();
+      expect(day.cortisol!.diurnalSlope).not.toBeNull();
+    }
+  });
+
+  it('leaves cortisol null on days with no lab samples', () => {
+    const days = summarizeDays(withEda, profile, cortisol);
+    expect(days.some((d) => d.cortisol === null)).toBe(true);
+  });
+
+  it('keeps cortisol days even when no sensor recorded that day', () => {
+    const lonelyDay = Date.parse('2026-07-04T07:00:00Z');
+    const days = summarizeDays([], profile, [
+      { t: lonelyDay, nmolPerL: 12, source: 'saliva', wakeTime: lonelyDay },
+      { t: lonelyDay + 1_800_000, nmolPerL: 20, source: 'saliva', wakeTime: lonelyDay },
+    ]);
+    expect(days).toHaveLength(1);
+    expect(days[0]!.cortisol!.car).toBeCloseTo(20 / 12 - 1, 5);
+    expect(days[0]!.recovery).toBeNull();
   });
 });

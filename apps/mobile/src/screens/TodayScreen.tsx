@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, Text, View, StyleSheet, RefreshControl } from 'react-native';
-import { describeRecovery, type UserProfile } from '@zoned/core';
+import { describeRecovery, describeStress, type UserProfile } from '@zoned/core';
 import { Card, Stat } from '../components/Card';
 import { Ring } from '../components/Ring';
 import { recoveryColor, spacing, theme } from '../lib/theme';
@@ -106,6 +106,31 @@ export function TodayScreen() {
         </View>
       </Card>
 
+      <Card title="Stress">
+        <View style={styles.row}>
+          <Stat
+            label="Stress"
+            value={today?.stress ? String(today.stress.score) : '—'}
+            unit="/ 100"
+          />
+          <Stat
+            label="Responses"
+            value={today?.eda ? today.eda.scrPerMin.toFixed(1) : '—'}
+            unit="/ min"
+          />
+          <Stat
+            label="Skin temp"
+            value={today?.skinTemperature ? today.skinTemperature.toFixed(1) : '—'}
+            unit="°C"
+          />
+        </View>
+        <Text style={styles.help}>
+          {today?.stress
+            ? describeStress(today.stress)
+            : 'No stress channel yet. Skin conductance needs a band with EDA electrodes — see docs/HARDWARE.md.'}
+        </Text>
+      </Card>
+
       <Card title="Strain today">
         <View style={styles.row}>
           <Stat
@@ -186,7 +211,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing(1),
   },
   row: { flexDirection: 'row', gap: spacing(1.5) },
-  help: { color: theme.textMuted, fontSize: 14, lineHeight: 20 },
+  help: { color: theme.textMuted, fontSize: 13, lineHeight: 19, marginTop: spacing(1.5) },
   history: { flexDirection: 'row', alignItems: 'flex-end', gap: 4, height: 120 },
   historyCol: { flex: 1, alignItems: 'center' },
   barTrack: {

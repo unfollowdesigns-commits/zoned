@@ -24,6 +24,7 @@
   /* Status palette - fixed, never themed. Recovery bands live here. */
   --status-good:     #0ca30c;
   --status-warning:  #fab219;
+  --status-serious:  #ec835a;
   --status-critical: #d03b3b;
 }
 

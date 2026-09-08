@@ -1,17 +1,23 @@
 'use client';
 
-import { describeRecovery, type DayMetrics } from '@zoned/core';
+import { describeRecovery, describeStress, type DayMetrics } from '@zoned/core';
 import { RecoveryTrend, bandColor } from './RecoveryTrend';
 import { MetricTrend } from './MetricTrend';
 import { SleepStages } from './SleepStages';
+import { StressTrend, stressColor } from './StressTrend';
+import { CortisolPanel } from './CortisolPanel';
 
 export function Dashboard({ days, demo }: { days: DayMetrics[]; demo: boolean }) {
   const today = days[days.length - 1];
   const recovery = today?.recovery ?? null;
 
+  const stress = today?.stress ?? null;
+
   const recent = days.slice(-28);
   const hrvPoints = recent.map((d) => ({ day: d.day, value: d.rmssd }));
   const rhrPoints = recent.map((d) => ({ day: d.day, value: d.restingHr }));
+  const hasStress = recent.some((d) => d.stress !== null);
+  const hasEda = recent.some((d) => d.stress?.channels.includes('eda'));
 
   return (
     <div className="shell">
@@ -59,6 +65,12 @@ export function Dashboard({ days, demo }: { days: DayMetrics[]; demo: boolean })
               ? `${Math.round(today.strain.durationMin)} min above resting`
               : 'No activity recorded.'
           }
+        />
+        <Tile
+          label="Stress"
+          value={stress ? String(stress.score) : '—'}
+          color={stress ? stressColor(stress.band) : undefined}
+          note={stress ? describeStress(stress) : 'No stress channel available.'}
         />
         <Tile
           label="HRV"
@@ -120,8 +132,26 @@ export function Dashboard({ days, demo }: { days: DayMetrics[]; demo: boolean })
         </section>
       </div>
 
+      {hasStress ? (
+        <section className="card">
+          <header>
+            <h2>Stress</h2>
+          </header>
+          <p className="caption">
+            {hasEda
+              ? 'Sympathetic activation, led by skin conductance responses — the channel that separates stress from mere effort.'
+              : 'Estimated from heart rate alone. Without skin conductance electrodes this tracks cardiac load, not stress. See docs/HARDWARE.md.'}
+          </p>
+          <StressTrend days={recent} />
+        </section>
+      ) : null}
+
       <section className="card">
         <SleepStages days={recent} />
+      </section>
+
+      <section className="card">
+        <CortisolPanel days={days} />
       </section>
 
       <footer>

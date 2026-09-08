@@ -6,8 +6,15 @@
  * with a known answer, which real data can never provide.
  */
 
+import { dayKey } from './time';
 import type { RecordedSession } from './daily';
-import type { HeartRateSample, MotionSample } from './types';
+import type {
+  CortisolReading,
+  EdaSample,
+  HeartRateSample,
+  MotionSample,
+  TemperatureSample,
+} from './types';
 
 /** Small deterministic PRNG so runs are reproducible. */
 export function seededRandom(seed: number): () => number {
@@ -211,4 +218,174 @@ export function syntheticHistory(
   }
 
   return sessions.sort((a, b) => a.startedAt - b.startedAt);
+}
+
+/**
+ * A block of waking-day recording from a band with EDA electrodes: skin
+ * conductance with realistic sweat-gland response shapes, skin temperature, and
+ * heart rate.
+ *
+ * Sampled at 2 Hz rather than the 4 Hz a real device would use, because the
+ * demo generates six weeks of these and the shape of the responses — not the
+ * sample rate — is what the analysis actually depends on.
+ */
+export function syntheticStressBlock(
+  startedAt: number,
+  minutes: number,
+  options: {
+    /** Skin conductance responses per minute. ~2 is calm, ~8 is stressed. */
+    scrPerMin?: number;
+    baselineScl?: number;
+    skinTemp?: number;
+    restingHr?: number;
+    seed?: number;
+  } = {},
+): { eda: EdaSample[]; temperature: TemperatureSample[]; hr: HeartRateSample[] } {
+  const scrPerMin = options.scrPerMin ?? 2;
+  const baselineScl = options.baselineScl ?? 5;
+  const skinTemp = options.skinTemp ?? 33.2;
+  const restingHr = options.restingHr ?? 60;
+  const random = seededRandom(options.seed ?? 31);
+
+  const fs = 2;
+  const totalSamples = Math.round(minutes * 60 * fs);
+
+  // Place response onsets randomly through the block.
+  const onsets: number[] = [];
+  const expected = Math.round(scrPerMin * minutes);
+  for (let i = 0; i < expected; i++) onsets.push(random() * minutes * 60);
+  onsets.sort((a, b) => a - b);
+
+  const eda: EdaSample[] = [];
+  const temperature: TemperatureSample[] = [];
+  const hr: HeartRateSample[] = [];
+
+  for (let i = 0; i < totalSamples; i++) {
+    const seconds = i / fs;
+    const t = startedAt + i * (1000 / fs);
+
+    // Slow tonic drift, plus each response as a fast rise and slow recovery.
+    let conductance =
+      baselineScl + Math.sin(seconds / 400) * 0.4 + (random() - 0.5) * 0.02;
+    for (const onset of onsets) {
+      const dt = seconds - onset;
+      if (dt < 0 || dt > 14) continue;
+      const amplitude = 0.25 + random() * 0.5;
+      conductance += amplitude * (1 - Math.exp(-dt / 0.9)) * Math.exp(-dt / 4) * 1.9;
+    }
+    eda.push({ t, microSiemens: conductance });
+
+    if (i % (fs * 30) === 0) {
+      // Stress constricts peripheral vessels, so busier days run cooler.
+      const cooling = (scrPerMin - 2) * 0.06;
+      temperature.push({
+        t,
+        celsius: skinTemp - cooling + Math.sin(seconds / 900) * 0.15 + (random() - 0.5) * 0.05,
+      });
+    }
+
+    if (i % fs === 0) {
+      const arousal = (scrPerMin - 2) * 1.5;
+      const bpm = Math.round(restingHr + 8 + arousal + (random() - 0.5) * 6);
+      hr.push({ t, bpm, rrIntervals: [60000 / bpm], contact: true });
+    }
+  }
+
+  return { eda, temperature, hr };
+}
+
+/**
+ * Attach waking-day stress recording to a history, as a band with EDA
+ * electrodes would produce. Sessions are added in place of nothing — the
+ * history's sleep and workouts are left untouched.
+ */
+export function withStressChannels(
+  sessions: readonly RecordedSession[],
+  options: { seed?: number } = {},
+): RecordedSession[] {
+  const random = seededRandom(options.seed ?? 77);
+  const out = [...sessions];
+
+  const days = new Set(sessions.map((s) => dayKey(s.startedAt)));
+  let index = 0;
+
+  for (const day of [...days].sort()) {
+    const anchor = sessions.find((s) => dayKey(s.startedAt) === day);
+    if (!anchor) continue;
+
+    const dayStart = new Date(anchor.startedAt);
+    dayStart.setHours(14, 0, 0, 0);
+
+    // A handful of genuinely stressful days, the rest ordinary.
+    const stressed = random() < 0.25;
+    const block = syntheticStressBlock(dayStart.getTime(), 30, {
+      scrPerMin: stressed ? 6 + random() * 3 : 1.5 + random() * 1.5,
+      baselineScl: 4.5 + random(),
+      restingHr: 56 + Math.round(random() * 4),
+      seed: 3000 + index,
+    });
+
+    out.push({
+      id: `daily-${day}`,
+      kind: 'daily',
+      startedAt: dayStart.getTime(),
+      endedAt: dayStart.getTime() + 30 * 60_000,
+      samples: block.hr,
+      motion: [],
+      eda: block.eda,
+      temperature: block.temperature,
+    });
+    index++;
+  }
+
+  return out.sort((a, b) => a.startedAt - b.startedAt);
+}
+
+/**
+ * A month of saliva cortisol, four samples a day on the standard protocol.
+ * Stressful days get a flatter curve, which is the pattern the analysis looks
+ * for.
+ */
+export function syntheticCortisol(
+  days: number,
+  options: { endingAt?: number; seed?: number } = {},
+): CortisolReading[] {
+  const endingAt = options.endingAt ?? Date.now();
+  const random = seededRandom(options.seed ?? 55);
+  const readings: CortisolReading[] = [];
+
+  for (let d = days - 1; d >= 0; d--) {
+    // Saliva kits are posted off, so only some days have samples.
+    if (random() > 0.35) continue;
+
+    const wake = new Date(endingAt - d * 86_400_000);
+    wake.setHours(7, 0, 0, 0);
+    const wakeTime = wake.getTime();
+    const flattened = random() < 0.3;
+
+    const schedule: Array<[hours: number, nmolPerL: number]> = flattened
+      ? [
+          [0, 9 + random()],
+          [0.5, 10 + random()],
+          [6, 7 + random()],
+          [14, 5 + random()],
+        ]
+      : [
+          [0, 11 + random() * 2],
+          [0.5, 19 + random() * 3],
+          [6, 6 + random()],
+          [14, 2.2 + random() * 0.6],
+        ];
+
+    for (const [hours, nmolPerL] of schedule) {
+      readings.push({
+        t: wakeTime + hours * 3_600_000,
+        nmolPerL,
+        source: 'saliva',
+        wakeTime,
+      });
+    }
+  }
+
+  return readings.sort((a, b) => a.t - b.t);
 }
