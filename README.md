@@ -53,12 +53,16 @@ is about exactly that.
 [docs/HARDWARE.md](docs/HARDWARE.md) is the complete bill of materials — every
 part, with prices, sources and the reason each was chosen. In summary:
 
-**The bracelet, built** — roughly £65–95 in parts plus a small PCB run. A band,
-**not a watch: no screen, no glass, no buttons.** An nRF5340 for the radio and
-the maths, a MAXM86161 optical module for heart rate and HRV, an **AD5941 for
+**The bracelet, built** — roughly £70–100 in parts plus a small PCB run.
+**37 × 29 × 13 mm**, about 31 g, a band and **not a watch: no screen, no glass,
+no buttons.** An nRF5340 module for the radio and the maths, a MAXM86161 optical module for heart rate and HRV, an **AD5941 for
 skin conductance and, later, cortisol**, a TMP117 for skin temperature and an
 LSM6DSV16X for motion. Nothing on sale has all four channels, which is the
 actual reason to build rather than buy.
+
+`docs/HARDWARE.md` carries the fit budget layer by layer, because thickness is
+what kills wrist devices: the haptic motor has to sit *beside* the battery
+rather than above it, or the band is 16 mm thick instead of 13.
 
 Leaving the display out roughly halves the power budget — about four days on a
 300 mAh cell — lets the board be fully potted instead of gasketed, and makes two

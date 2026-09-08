@@ -75,14 +75,14 @@ Prices are indicative. Everything is orderable from Mouser, DigiKey or Farnell.
 
 | # | Part | Purpose | ~Unit |
 |---|---|---|---|
-| 1 | **Nordic nRF5340** (or `Seeed XIAO nRF52840` to start) | Dual-core BLE 5.4 MCU. Application core for algorithms, network core for the radio, so signal processing never stalls Bluetooth. | £9 / £14 |
+| 1 | **nRF5340 module** — Raytac MDBT53-1M | Dual-core BLE 5.4. Buy the **module**, not the bare QFN: it includes both crystals, the matching network and a certified antenna, so you are not designing and certifying your own RF. 10.5 × 15.5 × 2.0 mm, and the tallest part on the board. | £14 |
 | 2 | **Maxim MAXM86161** | Complete optical module: green/red/IR LEDs, photodiode and analog front end in one 2.9 × 4.3 mm package. Designed for wrist and in-ear. Choosing this over discrete parts removes the hardest part of the optical design — LED/photodiode geometry — from your plate. | £11 |
 | 3 | **Analog Devices AD5941** | Skin impedance *and* electrochemical AFE. Drives EDA today, cortisol strips later. The single most important part in this list. | £9 |
 | 4 | **TI TMP117** | ±0.1 °C digital temperature. Medical-grade accuracy; the cheap sensors drift more than the signal you are chasing. | £5 |
 | 5 | **ST LSM6DSV16X** | 6-axis IMU with on-chip sensor fusion and a low-power mode that runs all night without waking the MCU. | £4 |
 | 6 | **Nordic nPM1300** | Power management: LiPo charger, regulators, fuel gauge, load switches. Replaces about five discrete parts and gives you an accurate battery percentage. | £3 |
 | 7 | **Winbond W25Q128JV** 16 MB flash | Records standalone when the phone is elsewhere — roughly a week of RR intervals, EDA and motion. More important on a screenless band than on a watch, because there is nothing on your wrist to look at and so no reason to bring the phone. | £2 |
-| 7b | **TI DRV2605L** + **Vybronics VLV101040A** LRA | Haptics. With no screen this is the only way the device can tell you anything: recording started, contact lost, scores ready. A linear resonant actuator over a coin motor — crisper pulses, so patterns stay distinguishable by feel. | £4 |
+| 7b | **TI DRV2605L** + **Vybronics VLV101040A** LRA | Haptics. With no screen this is the only way the device can tell you anything: recording started, contact lost, scores ready. A linear resonant actuator over a coin motor — crisper pulses, so patterns stay distinguishable by feel. **The motor goes beside the battery, never above it** — see *Does it fit?* below; stacked, it costs 3.4 mm of thickness the band does not have. | £4 |
 | 7c | Single side-emitting RGB LED | Charging and pairing state only. Deliberately not a notification channel: an LED you must look at is a bad screen. | £0.50 |
 | 8 | **Maxim MAX30003** *(optional)* | Single-lead ECG. Touch the far electrode with a finger for beat timing an optical sensor cannot match. Worth it if HRV is your main interest. | £7 |
 
@@ -91,13 +91,58 @@ Prices are indicative. Everything is orderable from Mouser, DigiKey or Farnell.
 | # | Part | Notes | ~Unit |
 |---|---|---|---|
 | 9 | **Ag/AgCl dry electrodes ×2** | For EDA, on the underside of the band, 20–30 mm apart, both touching skin. Stainless steel works and is cheaper; Ag/AgCl drifts less. | £6 pair |
-| 10 | **LiPo 502030, ~300 mAh** | Sized up deliberately: with no display there is both spare volume under the shell and spare power budget, so the cell that would have run a watch for a day and a half runs this for four or five. Buy one with a protection circuit. | £6 |
+| 10 | **LiPo 502030, ~300 mAh** | 30 × 20 × 5.0 mm. Sized up deliberately: with no display there is spare power budget, so the cell that would run a watch for a day and a half runs this for four. A 402030 (240 mAh) saves a millimetre of thickness and costs about a day. Buy one with a protection circuit. | £6 |
 | 11 | **Qi receiver coil** *(optional)* | Wireless charging means no port to waterproof. USB-C is easier but a sealing problem. | £4 |
 | 12 | **Sapphire or acrylic window** | A 6 mm lens over the optical module only — not a display cover. Must sit flush against skin; an air gap ruins the signal. | £3 |
 | 13 | **TPU strap + resin-printed shell** | Print it yourself. Expect five or six iterations; this is where the real work is. | £15 |
 
-**Board total: roughly £65–95 in parts**, plus £30–60 for a small PCB run
+**Board total: roughly £70–100 in parts**, plus £30–60 for a small PCB run
 (JLCPCB or PCBWay, 4-layer, ~£40 for five boards).
+
+---
+
+## Does it fit?
+
+Thickness is what kills wrist devices, not board area. The arithmetic, in stack
+order:
+
+| Layer | mm |
+|---|---|
+| Top shell wall | 1.2 |
+| Clearance and adhesive | 0.3 |
+| Qi coil over ferrite | 0.6 |
+| Battery, 502030 | 5.0 |
+| Clearance | 0.2 |
+| Tallest top-side part — the radio module | 2.0 |
+| PCB | 0.8 |
+| Optical module, underside | 1.4 |
+| Optical bond gap | 0.2 |
+| Skin plate | 1.3 |
+| **Total** | **13.0** |
+
+**The haptic motor decides this.** Put the LRA in the top shell above the
+battery, where it would naturally go, and the stack is **16.4 mm** — a brick,
+not a bracelet. Moving it into the 6.6 mm channel beside the cell removes
+3.4 mm outright and is the only reason the geometry closes.
+
+Want 12 mm instead? Drop to a **402030 cell, 240 mAh**: exactly 12.0 mm, and
+battery life falls from about four days to about three. That is the whole
+trade.
+
+**Lateral fit.** A 37 × 29 mm body with 1.2 mm walls gives a 34.6 × 26.6 mm
+cavity. The 31 × 23 mm board leaves 1.8 mm per side for potting; the 30 × 20 mm
+cell leaves a 6.6 mm strip beside it, and the motor is 4 × 10 mm, so it fits
+there inside a channel 5.6 mm deep. Electrodes at ±13 mm sit 2.5 mm inside the
+board edge.
+
+**Board area.** On 31 × 23 mm (713 mm²): the radio module is 163 mm², the other
+ICs and inductors 65 mm², and roughly fifty passives with courtyards 55 mm² —
+283 mm² against about 392 mm² realistically placeable on four layers. 72% used,
+which is comfortable, but only because the radio is a module. A bare nRF5340
+would free 114 mm² of area and cost you an antenna design.
+
+**Finished size: 37 × 29 × 13 mm, about 31 g with the strap.** For reference,
+that is a millimetre thicker than a Whoop.
 
 ---
 
@@ -122,7 +167,8 @@ one, the sensors are the whole budget:
 
 300 mAh at ~3 mA is roughly **four days**, and closer to five if the optical
 front end is duty-cycled harder while you are still. A 1.3-inch display would
-have cost more than everything above put together.
+have cost more than everything above put together — and would have added
+thickness the stack has no room for either.
 
 Optical sampling is the one dial worth tuning. Sample at 25 Hz in bursts rather
 than continuously; drop to spot checks when the accelerometer says you have not
@@ -215,9 +261,11 @@ it is not the stubborn option — it is the only option.
 2. **Breadboard each sensor separately** on the DK: MAXM86161 over I²C, then
    AD5941 over SPI, then the IMU and TMP117. One at a time, each with a scope
    or a serial plot, so a failure has one possible cause.
-3. **Design the PCB.** Four layers. Keep the optical module's analog ground
-   away from the switching regulator, and route the EDA electrode traces short
-   and guarded — skin impedance is megohms and picks up everything.
+3. **Design the PCB.** 31 × 23 mm, four layers. Keep the optical module's analog
+   ground away from the switching regulator, and route the EDA electrode traces
+   short and guarded — skin impedance is megohms and picks up everything. Check
+   the thickness budget above before committing: component height on the top
+   face adds directly to the finished band.
 4. **Order assembled.** For a first board, pay for assembly. Hand-placing a
    MAXM86161 is a skill, not a step.
 5. **Print the case badly, then better.** Sensor-to-skin pressure dominates
