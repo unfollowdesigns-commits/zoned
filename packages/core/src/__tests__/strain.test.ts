@@ -5,9 +5,9 @@ import {
   estimateMaxHr,
   heartRateZone,
   trimpToStrain,
-} from '../strain.js';
-import { syntheticWorkout } from '../synthetic.js';
-import type { HeartRateSample, UserProfile } from '../types.js';
+} from '../strain';
+import { syntheticWorkout } from '../synthetic';
+import type { HeartRateSample, UserProfile } from '../types';
 
 const profile: UserProfile = { age: 30, restingHr: 55, sex: 'male' };
 

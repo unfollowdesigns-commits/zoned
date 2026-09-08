@@ -10,8 +10,8 @@
  * curve is this project's own; it is not Whoop's formula, which is proprietary.
  */
 
-import type { HeartRateSample, StrainScore, UserProfile } from './types.js';
-import { clamp } from './baseline.js';
+import type { HeartRateSample, StrainScore, UserProfile } from './types';
+import { clamp } from './baseline';
 
 /** Tanaka et al. (2001) — more accurate across ages than 220 − age. */
 export function estimateMaxHr(age: number): number {

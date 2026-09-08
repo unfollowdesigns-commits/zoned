@@ -3,7 +3,7 @@ import {
   HeartRateParseError,
   collectRrIntervals,
   parseHeartRateMeasurement,
-} from '../ble.js';
+} from '../ble';
 
 /** Build a Heart Rate Measurement packet the way a real sensor would. */
 function packet(opts: {

@@ -9,7 +9,7 @@
  * than a month ago, and so the whole history never needs to be re-read.
  */
 
-import type { Baseline } from './types.js';
+import type { Baseline } from './types';
 
 export interface BaselineOptions {
   /**

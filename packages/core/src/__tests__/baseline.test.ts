@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildBaseline, emptyBaseline, updateBaseline, zScore } from '../baseline.js';
+import { buildBaseline, emptyBaseline, updateBaseline, zScore } from '../baseline';
 
 describe('baselines', () => {
   it('is not ready until enough days have accumulated', () => {

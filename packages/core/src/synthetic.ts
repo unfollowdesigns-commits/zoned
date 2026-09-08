@@ -6,7 +6,8 @@
  * with a known answer, which real data can never provide.
  */
 
-import type { HeartRateSample, MotionSample } from './types.js';
+import type { RecordedSession } from './daily';
+import type { HeartRateSample, MotionSample } from './types';
 
 /** Small deterministic PRNG so runs are reproducible. */
 export function seededRandom(seed: number): () => number {
@@ -153,4 +154,61 @@ function gaussian(random: () => number): number {
   const u = Math.max(random(), 1e-9);
   const v = random();
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+/**
+ * A plausible multi-week history: a night of sleep every day, workouts on some
+ * of them, and a slow drift in fitness so the baselines have something to track.
+ *
+ * Used by the dashboard's demo mode and by the daily-rollup tests, both of which
+ * need many days of data that no one wants to wait a month to collect.
+ */
+export function syntheticHistory(
+  days: number,
+  options: { endingAt?: number; seed?: number } = {},
+): RecordedSession[] {
+  const endingAt = options.endingAt ?? Date.now();
+  const random = seededRandom(options.seed ?? 99);
+  const sessions: RecordedSession[] = [];
+
+  for (let d = days - 1; d >= 0; d--) {
+    const dayStart = new Date(endingAt - d * 86_400_000);
+    dayStart.setHours(0, 0, 0, 0);
+
+    // Fitness improves slowly; hard days depress the following morning's HRV.
+    const trend = (days - d) / days;
+    const hardDay = random() < 0.45;
+    const restingHr = Math.round(56 - trend * 4 + (hardDay ? 2 : 0) + random() * 2);
+
+    const bedtime = dayStart.getTime() - 60 * 60_000 + Math.round(random() * 90 * 60_000);
+    const hours = 6 + random() * 2.5;
+    const night = syntheticNight(bedtime, hours, { seed: 1000 + d, restingHr });
+
+    sessions.push({
+      id: `sleep-${d}`,
+      kind: 'sleep',
+      startedAt: bedtime,
+      endedAt: bedtime + hours * 3_600_000,
+      samples: night.hr,
+      motion: night.motion,
+    });
+
+    if (hardDay) {
+      const start = dayStart.getTime() + (17 + random()) * 3_600_000;
+      const duration = 30 + Math.round(random() * 50);
+      sessions.push({
+        id: `workout-${d}`,
+        kind: 'workout',
+        startedAt: start,
+        endedAt: start + duration * 60_000,
+        samples: syntheticWorkout(start, duration, {
+          seed: 2000 + d,
+          peakHr: 150 + Math.round(random() * 30),
+        }),
+        motion: [],
+      });
+    }
+  }
+
+  return sessions.sort((a, b) => a.startedAt - b.startedAt);
 }

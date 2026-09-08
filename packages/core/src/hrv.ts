@@ -7,7 +7,7 @@
  * signal you are trying to read.
  */
 
-import type { HrvMetrics } from './types.js';
+import type { HrvMetrics } from './types';
 
 /** Beats outside this range are impossible (30–200 bpm) and always dropped. */
 const MIN_RR_MS = 300;

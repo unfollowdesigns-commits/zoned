@@ -4,8 +4,8 @@ import {
   estimateRespiratoryRate,
   filterRrIntervals,
   restingHeartRate,
-} from '../hrv.js';
-import { syntheticRrIntervals } from '../synthetic.js';
+} from '../hrv';
+import { syntheticRrIntervals } from '../synthetic';
 
 describe('filterRrIntervals', () => {
   it('keeps a clean recording intact', () => {

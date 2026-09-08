@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { analyzeSleep, coleKripke, sleepPerformance } from '../sleep.js';
-import { syntheticNight } from '../synthetic.js';
+import { analyzeSleep, coleKripke, sleepPerformance } from '../sleep';
+import { syntheticNight } from '../synthetic';
 
 describe('coleKripke', () => {
   it('scores stillness as sleep', () => {

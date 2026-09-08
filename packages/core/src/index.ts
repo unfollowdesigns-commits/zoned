@@ -6,11 +6,12 @@
  * in the web dashboard, and in tests on a laptop with no hardware attached.
  */
 
-export * from './types.js';
-export * from './ble.js';
-export * from './hrv.js';
-export * from './baseline.js';
-export * from './strain.js';
-export * from './sleep.js';
-export * from './recovery.js';
-export * from './synthetic.js';
+export * from './types';
+export * from './ble';
+export * from './hrv';
+export * from './baseline';
+export * from './strain';
+export * from './sleep';
+export * from './recovery';
+export * from './daily';
+export * from './synthetic';

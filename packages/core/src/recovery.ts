@@ -11,8 +11,8 @@
  * meant to be tuned against your own logbook — see docs/ROADMAP.md.
  */
 
-import type { RecoveryScore, RecoveryInput } from './types.js';
-import { clamp, zScore } from './baseline.js';
+import type { RecoveryScore, RecoveryInput } from './types';
+import { clamp, zScore } from './baseline';
 
 const WEIGHTS = {
   hrv: 0.5,

@@ -9,7 +9,7 @@
  * laptop with no hardware present.
  */
 
-import type { HeartRateSample } from './types.js';
+import type { HeartRateSample } from './types';
 
 /** Heart Rate Service. */
 export const HEART_RATE_SERVICE = '0000180d-0000-1000-8000-00805f9b34fb';

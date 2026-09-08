@@ -16,8 +16,8 @@ import type {
   SleepEpoch,
   SleepStage,
   SleepSummary,
-} from './types.js';
-import { mean } from './hrv.js';
+} from './types';
+import { mean } from './hrv';
 
 const EPOCH_MS = 60_000;
 

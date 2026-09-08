@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { computeRecovery, describeRecovery } from '../recovery.js';
-import { buildBaseline } from '../baseline.js';
-import type { RecoveryInput } from '../types.js';
+import { computeRecovery, describeRecovery } from '../recovery';
+import { buildBaseline } from '../baseline';
+import type { RecoveryInput } from '../types';
 
 function baselines() {
   return {
