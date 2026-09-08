@@ -1,0 +1,18 @@
+{
+  "name": "zoned",
+  "private": true,
+  "version": "0.1.0",
+  "description": "An open, self-built wearable recovery tracker: sensor -> phone -> dashboard.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "npm run test --workspace @zoned/core",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
