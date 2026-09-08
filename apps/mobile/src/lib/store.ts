@@ -9,6 +9,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   emptyBaseline,
+  mergeSessions,
   updateBaseline,
   type Baseline,
   type DayMetrics,
@@ -72,6 +73,49 @@ export async function saveSession(
   );
   await writeJson(KEYS.sessions, next);
   return stored;
+}
+
+/**
+ * Fold a backlog pulled off the band into what is already stored.
+ *
+ * A screenless band records standalone, so the same minutes can arrive twice —
+ * once streamed live, once replayed from flash with a slightly drifted clock.
+ * Merging rather than appending is what makes re-syncing safe: run this on the
+ * same backlog ten times and the stored result is identical to running it once.
+ *
+ * Sessions that changed are marked unsynced again so the merged version reaches
+ * the server, replacing the partial one already uploaded.
+ */
+export async function ingestBackfill(
+  backlog: readonly RecordedSession[],
+): Promise<{ sessions: number; added: number }> {
+  const existing = await loadSessions();
+  const merged = mergeSessions(existing, backlog) as StoredSession[];
+
+  const previous = new Map(existing.map((s) => [s.id, s]));
+  let added = 0;
+
+  for (const session of merged) {
+    const before = previous.get(session.id);
+    if (!before) {
+      added++;
+      continue;
+    }
+    // Carry the sync marker across, but clear it if the merge changed anything.
+    const changed =
+      before.samples.length !== session.samples.length ||
+      (before.motion?.length ?? 0) !== (session.motion?.length ?? 0) ||
+      (before.eda?.length ?? 0) !== (session.eda?.length ?? 0) ||
+      (before.temperature?.length ?? 0) !== (session.temperature?.length ?? 0);
+
+    session.motion = session.motion ?? [];
+    if (!changed && before.syncedAt) session.syncedAt = before.syncedAt;
+  }
+
+  for (const session of merged) session.motion = session.motion ?? [];
+
+  await writeJson(KEYS.sessions, merged);
+  return { sessions: merged.length, added };
 }
 
 export async function deleteSession(id: string): Promise<void> {

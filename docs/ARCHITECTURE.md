@@ -48,6 +48,7 @@ That constraint buys three things:
 | `packages/core/src/stress.ts` | Fuses EDA, HRV, heart rate and skin temperature into one stress score. |
 | `packages/core/src/cortisol.ts` | Lab cortisol read against the diurnal curve: awakening response, slope. |
 | `packages/core/src/daily.ts` | Rolls sessions up into one row per day. Shared by both apps. |
+| `packages/core/src/merge.ts` | Folds a standalone band's backlog into stored data without double-counting. |
 | `packages/core/src/synthetic.ts` | Deterministic fake sensor data for tests and the demo. |
 | `apps/mobile` | Expo app: BLE, recording, local storage, sync. |
 | `apps/web` | Next.js dashboard: charts over the same scores. |
@@ -94,6 +95,29 @@ two charts instead.
 | **Stress 0–100** | **This project's own** weighting of EDA, HRV, heart rate and skin temperature. |
 
 The last three are the ones to tune. See `docs/ROADMAP.md`.
+
+## Why the band has no screen
+
+It is a band, not a watch. The display would have been the largest power draw on
+the device, the hardest joint to waterproof, and a worse version of the phone
+already in your pocket. Leaving it out buys about four days of battery and lets
+the board be potted solid.
+
+Two consequences land in this code rather than in the enclosure:
+
+**Haptics are the only output.** `ble.ts` defines a deliberately small
+vocabulary of five patterns, because a band that buzzes all day gets taken off
+and a band you are not wearing measures nothing. `contact-lost` is the one that
+earns its keep — on a watch you would glance down and see the artifact rate
+climbing; here the band has to tell you or the night is wasted.
+
+**The band records alone, so backfill must be idempotent.** With nothing to
+glance at there is no reason to keep your phone nearby, so the band logs to
+flash and replays later — and the same minutes arrive twice, once live and once
+from flash with a drifted clock. `merge.ts` unions them within a tolerance sized
+to the sampling interval. Appending instead would double every overlapping beat,
+halve the apparent RR intervals and sum strain twice, with no screen on your
+wrist to reveal it. That failure is pinned by a test.
 
 ## Why EDA is a separate channel
 

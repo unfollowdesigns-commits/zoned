@@ -37,6 +37,7 @@ mockup.
 | **Resting heart rate** | The lowest *sustained* rate overnight, not the single slowest beat |
 | **Respiratory rate** | Extracted from the way your heart rate rises and falls as you breathe |
 | **Sleep** | Cole-Kripke wake detection from motion; stages estimated from heart rate and stillness |
+| **Backfill** | A screenless band records alone; overlapping logs merge idempotently, so re-syncing never double-counts |
 | **Stress, 0–100** | Skin conductance responses, HRV, heart rate and skin temperature fused against your own baseline. The EDA channel is what makes this stress rather than effort |
 | **Cortisol** | Awakening response and diurnal slope from saliva samples, read against the reference curve for hours since waking |
 | **Recovery, 0–100** | HRV, resting heart rate, breathing rate and sleep, each weighed against *your own* rolling baseline |
@@ -52,11 +53,19 @@ is about exactly that.
 [docs/HARDWARE.md](docs/HARDWARE.md) is the complete bill of materials — every
 part, with prices, sources and the reason each was chosen. In summary:
 
-**The bracelet, built** — roughly £60–90 in parts plus a small PCB run. The
-sensors are an nRF5340 for the radio and the maths, a MAXM86161 optical module
-for heart rate and HRV, an **AD5941 for skin conductance and, later, cortisol**,
-a TMP117 for skin temperature and an LSM6DSV16X for motion. Nothing on sale has
-all four channels, which is the actual reason to build rather than buy.
+**The bracelet, built** — roughly £65–95 in parts plus a small PCB run. A band,
+**not a watch: no screen, no glass, no buttons.** An nRF5340 for the radio and
+the maths, a MAXM86161 optical module for heart rate and HRV, an **AD5941 for
+skin conductance and, later, cortisol**, a TMP117 for skin temperature and an
+LSM6DSV16X for motion. Nothing on sale has all four channels, which is the
+actual reason to build rather than buy.
+
+Leaving the display out roughly halves the power budget — about four days on a
+300 mAh cell — lets the board be fully potted instead of gasketed, and makes two
+parts load-bearing: a haptic motor, because buzzing is the band's only way to
+reach you, and onboard flash, because with nothing to glance at there is no
+reason to keep your phone nearby. The band records standalone and the app merges
+the backlog without double-counting.
 
 **Cortisol, today** — a four-sample salivary panel, £50–90, posted to a lab. The
 app expects exactly that protocol.

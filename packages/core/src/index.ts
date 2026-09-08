@@ -18,4 +18,5 @@ export * from './eda';
 export * from './stress';
 export * from './cortisol';
 export * from './daily';
+export * from './merge';
 export * from './synthetic';

@@ -16,6 +16,8 @@ The foundation, in this repository already:
 - [x] Database schema with row level security
 - [x] Electrodermal activity analysis and a fused stress score
 - [x] Cortisol interpretation: awakening response, diurnal slope, reference curve
+- [x] Custom BLE service for skin conductance, backlog transfer and haptics
+- [x] Idempotent backfill merging, so a standalone band never double-counts
 
 ## Stage 1 — get real data (week 1)
 
@@ -76,6 +78,10 @@ written for every channel on it, so the board is the only thing missing.
 - [ ] Firmware on the DK advertising Heart Rate Service `0x180D` — the app
       connects with zero changes, which proves the chain before you solder
 - [ ] Each sensor breadboarded separately: optical, then EDA, then IMU and temp
+- [ ] Haptic patterns implemented against the vocabulary in `ble.ts`, and
+      double-tap start/stop on the IMU — with no screen these are the band's
+      entire user interface
+- [ ] Log to flash whenever no phone is connected, and replay on reconnect
 - [ ] PCB designed, ordered assembled, case printed and re-printed
 - [ ] Validate against the H10 over a night; RMSSD within ~10% means the optical
       chain works
