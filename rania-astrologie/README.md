@@ -4,7 +4,7 @@ Multilingual (FR / EN / AR with full right-to-left support) website for Rania, c
 
 It's a complete product: the public site, an online booking system, a blog, a contact form, and a secure back-office where Rania manages everything herself.
 
-> **Pour Rania :** le guide d'utilisation de l'espace d'administration (en français) est dans [`docs/GUIDE-ADMIN.md`](docs/GUIDE-ADMIN.md). La proposition de réalisation (structure, étapes, délais, budget, maintenance) est dans [`docs/PROPOSITION.md`](docs/PROPOSITION.md).
+> **Pour Rania :** la liste des informations à fournir est dans [`docs/INFOS-A-FOURNIR.md`](docs/INFOS-A-FOURNIR.md). Le guide d'utilisation de l'espace d'administration (en français) est dans [`docs/GUIDE-ADMIN.md`](docs/GUIDE-ADMIN.md). La proposition de réalisation (structure, étapes, délais, budget, maintenance) est dans [`docs/PROPOSITION.md`](docs/PROPOSITION.md).
 
 ---
 
@@ -27,7 +27,8 @@ It's a complete product: the public site, an online booking system, a blog, a co
 | Pricing | Stored in the database and edited in the admin |
 | Articles | `/journal`, Markdown editor with preview, cover upload, translations linked across languages |
 | Simple content management | `/admin` |
-| Multilingual SEO | Per-page metadata, canonical + `hreflang`, `sitemap.xml`, `robots.txt`, JSON-LD (ProfessionalService, Article), Open Graph images |
+| Multilingual SEO | Per-page metadata, canonical + `hreflang`, `sitemap.xml`, `robots.txt`, Open Graph images on every page, visible breadcrumbs |
+| AEO (answer engines) | FAQ on every consultation page plus a `/faq` page, written as short direct answers; a linked schema.org graph (WebSite, ProfessionalService, Person, Service with prices, FAQPage, BreadcrumbList, Article); `/llms.txt`; AI crawlers explicitly allowed |
 | GDPR / secure data handling | Explicit consent, privacy policy + legal notice, retention purge, per-record deletion, no tracking cookies |
 
 ## Stack
@@ -74,6 +75,16 @@ See [`.env.example`](.env.example). Required in production:
 | `SMTP_HOST` `SMTP_PORT` `SMTP_USER` `SMTP_PASSWORD` `MAIL_FROM` | Transactional e-mail (Brevo, Resend SMTP, Mailjet, OVH, Gmail Workspace…) |
 | `NOTIFY_EMAIL` | Where new bookings and messages are announced |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Only used by `db:seed` / `admin:create`. You can remove them afterwards |
+
+## Client preview on Vercel (demo mode)
+
+If the app runs on Vercel and `DATABASE_URL` is **not** set, it switches to **demo mode**:
+- it uses a temporary SQLite file and seeds itself with the consultations, sample articles and a month of slots;
+- it creates an admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD`;
+- the admin shows a banner saying it is a demo;
+- no e-mail is sent without SMTP settings.
+
+Data is not durable (it resets when the function instance is recycled), so use this only for previews. For a preview, set only `APP_SECRET`, `ADMIN_EMAIL` and `ADMIN_PASSWORD`, plus `SITE_URL` once the domain is known.
 
 ## Deployment (recommended: Vercel + Turso)
 

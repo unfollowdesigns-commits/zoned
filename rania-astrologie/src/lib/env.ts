@@ -7,10 +7,21 @@ function read(name: string): string | undefined {
 
 const isProd = process.env.NODE_ENV === "production";
 
+/**
+ * Demo mode: on Vercel without a configured database, the app runs on a temporary
+ * SQLite file and seeds itself. Good for client previews; data is not durable.
+ */
+const demo = Boolean(process.env.VERCEL) && !read("DATABASE_URL");
+
 export const env = {
   isProd,
-  siteUrl: (read("SITE_URL") ?? "http://localhost:3000").replace(/\/+$/, ""),
-  databaseUrl: read("DATABASE_URL") ?? "file:./db/rania.db",
+  siteUrl: (
+    read("SITE_URL") ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : undefined) ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
+  ).replace(/\/+$/, ""),
+  demo,
+  databaseUrl: read("DATABASE_URL") ?? (demo ? "file:/tmp/rania-demo.db" : "file:./db/rania.db"),
   databaseAuthToken: read("DATABASE_AUTH_TOKEN"),
   get appSecret(): string {
     const s = read("APP_SECRET");

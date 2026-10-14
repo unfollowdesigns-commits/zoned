@@ -11,6 +11,7 @@ export const routes = {
   contact: "/contact",
   journal: "/journal",
   article: (slug: string) => `/journal/${encodeURIComponent(slug)}`,
+  faq: "/faq",
   privacy: "/privacy",
   legal: "/legal",
 };

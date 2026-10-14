@@ -25,7 +25,12 @@ export default async function ConsultationsPage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <PageHero kicker={dict.nav.consultations} title={dict.services.indexTitle} lede={dict.services.indexLede} />
+      <PageHero
+        kicker={dict.nav.consultations}
+        title={dict.services.indexTitle}
+        lede={dict.services.indexLede}
+        crumbs={[{ name: dict.nav.home, href: href(locale) }, { name: dict.nav.consultations, href: href(locale, routes.consultations) }]}
+      />
       <section className="pb-24">
         <div className="container-x">
           <ul className="border-t border-line">

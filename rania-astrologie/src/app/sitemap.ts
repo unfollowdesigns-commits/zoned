@@ -8,7 +8,7 @@ import { listAllPublished, type Article } from "@/lib/repo/articles";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const paths = [routes.home, routes.about, routes.consultations, ...serviceKeys.map(routes.service), routes.pricing, routes.journal, routes.contact, routes.privacy, routes.legal];
+  const paths = [routes.home, routes.about, routes.consultations, ...serviceKeys.map(routes.service), routes.pricing, routes.faq, routes.journal, routes.contact, routes.privacy, routes.legal];
   const entries: MetadataRoute.Sitemap = paths.map((p) => ({
     url: `${env.siteUrl}/fr${p}`,
     changeFrequency: "monthly",

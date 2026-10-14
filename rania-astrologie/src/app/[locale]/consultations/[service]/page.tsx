@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Faq } from "@/components/Faq";
+import { JsonLd } from "@/components/JsonLd";
 import { ServiceGlyph } from "@/components/ServiceGlyph";
 import { SplitText } from "@/components/SplitText";
 import { Arrow, CtaBand, Kicker } from "@/components/ui";
@@ -9,6 +12,7 @@ import { isLocale, locales } from "@/i18n/config";
 import { listOfferings, type Offering } from "@/lib/repo/offerings";
 import { href, routes } from "@/lib/paths";
 import { pageMetadata } from "@/lib/seo";
+import { abs, faqPage, ids } from "@/lib/schema-org";
 import { formatPrice } from "@/lib/time";
 
 export function generateStaticParams() {
@@ -40,13 +44,42 @@ export default async function ServicePage({ params }: { params: Promise<{ locale
   const index = serviceKeys.indexOf(service);
   const related = serviceKeys.filter((k) => k !== service).slice(0, 6);
   const bookHref = `${href(locale, routes.pricing)}${offerings[0] ? `?offering=${offerings[0].id}` : ""}#booking`;
+  const pageUrl = abs(href(locale, routes.service(service)));
+  const serviceLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${pageUrl}#service`,
+    name: s.title,
+    description: s.seoDescription,
+    serviceType: s.title,
+    url: pageUrl,
+    inLanguage: locale,
+    provider: { "@id": ids.business },
+    areaServed: { "@type": "Place", name: "Worldwide" },
+    availableChannel: { "@type": "ServiceChannel", serviceUrl: abs(href(locale, routes.pricing)), name: dict.services.formatValue },
+    offers: offerings.map((o) => ({
+      "@type": "Offer",
+      name: o.name[locale],
+      price: (o.priceCents / 100).toFixed(2),
+      priceCurrency: o.currency,
+      url: abs(`${href(locale, routes.pricing)}?offering=${o.id}`),
+      availability: "https://schema.org/InStock",
+    })),
+  };
 
   return (
     <>
       {/* Hero */}
-      <section className="relative pt-[calc(var(--header-h)+clamp(4rem,12vw,9rem))] pb-[clamp(3rem,8vw,6rem)]">
+      <section className="hero-intro relative pt-[calc(var(--header-h)+clamp(4rem,12vw,9rem))] pb-[clamp(3rem,8vw,6rem)]">
         <div className="container-x">
           <div className="max-w-4xl">
+            <Breadcrumbs
+              items={[
+                { name: dict.nav.home, href: href(locale) },
+                { name: dict.nav.consultations, href: href(locale, routes.consultations) },
+                { name: s.title, href: href(locale, routes.service(service)) },
+              ]}
+            />
             <Kicker>
               {t.kicker} · {ROMAN[index]}
             </Kicker>
@@ -72,7 +105,7 @@ export default async function ServicePage({ params }: { params: Promise<{ locale
       {/* Body */}
       <section className="pb-[clamp(4rem,10vw,8rem)]">
         <div className="container-x grid gap-14 lg:grid-cols-12">
-          <div className="space-y-6 lg:col-span-7">
+          <div className="min-w-0 space-y-6 lg:col-span-7">
             {s.intro.map((p, i) => (
               <p key={i} className={i === 0 ? "font-display text-[clamp(1.4rem,2.3vw,1.9rem)] leading-[1.45] text-ivory/90" : "text-lg text-ivory/75"} data-reveal>
                 {p}
@@ -112,8 +145,8 @@ export default async function ServicePage({ params }: { params: Promise<{ locale
               <h2 className="t-2 text-ivory" data-reveal>{t.forWhom}</h2>
               <ul className="mt-8 space-y-4">
                 {s.questions.map((q, i) => (
-                  <li key={i} className="flex gap-4 border-b border-line pb-4 font-display text-xl text-ivory/90 italic-accent md:text-2xl" data-reveal style={{ ["--d" as string]: `${i * 70}ms` }}>
-                    <span className="text-gold not-italic">✦</span>
+                  <li key={i} className="flex gap-5 border-b border-line pb-5 font-display text-xl text-ivory/90 italic-accent md:text-2xl" data-reveal style={{ ["--d" as string]: `${i * 70}ms` }}>
+                    <span className="pt-2 font-sans text-xs not-italic tabular-nums text-gold/70">{String(i + 1).padStart(2, "0")}</span>
                     {q}
                   </li>
                 ))}
@@ -158,7 +191,7 @@ export default async function ServicePage({ params }: { params: Promise<{ locale
                         {p}
                       </p>
                     ))}
-                    {service === "relational" && <p className="text-xs text-gold/80">✦ {dict.pricing.partnerNeeded}</p>}
+                    {service === "relational" && <p className="text-xs text-gold/80">{dict.pricing.partnerNeeded}</p>}
                   </dd>
                 </div>
               </dl>
@@ -168,6 +201,20 @@ export default async function ServicePage({ params }: { params: Promise<{ locale
             </div>
           </aside>
         </div>
+      </section>
+
+      {/* FAQ — direct answers for search and answer engines */}
+      <section className="section border-t border-line" aria-labelledby="faq-title">
+        <div className="container-x grid gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <h2 id="faq-title" className="t-2 text-ivory" data-reveal>{dict.faq.serviceTitle}</h2>
+          </div>
+          <div className="lg:col-span-8">
+            <Faq items={s.faq} />
+          </div>
+        </div>
+        <JsonLd data={serviceLd} />
+        <JsonLd data={faqPage(s.faq, locale, pageUrl)} />
       </section>
 
       {/* Related */}

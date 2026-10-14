@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Faq } from "@/components/Faq";
+import { JsonLd } from "@/components/JsonLd";
 import { ChartTicker } from "@/components/home/ChartTicker";
 import { Constellation } from "@/components/home/Constellation";
 import { MethodDial } from "@/components/home/MethodDial";
@@ -11,6 +13,7 @@ import { isLocale } from "@/i18n/config";
 import { listPublished } from "@/lib/repo/articles";
 import { listOfferings } from "@/lib/repo/offerings";
 import { href, routes } from "@/lib/paths";
+import { abs, faqPage } from "@/lib/schema-org";
 
 async function safe<T>(p: Promise<T>, fallback: T): Promise<T> {
   try {
@@ -34,19 +37,19 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* ───────── Hero ───────── */}
       <section className="hero-intro relative flex min-h-[100svh] flex-col justify-end pb-10 pt-[calc(var(--header-h)+4rem)] md:justify-center md:pb-24">
         <div className="container-x relative">
-          <p className="eyebrow mb-8 max-md:mt-[38svh]" data-reveal style={{ ["--d" as string]: "100ms" }}>
+          <p className="intro-fade eyebrow mb-8 max-md:mt-[38svh]" style={{ ["--d" as string]: "100ms" }}>
             {t.eyebrow}
           </p>
           <h1 className="t-hero text-ivory">
-            <SplitText text={t.titleA} className="block" delay={200} />
-            <SplitText text={t.titleB} className="block md:ps-[6vw]" delay={200} startIndex={2} />
-            <SplitText text={t.titleC} className="block" wordClassName="text-gradient-gold italic-accent" delay={200} startIndex={4} />
+            <SplitText text={t.titleA} className="block" delay={0} />
+            <SplitText text={t.titleB} className="block md:ps-[6vw]" delay={0} startIndex={2} />
+            <SplitText text={t.titleC} className="block" wordClassName="text-gradient-gold italic-accent" delay={0} startIndex={4} />
           </h1>
           <div className="mt-10 max-w-xl">
-            <p className="lede" data-reveal style={{ ["--d" as string]: "800ms" }}>
+            <p className="intro-fade lede" style={{ ["--d" as string]: "350ms" }}>
               {t.lede}
             </p>
-            <div className="mt-10 flex flex-wrap items-center gap-4" data-reveal style={{ ["--d" as string]: "1000ms" }}>
+            <div className="intro-fade mt-10 flex flex-wrap items-center gap-4" style={{ ["--d" as string]: "500ms" }}>
               <Link href={href(locale, routes.consultations)} className="btn btn-primary group">
                 {t.ctaPrimary} <Arrow />
               </Link>
@@ -55,12 +58,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </Link>
             </div>
           </div>
-        </div>
-        <div className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-[0.65rem] uppercase tracking-[0.4em] text-mist md:flex" data-reveal="fade" style={{ ["--d" as string]: "1500ms" }}>
-          {dict.common.scroll}
-          <span className="relative h-12 w-px overflow-hidden bg-line">
-            <span className="absolute inset-x-0 top-0 h-1/2 bg-gold [animation:scroll-cue_2.4s_var(--ease-in-out-quint)_infinite]" />
-          </span>
         </div>
       </section>
 
@@ -191,7 +188,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   dict={dict}
                   i={i}
                   action={
-                    <Link href={`${href(locale, routes.pricing)}?offering=${o.id}#booking`} className="inline-flex items-center gap-2 text-sm text-gold-bright group">
+                    <Link href={`${href(locale, routes.pricing)}?offering=${o.id}#booking`} className="group -my-2 inline-flex items-center gap-2 py-3 text-sm text-gold-bright">
                       {dict.nav.book} <Arrow />
                     </Link>
                   }
@@ -223,6 +220,23 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </div>
         </section>
       )}
+
+      {/* ───────── FAQ ───────── */}
+      <section className="section" aria-labelledby="home-faq">
+        <div className="container-x grid gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <Kicker>{dict.faq.nav}</Kicker>
+            <h2 id="home-faq" className="t-2 mt-6 text-ivory" data-reveal>{dict.faq.title}</h2>
+            <Link href={href(locale, routes.faq)} className="btn btn-ghost group mt-10" data-reveal>
+              {dict.common.readMore} <Arrow />
+            </Link>
+          </div>
+          <div className="lg:col-span-8">
+            <Faq items={dict.faq.items.slice(0, 5)} />
+          </div>
+        </div>
+        <JsonLd data={faqPage(dict.faq.items.slice(0, 5), locale, abs(href(locale)))} />
+      </section>
 
       <CtaBand locale={locale} dict={dict} title={t.finalTitle} body={t.finalBody} />
     </>

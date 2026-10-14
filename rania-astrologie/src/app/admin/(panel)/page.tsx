@@ -28,7 +28,7 @@ export default async function Dashboard() {
 
   return (
     <>
-      <AdminTitle title="Bonjour Rania ✦" subtitle="Voici l'essentiel de votre activité." />
+      <AdminTitle title="Bonjour Rania" subtitle="Voici l'essentiel de votre activité." />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((s) => (
           <Link key={s.label} href={s.href} className="rounded-2xl border border-line bg-deep/60 p-6 transition-colors hover:border-gold/40">

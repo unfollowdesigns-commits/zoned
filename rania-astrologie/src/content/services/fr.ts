@@ -31,6 +31,11 @@ const fr: ServiceCatalog = {
     ],
     seoDescription:
       "Consultation d'astrologie natale approfondie : Ascendant, maisons, planètes, aspects, maîtrises et degrés pour comprendre vos ressources et vos dynamiques.",
+    faq: [
+      { q: "Qu'est-ce qu'un thème natal ?", a: "Le thème natal est la carte du ciel au moment exact et au lieu de votre naissance. Il indique la position des planètes dans les douze signes et les douze maisons, ainsi que les angles qu'elles forment entre elles (les aspects). C'est la base de toute lecture astrologique personnalisée." },
+      { q: "Pourquoi l'heure de naissance est-elle importante ?", a: "L'heure de naissance détermine l'Ascendant et la position des maisons, qui changent environ toutes les deux heures pour l'Ascendant et beaucoup plus vite pour les degrés. Sans heure, la lecture reste possible mais se concentre sur les planètes, les signes et les aspects." },
+      { q: "Que vais-je apprendre lors d'une lecture de thème natal ?", a: "La consultation met en lumière la structure de votre thème : vos dominantes, vos ressources, vos zones de tension, vos besoins affectifs et la manière dont ces éléments s'articulent. Elle se termine par des pistes de réflexion reliées à vos propres questions." },
+    ],
   },
   psychological: {
     title: "Astrologie psychologique",
@@ -64,6 +69,11 @@ const fr: ServiceCatalog = {
       "L'astrologie psychologique est une démarche symbolique de connaissance de soi. Elle ne constitue pas une thérapie et ne remplace pas un accompagnement par un professionnel de santé.",
     seoDescription:
       "Astrologie psychologique : besoins émotionnels, mécanismes de défense, conflits intérieurs et schémas répétitifs lus à travers votre thème natal.",
+    faq: [
+      { q: "Qu'est-ce que l'astrologie psychologique ?", a: "L'astrologie psychologique utilise le thème natal comme une grille de lecture symbolique de la personnalité : besoins émotionnels, mécanismes de défense, conflits intérieurs et schémas répétitifs. Son objectif est la connaissance de soi, pas la prédiction d'événements." },
+      { q: "L'astrologie psychologique remplace-t-elle une thérapie ?", a: "Non. Il s'agit d'une démarche symbolique de connaissance de soi. Elle peut accompagner une réflexion personnelle mais ne remplace jamais un suivi par un psychologue, un psychiatre ou un autre professionnel de santé." },
+      { q: "Quels éléments du thème sont les plus étudiés ?", a: "La Lune, les planètes personnelles (Soleil, Mercure, Vénus, Mars), les aspects de tension comme les carrés et les oppositions, ainsi que les maisons liées à l'intériorité et aux relations." },
+    ],
   },
   relational: {
     title: "Astrologie relationnelle",
@@ -110,6 +120,11 @@ const fr: ServiceCatalog = {
     ],
     seoDescription:
       "Synastrie, compatibilité astrologique et thème composite : explorer la dynamique d'une relation, ses affinités, ses tensions et ses enjeux.",
+    faq: [
+      { q: "Qu'est-ce que la synastrie ?", a: "La synastrie est la comparaison de deux thèmes natals. Elle étudie comment les planètes d'une personne entrent en résonance avec celles de l'autre, afin d'éclairer les affinités, les tensions, la communication et les besoins affectifs au sein d'une relation." },
+      { q: "Quelle est la différence entre synastrie et thème composite ?", a: "La synastrie compare deux thèmes pour comprendre l'interaction entre deux personnes. Le thème composite est un thème unique calculé à partir des points médians des deux thèmes : il représente la relation elle-même, comme une entité à part entière." },
+      { q: "Faut-il les données de naissance des deux personnes ?", a: "Oui. Pour une synastrie ou un thème composite, la date, le lieu et idéalement l'heure de naissance des deux personnes sont nécessaires. L'accord de la seconde personne est recommandé." },
+    ],
   },
   karmic: {
     title: "Astrologie karmique",
@@ -140,6 +155,11 @@ const fr: ServiceCatalog = {
     ],
     seoDescription:
       "Astrologie karmique : nœuds lunaires, schémas répétitifs, attachements et axes d'évolution personnelle et relationnelle.",
+    faq: [
+      { q: "Que sont les nœuds lunaires en astrologie ?", a: "Les nœuds lunaires sont les deux points où l'orbite de la Lune croise l'écliptique, le chemin apparent du Soleil. Toujours opposés, le nœud Sud et le nœud Nord forment un axe que l'astrologie karmique interprète comme un mouvement entre le familier et ce qui demande à se développer." },
+      { q: "L'astrologie karmique parle-t-elle de vies antérieures ?", a: "Dans mon approche, l'astrologie karmique est lue comme un langage symbolique d'évolution : elle éclaire les schémas qui se répètent et les axes de croissance, sans affirmations invérifiables ni fatalisme." },
+      { q: "À qui s'adresse une consultation karmique ?", a: "Aux personnes qui ont le sentiment de revivre les mêmes situations, dans leur vie personnelle ou leurs relations, et qui souhaitent comprendre ces répétitions pour s'en dégager." },
+    ],
   },
   progressed: {
     title: "Thèmes progressés",
@@ -170,6 +190,11 @@ const fr: ServiceCatalog = {
     ],
     seoDescription:
       "Thèmes progressés : Lune progressée et progressions planétaires pour explorer vos évolutions intérieures et vos étapes de transformation.",
+    faq: [
+      { q: "Qu'est-ce qu'un thème progressé ?", a: "Le thème progressé fait évoluer symboliquement le thème natal dans le temps, selon la règle « un jour après la naissance pour une année de vie ». Il permet d'observer les étapes de maturation intérieure d'une personne." },
+      { q: "Qu'est-ce que la Lune progressée ?", a: "La Lune progressée avance d'environ un signe tous les deux ans et demi. Sa position décrit le climat émotionnel d'une période et les besoins qui deviennent prioritaires à ce moment de la vie." },
+      { q: "Les progressions prédisent-elles des événements ?", a: "Ma lecture des progressions s'intéresse au processus intérieur : comprendre une transition, donner du sens à une période. Elle ne vise pas à prédire des événements précis." },
+    ],
   },
   degrees: {
     title: "Degrés et configurations planétaires",
@@ -200,6 +225,11 @@ const fr: ServiceCatalog = {
     ],
     seoDescription:
       "Lecture approfondie des degrés planétaires et des configurations astrologiques pour une interprétation précise et personnalisée du thème natal.",
+    faq: [
+      { q: "Pourquoi les degrés comptent-ils en astrologie ?", a: "Un signe s'étend sur trente degrés. Le degré exact d'une planète précise l'intensité de ses aspects, révèle des liens discrets avec d'autres planètes et distingue deux thèmes qui semblent identiques à l'échelle des signes." },
+      { q: "Qu'est-ce qu'un orbe ?", a: "L'orbe est l'écart, en degrés, entre un aspect parfait et la position réelle de deux planètes. Plus l'orbe est faible, plus l'aspect est exact et marquant dans le thème." },
+      { q: "Qu'est-ce qu'une configuration planétaire ?", a: "C'est un ensemble d'aspects reliant trois planètes ou plus, comme le T-carré, le grand trigone ou le stellium. Ces structures concentrent l'énergie du thème et en orientent souvent la lecture." },
+    ],
   },
   healing: {
     title: "Guérison symbolique des planètes",
@@ -231,6 +261,11 @@ const fr: ServiceCatalog = {
       "Cette démarche s'inscrit dans une perspective symbolique et de connaissance de soi. Elle est complémentaire à toute prise en charge professionnelle lorsque celle-ci est nécessaire, et ne s'y substitue jamais.",
     seoDescription:
       "Guérison symbolique des planètes : pistes personnalisées de réflexion et de développement personnel inspirées de votre thème natal.",
+    faq: [
+      { q: "Qu'est-ce que la guérison symbolique des planètes ?", a: "C'est une approche qui part des configurations tendues du thème natal pour proposer des pratiques personnelles (activités, introspection, rituels du quotidien) en résonance avec le symbolisme des planètes concernées, afin d'apprivoiser les fonctions qu'elles représentent." },
+      { q: "S'agit-il d'un soin médical ?", a: "Non. Le terme « guérison » est employé au sens symbolique. Cette démarche de connaissance de soi complète, sans jamais la remplacer, toute prise en charge médicale ou psychologique nécessaire." },
+      { q: "Les pratiques proposées sont-elles personnalisées ?", a: "Oui. Elles découlent de votre thème et de ce qui a du sens pour vous ; il n'y a pas de recette générale." },
+    ],
   },
 };
 

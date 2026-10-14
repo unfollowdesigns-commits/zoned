@@ -27,7 +27,7 @@ const oneLine = (s: string) => s.replace(/[\r\n]+/g, " ").slice(0, 200);
 function layout(body: string, dir: "ltr" | "rtl" = "ltr"): string {
   return `<!doctype html><html dir="${dir}"><body style="margin:0;background:#0b0c16;padding:32px 16px;font-family:Georgia,'Times New Roman',serif;color:#efe7da">
   <table role="presentation" width="100%" style="max-width:560px;margin:0 auto;background:#12131f;border:1px solid #2a2a3d;border-radius:14px">
-  <tr><td style="padding:32px 32px 8px;text-align:center;letter-spacing:.3em;font-size:12px;color:#c9a96e">✦ RANIA ✦</td></tr>
+  <tr><td style="padding:32px 32px 8px;text-align:center;letter-spacing:.3em;font-size:12px;color:#c9a96e">RANIA</td></tr>
   <tr><td style="padding:8px 32px 32px;font-size:16px;line-height:1.6">${body}</td></tr></table></body></html>`;
 }
 

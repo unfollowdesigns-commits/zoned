@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { JsonLd } from "@/components/JsonLd";
 import { ArticleCard, CtaBand } from "@/components/ui";
+import { abs, ids } from "@/lib/schema-org";
 import { getDictionary } from "@/i18n";
 import { isLocale, localeMeta, type Locale } from "@/i18n/config";
 import { env } from "@/lib/env";
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       description: a.excerpt,
       locale: localeMeta[locale].og,
       publishedTime: a.publishedAt ? new Date(a.publishedAt).toISOString() : undefined,
-      images: a.coverMediaId ? [{ url: `${env.siteUrl}/media/${a.coverMediaId}`, alt: a.coverAlt }] : undefined,
+      images: [a.coverMediaId ? { url: `${env.siteUrl}/media/${a.coverMediaId}`, alt: a.coverAlt } : { url: `${env.siteUrl}/${locale}/opengraph-image`, width: 1200, height: 630 }],
     },
   };
 }
@@ -57,7 +58,6 @@ export default async function ArticlePage({ params }: { params: Promise<{ locale
   }
 
   const html = renderMarkdown(a.contentMd);
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const others = (await listPublished(locale, 4)).filter((x) => x.id !== a.id).slice(0, 3);
   const jsonLd = {
     "@context": "https://schema.org",
@@ -67,7 +67,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ locale
     inLanguage: locale,
     datePublished: a.publishedAt ? new Date(a.publishedAt).toISOString() : undefined,
     dateModified: new Date(a.updatedAt).toISOString(),
-    author: { "@type": "Person", name: "Rania" },
+    author: { "@id": ids.person, "@type": "Person", name: "Rania", url: abs(href(locale, routes.about)) },
+    publisher: { "@id": ids.business },
     image: a.coverMediaId ? `${env.siteUrl}/media/${a.coverMediaId}` : undefined,
     mainEntityOfPage: `${env.siteUrl}/${locale}${routes.article(a.slug)}`,
   };
@@ -76,9 +77,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ locale
     <>
       <article className="pt-[calc(var(--header-h)+clamp(3rem,10vw,7rem))]">
         <header className="container-narrow">
-          <Link href={href(locale, routes.journal)} className="eyebrow inline-flex items-center gap-2" data-reveal>
-            <span className="rtl-flip">←</span> {dict.journal.back}
-          </Link>
+          <Breadcrumbs
+            items={[
+              { name: dict.nav.home, href: href(locale) },
+              { name: dict.nav.journal, href: href(locale, routes.journal) },
+              { name: a.title, href: href(locale, routes.article(a.slug)) },
+            ]}
+          />
           <h1 className="t-1 mt-8 text-ivory" data-reveal>{a.title}</h1>
           <p className="mt-6 text-sm text-mist" data-reveal>
             {dict.journal.publishedOn} {a.publishedAt ? formatDate(a.publishedAt, locale) : ""} · {readingMinutes(a.contentMd)} {dict.common.readingTime}
@@ -94,7 +99,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ locale
         <div className="container-narrow mt-16">
           <div className="prose-astro" dangerouslySetInnerHTML={{ __html: html }} />
         </div>
-        <script type="application/ld+json" nonce={nonce} dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+        <JsonLd data={jsonLd} />
       </article>
 
       {others.length > 0 && (

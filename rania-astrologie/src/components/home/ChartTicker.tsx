@@ -10,7 +10,7 @@ export function ChartTicker() {
         {row.map((t, i) => (
           <span key={i} className="flex items-center gap-12">
             {t}
-            <span className="text-[0.5rem] text-gold/40">✦</span>
+            <span className="h-px w-6 bg-gold/30" />
           </span>
         ))}
       </div>

@@ -5,6 +5,7 @@ import { startTransition, useActionState, useEffect, useMemo, useRef, useState, 
 import { submitBooking, type FormState } from "@/app/actions/public";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
+import { Check } from "@/components/Check";
 
 export type WizardOffering = { id: number; name: string; summary: string; duration: number; price: string; requiresPartner: boolean };
 export type WizardSlot = { id: number; startsAt: number; durationMin: number };
@@ -37,6 +38,7 @@ export function BookingWizard({ locale, t, errors, common, offerings, slots, ini
   const [localError, setLocalError] = useState<string | null>(null);
   const [startedAt] = useState(() => Date.now());
   const topRef = useRef<HTMLDivElement>(null);
+  const stepChanged = useRef(false);
 
   // Slot times depend on the visitor's time zone, so they render on the client only.
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
@@ -60,7 +62,12 @@ export function BookingWizard({ locale, t, errors, common, offerings, slots, ini
   }
 
   useEffect(() => {
-    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Skip the initial render so arriving on the page doesn't jump to the form.
+    if (!stepChanged.current) {
+      stepChanged.current = true;
+      return;
+    }
+    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
   }, [step]);
 
   const tz = mounted ? Intl.DateTimeFormat().resolvedOptions().timeZone : "";
@@ -94,7 +101,7 @@ export function BookingWizard({ locale, t, errors, common, offerings, slots, ini
   if (state.status === "success") {
     return (
       <div ref={topRef} className="card scroll-mt-32 p-8 text-center md:p-14" aria-live="polite">
-        <div className="mx-auto grid h-20 w-20 place-items-center rounded-full border border-gold/50 text-3xl text-gold-bright">✦</div>
+        <Check className="mx-auto h-16 w-16 text-gold-bright" />
         <h3 className="t-2 mt-8 text-ivory">{t.successTitle}</h3>
         <p className="lede mx-auto mt-5 max-w-xl">{t.successBody}</p>
         {state.ref && (
@@ -231,7 +238,7 @@ export function BookingWizard({ locale, t, errors, common, offerings, slots, ini
           <legend className="t-3 mb-2 text-ivory">{t.yourDetails}</legend>
           {offering && slot && (
             <p className="rounded-2xl border border-line bg-ink/40 p-4 text-sm text-mist">
-              <span className="text-gold">✦</span> {offering.name} · {fmtFull(slot.startsAt)} · {offering.price}
+              {offering.name} · {fmtFull(slot.startsAt)} · {offering.price}
             </p>
           )}
           <div className="grid gap-5 md:grid-cols-2">

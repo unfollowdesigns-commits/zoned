@@ -5,7 +5,7 @@ const en: Dictionary = {
     siteName: "Rania · Astrology",
     defaultTitle: "Rania — Natal, psychological, relational and karmic astrology",
     description:
-      "In-depth, personalised astrology consultations: natal chart, psychological astrology, synastry, composite charts, progressions, karmic astrology and precise reading of planetary degrees.",
+      "In-depth astrology consultations: natal chart, psychological astrology, synastry, composite charts, progressions, karmic astrology and planetary degrees.",
   },
   nav: {
     home: "Home",
@@ -55,7 +55,7 @@ const en: Dictionary = {
     manifestoPoints: [
       { k: "12", label: "houses studied as a whole" },
       { k: "360°", label: "read to the exact degree" },
-      { k: "1", label: "chart, one unique reading" },
+      { k: "8", label: "years old when I began studying the sky" },
     ],
     constellationKicker: "Areas of expertise",
     constellationTitle: "A constellation of approaches, one single thread: understanding you in depth.",
@@ -247,6 +247,23 @@ const en: Dictionary = {
       slot: "Please choose a time slot.",
       offering: "Please choose a consultation.",
     },
+  },
+  faq: {
+    title: "Frequently asked questions",
+    lede: "Everything you need to know before booking a consultation.",
+    seo: "How a consultation works, birth time, confidentiality, cancellation: clear answers to common questions about my astrology consultations.",
+    nav: "FAQ",
+    serviceTitle: "Frequently asked questions",
+    items: [
+      { q: "How does an astrology consultation work?", a: "After you book, I calculate and study your chart beforehand. The session takes place by video call, phone or WhatsApp: I present the reading of your chart, then we connect it to your questions. You can interrupt and respond at any time." },
+      { q: "What information do I need to provide?", a: "Your date, time and place of birth. The time usually appears on a full birth certificate. For synastry or a composite chart, the same information is needed for the second person." },
+      { q: "What if I don't know my time of birth?", a: "The consultation is still possible. Without a time, the Ascendant and houses cannot be calculated precisely, so the reading focuses on planets, signs, aspects and degrees." },
+      { q: "Do you predict the future?", a: "No. My approach is psychological and symbolic: it aims to help you understand how you function, your relationships and your stages of growth. I do not predict events or make promises." },
+      { q: "Which consultation should I choose?", a: "For a first consultation, natal astrology gives an overall picture. Psychological astrology goes deeper into emotional dynamics, synastry and composite charts shed light on a relationship, and progressed charts on a period of transition. If in doubt, write to me." },
+      { q: "Is my data confidential?", a: "Yes. Your birth data and our exchanges are used only to prepare and conduct your consultation. They are never sold or shared, and you can ask for them to be deleted at any time." },
+      { q: "Can I cancel or reschedule?", a: "Yes, using the link sent by email, up to the deadline stated in the booking terms. After that, please contact me directly." },
+      { q: "Does astrology replace medical or psychological care?", a: "No. Astrology is a symbolic tool for reflection and self-knowledge. It is in no way a substitute for medical, psychological, legal or financial advice." },
+    ],
   },
   footer: {
     tagline: "Natal, psychological, relational and karmic astrology.",

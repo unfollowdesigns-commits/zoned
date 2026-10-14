@@ -42,11 +42,11 @@ export default async function PricingPage({
 
   return (
     <>
-      <PageHero kicker={t.kicker} title={t.title} lede={t.lede} />
+      <PageHero kicker={t.kicker} title={t.title} lede={t.lede} crumbs={[{ name: dict.nav.home, href: href(locale) }, { name: dict.nav.pricing, href: href(locale, routes.pricing) }]} />
 
       <section id="booking" className="scroll-mt-24 pb-[clamp(4rem,10vw,8rem)]">
         <div className="container-x grid gap-14 lg:grid-cols-12">
-          <div className="lg:col-span-7">
+          <div className="min-w-0 lg:col-span-7">
             {offerings.length === 0 ? (
               <div className="card p-10 text-center text-mist">{t.noOfferings}</div>
             ) : (
@@ -71,7 +71,7 @@ export default async function PricingPage({
               </div>
             )}
           </div>
-          <aside className="lg:col-span-4 lg:col-start-9">
+          <aside className="min-w-0 lg:col-span-4 lg:col-start-9">
             <Kicker>{t.termsTitle}</Kicker>
             <dl className="mt-8 space-y-8">
               {t.terms.map((term, i) => (

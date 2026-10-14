@@ -25,6 +25,8 @@ export type ServiceContent = {
   questions: string[];
   note?: string;
   seoDescription: string;
+  /** Direct question/answer pairs — rendered on the page and as FAQPage structured data (SEO/AEO). */
+  faq: { q: string; a: string }[];
 };
 
 export type ServiceCatalog = Record<ServiceKey, ServiceContent>;

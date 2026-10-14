@@ -126,7 +126,7 @@ export function Header({ locale, nav, brandLabel, services }: Props) {
           </nav>
 
           <div className="flex items-center gap-2">
-            <div className="hidden items-center rounded-full border border-line p-1 sm:flex" role="group" aria-label={nav.language}>
+            <div className="flex items-center rounded-full border border-line p-0.5 sm:p-1" role="group" aria-label={nav.language}>
               {locales.map((l) => (
                 <Link
                   key={l}
@@ -134,7 +134,8 @@ export function Header({ locale, nav, brandLabel, services }: Props) {
                   hrefLang={l}
                   lang={l}
                   aria-current={l === locale ? "true" : undefined}
-                  className={`grid h-8 min-w-8 place-items-center rounded-full px-2 text-[0.72rem] tracking-wider transition-colors ${
+                  title={localeMeta[l].label}
+                  className={`grid h-8 min-w-8 place-items-center rounded-full px-1.5 text-[0.7rem] tracking-wider transition-colors sm:px-2 ${
                     l === locale ? "bg-gold/15 text-gold-bright" : "text-mist hover:text-ivory"
                   }`}
                 >
@@ -216,9 +217,9 @@ export function Header({ locale, nav, brandLabel, services }: Props) {
               {l.label}
             </Link>
           ))}
-          <div className={`mt-6 grid grid-cols-2 gap-2 transition-opacity delay-500 duration-700 ${open ? "opacity-100" : "opacity-0"}`}>
+          <div className={`mt-8 grid gap-1 border-t border-line pt-6 transition-opacity delay-500 duration-700 ${open ? "opacity-100" : "opacity-0"}`}>
             {services.map((s) => (
-              <Link key={s.key} href={href(locale, routes.service(s.key))} tabIndex={open ? 0 : -1} className="flex items-center gap-2 py-1.5 text-sm text-mist">
+              <Link key={s.key} href={href(locale, routes.service(s.key))} tabIndex={open ? 0 : -1} className="flex items-center gap-3 py-2 text-[0.95rem] text-mist">
                 <ServiceGlyph k={s.key} className="h-5 w-5 text-gold" /> {s.title}
               </Link>
             ))}

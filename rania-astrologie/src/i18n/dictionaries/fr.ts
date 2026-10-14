@@ -3,7 +3,7 @@ const fr = {
     siteName: "Rania · Astrologie",
     defaultTitle: "Rania — Astrologie natale, psychologique, relationnelle et karmique",
     description:
-      "Consultations d'astrologie approfondies et personnalisées : thème natal, astrologie psychologique, synastrie, thème composite, progressions, astrologie karmique et lecture des degrés planétaires.",
+      "Astrologie approfondie : thème natal, astrologie psychologique, synastrie, thème composite, progressions, astrologie karmique et lecture des degrés.",
   },
   nav: {
     home: "Accueil",
@@ -53,7 +53,7 @@ const fr = {
     manifestoPoints: [
       { k: "12", label: "maisons étudiées dans leur ensemble" },
       { k: "360°", label: "lus au degré près" },
-      { k: "1", label: "thème, une lecture unique" },
+      { k: "8", label: "ans : l'âge où j'ai commencé à étudier le ciel" },
     ],
     constellationKicker: "Domaines d'expertise",
     constellationTitle: "Une constellation d'approches, un seul fil : vous comprendre en profondeur.",
@@ -247,6 +247,23 @@ const fr = {
       slot: "Merci de choisir un créneau.",
       offering: "Merci de choisir une consultation.",
     },
+  },
+  faq: {
+    title: "Questions fréquentes",
+    lede: "Tout ce qu'il faut savoir avant de réserver une consultation.",
+    seo: "Déroulement d'une consultation, heure de naissance, confidentialité, annulation : réponses claires aux questions sur mes consultations d'astrologie.",
+    nav: "Questions fréquentes",
+    serviceTitle: "Questions fréquentes",
+    items: [
+      { q: "Comment se déroule une consultation d'astrologie ?", a: "Après votre réservation, je calcule et j'étudie votre thème en amont. La séance a lieu en visioconférence, par téléphone ou via WhatsApp : je vous présente la lecture de votre thème, puis nous la relions à vos questions. Vous pouvez m'interrompre et réagir à tout moment." },
+      { q: "Quelles informations dois-je fournir ?", a: "Votre date, votre heure et votre lieu de naissance. L'heure figure souvent sur l'acte de naissance intégral. Pour une synastrie ou un thème composite, les mêmes informations sont nécessaires pour la seconde personne." },
+      { q: "Et si je ne connais pas mon heure de naissance ?", a: "La consultation reste possible. Sans heure, l'Ascendant et les maisons ne peuvent pas être calculés avec précision : la lecture se concentre alors sur les planètes, les signes, les aspects et les degrés." },
+      { q: "Prédisez-vous l'avenir ?", a: "Non. Mon approche est psychologique et symbolique : elle vise à mieux comprendre votre fonctionnement, vos relations et vos étapes d'évolution. Je ne fais pas de prédictions d'événements ni de promesses." },
+      { q: "Quelle consultation choisir ?", a: "Pour une première consultation, l'astrologie natale offre une vision d'ensemble. L'astrologie psychologique approfondit les dynamiques émotionnelles, la synastrie et le thème composite éclairent une relation, et les thèmes progressés une période de transition. En cas de doute, écrivez-moi." },
+      { q: "Mes données sont-elles confidentielles ?", a: "Oui. Vos données de naissance et vos échanges sont utilisés uniquement pour préparer et réaliser votre consultation. Ils ne sont jamais vendus ni partagés, et vous pouvez demander leur suppression à tout moment." },
+      { q: "Puis-je annuler ou reporter une consultation ?", a: "Oui, depuis le lien reçu par e-mail, jusqu'au délai indiqué dans les modalités de réservation. Au-delà, contactez-moi directement." },
+      { q: "L'astrologie remplace-t-elle un suivi médical ou psychologique ?", a: "Non. L'astrologie est un outil symbolique de réflexion et de connaissance de soi. Elle ne remplace en aucun cas un avis médical, psychologique, juridique ou financier." },
+    ],
   },
   footer: {
     tagline: "Astrologie natale, psychologique, relationnelle et karmique.",

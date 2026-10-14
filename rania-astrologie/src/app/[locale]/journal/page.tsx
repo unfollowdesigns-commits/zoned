@@ -3,7 +3,7 @@ import { ArticleCard, PageHero } from "@/components/ui";
 import { getDictionary } from "@/i18n";
 import { isLocale } from "@/i18n/config";
 import { listPublished, type Article } from "@/lib/repo/articles";
-import { routes } from "@/lib/paths";
+import { href, routes } from "@/lib/paths";
 import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -26,7 +26,12 @@ export default async function JournalPage({ params }: { params: Promise<{ locale
 
   return (
     <>
-      <PageHero kicker={dict.journal.kicker} title={dict.journal.title} lede={dict.journal.lede} />
+      <PageHero
+        kicker={dict.journal.kicker}
+        title={dict.journal.title}
+        lede={dict.journal.lede}
+        crumbs={[{ name: dict.nav.home, href: href(locale) }, { name: dict.nav.journal, href: href(locale, routes.journal) }]}
+      />
       <section className="pb-[clamp(4rem,10vw,8rem)]">
         <div className="container-x">
           {articles.length === 0 ? (

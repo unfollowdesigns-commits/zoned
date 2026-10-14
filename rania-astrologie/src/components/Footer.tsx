@@ -39,27 +39,28 @@ export function Footer({ locale, dict, services, email, whatsapp, instagram }: P
         </div>
         <div className="md:col-span-4">
           <p className="eyebrow">{dict.nav.consultations}</p>
-          <ul className="mt-5 space-y-2.5">
+          <ul className="mt-4 space-y-0.5">
             {services.map((s) => (
               <li key={s.key}>
-                <Link href={href(locale, routes.service(s.key))} className="link-underline text-ivory/80 hover:text-ivory">{s.title}</Link>
+                <Link href={href(locale, routes.service(s.key))} className="link-underline inline-block py-2 text-ivory/80 hover:text-ivory">{s.title}</Link>
               </li>
             ))}
           </ul>
         </div>
         <div className="md:col-span-3">
           <p className="eyebrow">{dict.footer.explore}</p>
-          <ul className="mt-5 space-y-2.5">
+          <ul className="mt-4 space-y-0.5">
             {[
               [routes.about, dict.nav.about],
               [routes.pricing, dict.nav.pricing],
               [routes.journal, dict.nav.journal],
+              [routes.faq, dict.faq.nav],
               [routes.contact, dict.nav.contact],
               [routes.privacy, dict.footer.privacy],
               [routes.legal, dict.footer.legalNotice],
             ].map(([p, label]) => (
               <li key={p}>
-                <Link href={href(locale, p)} className="link-underline text-ivory/80 hover:text-ivory">{label}</Link>
+                <Link href={href(locale, p)} className="link-underline inline-block py-2 text-ivory/80 hover:text-ivory">{label}</Link>
               </li>
             ))}
           </ul>

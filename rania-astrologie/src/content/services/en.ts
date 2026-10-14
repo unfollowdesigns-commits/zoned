@@ -31,6 +31,11 @@ const en: ServiceCatalog = {
     ],
     seoDescription:
       "In-depth natal astrology consultation: Ascendant, houses, planets, aspects, rulerships and degrees to understand your resources and dynamics.",
+    faq: [
+      { q: "What is a natal chart?", a: "A natal chart is a map of the sky at the exact time and place of your birth. It shows the positions of the planets in the twelve signs and twelve houses, and the angles they form with one another (the aspects). It is the foundation of any personalised astrological reading." },
+      { q: "Why does my time of birth matter?", a: "Your time of birth determines the Ascendant and the house positions, which shift about every two hours for the Ascendant and much faster at the level of degrees. Without a birth time a reading is still possible, focusing on planets, signs and aspects." },
+      { q: "What will I learn from a natal chart reading?", a: "The consultation brings out the structure of your chart: your dominants, resources, areas of tension, emotional needs and how these fit together. It ends with avenues for reflection connected to your own questions." },
+    ],
   },
   psychological: {
     title: "Psychological astrology",
@@ -64,6 +69,11 @@ const en: ServiceCatalog = {
       "Psychological astrology is a symbolic approach to self-knowledge. It is not therapy and does not replace support from a healthcare professional.",
     seoDescription:
       "Psychological astrology: emotional needs, defence mechanisms, inner conflicts and recurring patterns read through your natal chart.",
+    faq: [
+      { q: "What is psychological astrology?", a: "Psychological astrology uses the natal chart as a symbolic framework for the personality: emotional needs, defence mechanisms, inner conflicts and recurring patterns. Its aim is self-knowledge, not predicting events." },
+      { q: "Does psychological astrology replace therapy?", a: "No. It is a symbolic approach to self-knowledge. It can support personal reflection but never replaces care from a psychologist, psychiatrist or other healthcare professional." },
+      { q: "Which parts of the chart are studied most closely?", a: "The Moon, the personal planets (Sun, Mercury, Venus, Mars), tense aspects such as squares and oppositions, and the houses linked to inner life and relationships." },
+    ],
   },
   relational: {
     title: "Relational astrology",
@@ -110,6 +120,11 @@ const en: ServiceCatalog = {
     ],
     seoDescription:
       "Synastry, astrological compatibility and composite charts: exploring the dynamics of a relationship, its affinities, tensions and stakes.",
+    faq: [
+      { q: "What is synastry?", a: "Synastry is the comparison of two natal charts. It studies how one person's planets resonate with the other's, to shed light on affinities, tensions, communication and emotional needs within a relationship." },
+      { q: "What is the difference between synastry and a composite chart?", a: "Synastry compares two charts to understand the interaction between two people. A composite chart is a single chart calculated from the midpoints of both charts: it represents the relationship itself, as an entity in its own right." },
+      { q: "Do you need both people's birth data?", a: "Yes. For synastry or a composite chart, the date, place and ideally the time of birth of both people are needed. The second person's agreement is recommended." },
+    ],
   },
   karmic: {
     title: "Karmic astrology",
@@ -140,6 +155,11 @@ const en: ServiceCatalog = {
     ],
     seoDescription:
       "Karmic astrology: lunar nodes, recurring patterns, attachments and axes of personal and relational growth.",
+    faq: [
+      { q: "What are the lunar nodes in astrology?", a: "The lunar nodes are the two points where the Moon's orbit crosses the ecliptic, the Sun's apparent path. Always opposite, the South and North Nodes form an axis that karmic astrology reads as a movement between what is familiar and what is asking to develop." },
+      { q: "Is karmic astrology about past lives?", a: "In my approach, karmic astrology is read as a symbolic language of growth: it illuminates recurring patterns and axes of development, without unverifiable claims or fatalism." },
+      { q: "Who is a karmic consultation for?", a: "For people who feel they keep reliving the same situations, in their personal life or relationships, and who want to understand these repetitions in order to move beyond them." },
+    ],
   },
   progressed: {
     title: "Progressed charts",
@@ -170,6 +190,11 @@ const en: ServiceCatalog = {
     ],
     seoDescription:
       "Progressed charts: progressed Moon and planetary progressions to explore your inner evolution and stages of transformation.",
+    faq: [
+      { q: "What is a progressed chart?", a: "A progressed chart moves the natal chart forward symbolically in time, using the rule of 'one day after birth for each year of life'. It shows the stages of a person's inner maturation." },
+      { q: "What is the progressed Moon?", a: "The progressed Moon moves roughly one sign every two and a half years. Its position describes the emotional climate of a period and the needs that become a priority at that point in life." },
+      { q: "Do progressions predict events?", a: "My reading of progressions focuses on inner process: understanding a transition and giving meaning to a period. It does not aim to predict specific events." },
+    ],
   },
   degrees: {
     title: "Degrees and planetary configurations",
@@ -200,6 +225,11 @@ const en: ServiceCatalog = {
     ],
     seoDescription:
       "In-depth reading of planetary degrees and astrological configurations for a precise, personalised interpretation of the natal chart.",
+    faq: [
+      { q: "Why do degrees matter in astrology?", a: "A sign spans thirty degrees. A planet's exact degree specifies the strength of its aspects, reveals subtle links with other planets and distinguishes two charts that look identical at the level of signs." },
+      { q: "What is an orb?", a: "An orb is the gap, in degrees, between an exact aspect and the actual positions of two planets. The smaller the orb, the more exact and prominent the aspect is in the chart." },
+      { q: "What is a planetary configuration?", a: "A set of aspects linking three or more planets, such as a T-square, grand trine or stellium. These structures concentrate the chart's energy and often shape its reading." },
+    ],
   },
   healing: {
     title: "Symbolic planetary healing",
@@ -231,6 +261,11 @@ const en: ServiceCatalog = {
       "This approach is symbolic and oriented towards self-knowledge. It complements any professional care when such care is needed, and never replaces it.",
     seoDescription:
       "Symbolic planetary healing: personalised avenues for reflection and personal growth inspired by your natal chart.",
+    faq: [
+      { q: "What is symbolic planetary healing?", a: "It is an approach that starts from the tense configurations in the natal chart to suggest personal practices (activities, introspection, everyday rituals) that resonate with the symbolism of the planets involved, helping you befriend the functions they represent." },
+      { q: "Is this a medical treatment?", a: "No. 'Healing' is meant in a symbolic sense. This self-knowledge approach complements, and never replaces, any necessary medical or psychological care." },
+      { q: "Are the suggested practices personalised?", a: "Yes. They come from your chart and from what is meaningful to you; there is no one-size-fits-all recipe." },
+    ],
   },
 };
 

@@ -3,7 +3,7 @@ import { SplitText } from "@/components/SplitText";
 import { CtaBand, Kicker, PageHero } from "@/components/ui";
 import { getDictionary } from "@/i18n";
 import { isLocale } from "@/i18n/config";
-import { routes } from "@/lib/paths";
+import { href, routes } from "@/lib/paths";
 import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -21,7 +21,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
   return (
     <>
-      <PageHero kicker={t.kicker} title={t.title} lede={t.lede} />
+      <PageHero kicker={t.kicker} title={t.title} lede={t.lede} crumbs={[{ name: dict.nav.home, href: href(locale) }, { name: dict.nav.about, href: href(locale, routes.about) }]} />
 
       <section className="pb-[clamp(4rem,10vw,8rem)]">
         <div className="container-x grid gap-16 lg:grid-cols-12">
@@ -68,8 +68,8 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
           <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {t.values.map((v, i) => (
               <div key={i} className="card p-8" data-reveal style={{ ["--d" as string]: `${i * 90}ms` }}>
-                <span className="font-display text-4xl text-gold/70">{["✦", "◐", "◎", "☊"][i]}</span>
-                <h3 className="mt-6 font-display text-2xl text-ivory">{v.title}</h3>
+                <span className="font-display text-lg text-gold/70">{["I", "II", "III", "IV"][i]}</span>
+                <h3 className="mt-4 font-display text-2xl text-ivory">{v.title}</h3>
                 <p className="mt-3 text-mist">{v.body}</p>
               </div>
             ))}

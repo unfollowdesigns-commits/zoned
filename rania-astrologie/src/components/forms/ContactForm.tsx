@@ -4,6 +4,7 @@ import { startTransition, useActionState, useState, type FormEvent } from "react
 import { submitContact, type FormState } from "@/app/actions/public";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
+import { Check } from "@/components/Check";
 
 const initialState: FormState = { status: "idle" };
 
@@ -22,7 +23,7 @@ export function ContactForm({ locale, t, errors, common }: { locale: Locale; t: 
   if (state.status === "success") {
     return (
       <div className="card p-10 text-center" role="status">
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-full border border-gold/50 text-2xl text-gold-bright">✦</div>
+        <Check className="mx-auto h-14 w-14 text-gold-bright" />
         <p className="mt-6 font-display text-2xl text-ivory">{t.success}</p>
       </div>
     );

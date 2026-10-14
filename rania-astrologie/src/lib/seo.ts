@@ -22,8 +22,9 @@ export function pageMetadata(locale: Locale, path: string, opts: { title?: strin
       url: `${env.siteUrl}/${locale}${path}`,
       title,
       description,
+      images: [{ url: `${env.siteUrl}/${locale}/opengraph-image`, width: 1200, height: 630, alt: dict.meta.defaultTitle }],
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { card: "summary_large_image", title, description, images: [`${env.siteUrl}/${locale}/opengraph-image`] },
     robots: opts.noindex ? { index: false, follow: false } : undefined,
   };
 }

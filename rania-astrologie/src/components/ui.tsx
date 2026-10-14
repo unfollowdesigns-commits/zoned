@@ -7,6 +7,8 @@ import type { Article } from "@/lib/repo/articles";
 import { readingMinutes } from "@/lib/article-utils";
 import { href, routes } from "@/lib/paths";
 import { formatDate, formatPrice } from "@/lib/time";
+import { Breadcrumbs } from "./Breadcrumbs";
+import { ServiceGlyph } from "./ServiceGlyph";
 import { SplitText } from "./SplitText";
 
 export function Kicker({ children, className = "" }: { children: ReactNode; className?: string }) {
@@ -18,11 +20,24 @@ export function Kicker({ children, className = "" }: { children: ReactNode; clas
   );
 }
 
-export function PageHero({ kicker, title, lede, children }: { kicker: string; title: string; lede?: string; children?: ReactNode }) {
+export function PageHero({
+  kicker,
+  title,
+  lede,
+  children,
+  crumbs,
+}: {
+  kicker: string;
+  title: string;
+  lede?: string;
+  children?: ReactNode;
+  crumbs?: { name: string; href: string }[];
+}) {
   return (
-    <section className="relative pt-[calc(var(--header-h)+clamp(4rem,12vw,9rem))] pb-[clamp(3rem,8vw,6rem)]">
+    <section className="hero-intro relative pt-[calc(var(--header-h)+clamp(4rem,12vw,9rem))] pb-[clamp(3rem,8vw,6rem)]">
       <div className="container-x">
         <div className="max-w-4xl">
+          {crumbs && <Breadcrumbs items={crumbs} />}
           <Kicker>{kicker}</Kicker>
           <SplitText as="h1" text={title} className="t-1 mt-6 block text-ivory" />
           {lede && (
@@ -54,7 +69,7 @@ export function OfferingCard({ o, locale, dict, i = 0, action }: { o: Offering; 
         </p>
       </div>
       {o.summary[locale] && <p className="mt-4 flex-1 text-mist">{o.summary[locale]}</p>}
-      {o.requiresPartner && <p className="mt-4 text-xs text-gold/80">✦ {dict.pricing.partnerNeeded}</p>}
+      {o.requiresPartner && <p className="mt-4 text-xs text-gold/80">{dict.pricing.partnerNeeded}</p>}
       <div className="mt-6">{action}</div>
     </article>
   );
@@ -69,7 +84,7 @@ export function ArticleCard({ a, locale, dict, i = 0 }: { a: Article; locale: Lo
           <img src={`/media/${a.coverMediaId}`} alt={a.coverAlt} loading="lazy" className="h-full w-full object-cover transition-transform duration-[1500ms] ease-[var(--ease-out-expo)] group-hover:scale-105" />
         ) : (
           <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_30%_30%,rgba(145,137,208,0.25),transparent_60%),radial-gradient(circle_at_70%_80%,rgba(207,174,118,0.2),transparent_55%)]">
-            <span className="font-display text-6xl text-gold/50 transition-transform duration-[1500ms] group-hover:rotate-45">✦</span>
+            <ServiceGlyph k="natal" className="h-20 w-20 text-gold/45 transition-transform duration-[1500ms] group-hover:rotate-45" />
           </div>
         )}
       </div>

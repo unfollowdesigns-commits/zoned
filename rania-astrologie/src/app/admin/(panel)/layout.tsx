@@ -4,6 +4,7 @@ import { logout } from "@/app/actions/admin";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { LogoMark } from "@/components/Logo";
 import { requireAdmin } from "@/lib/auth";
+import { env } from "@/lib/env";
 import { countByStatus } from "@/lib/repo/bookings";
 import { countUnread } from "@/lib/repo/messages";
 
@@ -33,7 +34,14 @@ export default async function PanelLayout({ children }: { children: ReactNode })
           </div>
         </div>
       </aside>
-      <main className="min-w-0 flex-1 pb-16 lg:pt-4">{children}</main>
+      <main className="min-w-0 flex-1 pb-16 lg:pt-4">
+        {env.demo && (
+          <p className="mb-6 rounded-xl border border-violet/40 bg-violet/10 px-4 py-3 text-sm text-ivory/85">
+            Mode démonstration : les données sont temporaires et peuvent être réinitialisées à tout moment. Aucun e-mail n&apos;est envoyé.
+          </p>
+        )}
+        {children}
+      </main>
     </div>
   );
 }

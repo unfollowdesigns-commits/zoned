@@ -5,13 +5,13 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const items = [
-  { href: "/admin", label: "Tableau de bord", icon: "◎" },
-  { href: "/admin/reservations", label: "Réservations", icon: "☉" },
-  { href: "/admin/creneaux", label: "Créneaux", icon: "◷" },
-  { href: "/admin/consultations", label: "Consultations & tarifs", icon: "✦" },
-  { href: "/admin/articles", label: "Articles", icon: "✎" },
-  { href: "/admin/messages", label: "Messages", icon: "✉" },
-  { href: "/admin/parametres", label: "Paramètres", icon: "⚙" },
+  { href: "/admin", label: "Tableau de bord" },
+  { href: "/admin/reservations", label: "Réservations" },
+  { href: "/admin/creneaux", label: "Créneaux" },
+  { href: "/admin/consultations", label: "Consultations & tarifs" },
+  { href: "/admin/articles", label: "Articles" },
+  { href: "/admin/messages", label: "Messages" },
+  { href: "/admin/parametres", label: "Paramètres" },
 ];
 
 export function AdminNav({ unread, pending }: { unread: number; pending: number }) {
@@ -34,11 +34,10 @@ export function AdminNav({ unread, pending }: { unread: number; pending: number 
                   href={it.href}
                   onClick={() => setOpen(false)}
                   className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition-colors ${
-                    active ? "bg-gold/12 text-gold-bright" : "text-ivory/75 hover:bg-ivory/5 hover:text-ivory"
+                    active ? "bg-ivory/[0.06] text-ivory shadow-[inset_2px_0_0_var(--color-gold)]" : "text-ivory/65 hover:bg-ivory/[0.04] hover:text-ivory"
                   }`}
                 >
-                  <span className="w-5 text-center text-gold/80">{it.icon}</span>
-                  <span className="flex-1">{it.label}</span>
+                                    <span className="flex-1">{it.label}</span>
                   {n > 0 && <span className="rounded-full bg-gold px-2 py-0.5 text-[0.7rem] font-semibold text-ink">{n}</span>}
                 </Link>
               </li>

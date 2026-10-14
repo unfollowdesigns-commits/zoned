@@ -25,7 +25,7 @@ export default async function OgImage({ params }: { params: Promise<{ locale: st
           );
         })}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%", padding: "0 90px" }}>
-          <div style={{ fontSize: 22, letterSpacing: 10, color: "#cfae76", display: "flex" }}>✦ ASTROLOGIE ✦</div>
+          <div style={{ fontSize: 22, letterSpacing: 10, color: "#cfae76", display: "flex" }}>ASTROLOGIE</div>
           <div style={{ fontSize: 150, marginTop: 10, fontFamily: "serif", display: "flex" }}>Rania</div>
           <div style={{ fontSize: 30, color: "#a9a3b8", marginTop: 10, display: "flex" }}>{taglines[locale] ?? taglines.fr}</div>
         </div>

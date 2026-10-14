@@ -3,7 +3,7 @@ import { ContactForm } from "@/components/forms/ContactForm";
 import { PageHero } from "@/components/ui";
 import { getDictionary } from "@/i18n";
 import { isLocale } from "@/i18n/config";
-import { routes } from "@/lib/paths";
+import { href, routes } from "@/lib/paths";
 import { pageMetadata } from "@/lib/seo";
 import { getSettings, whatsappLink } from "@/lib/settings";
 
@@ -23,10 +23,10 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
 
   return (
     <>
-      <PageHero kicker={t.kicker} title={t.title} lede={t.lede} />
+      <PageHero kicker={t.kicker} title={t.title} lede={t.lede} crumbs={[{ name: dict.nav.home, href: href(locale) }, { name: dict.nav.contact, href: href(locale, routes.contact) }]} />
       <section className="pb-[clamp(4rem,10vw,8rem)]">
         <div className="container-x grid gap-14 lg:grid-cols-12">
-          <div className="glass rounded-[2rem] p-6 md:p-10 lg:col-span-7" data-reveal>
+          <div className="min-w-0 glass rounded-[2rem] p-6 md:p-10 lg:col-span-7" data-reveal>
             <ContactForm locale={locale} t={t} errors={dict.forms.errors} common={dict.common} />
           </div>
           <aside className="space-y-6 lg:col-span-4 lg:col-start-9">

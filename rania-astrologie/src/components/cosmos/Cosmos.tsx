@@ -21,11 +21,18 @@ export default function Cosmos({ rtl }: { rtl: boolean }) {
     const onLost = () => setFailed(true);
     canvas.addEventListener("cosmos:lost", onLost);
 
-    import("./engine")
+    // Start the cosmos once the page is idle so it never competes with first paint.
+    const idle = (cb: () => void) =>
+      typeof window.requestIdleCallback === "function" ? window.requestIdleCallback(cb, { timeout: 1200 }) : setTimeout(cb, 300);
+    const load = () => import("./engine");
+    const ready = new Promise<Awaited<ReturnType<typeof load>>>((resolve, reject) => idle(() => load().then(resolve, reject)));
+    ready
       .then(({ createEngine }) => {
         if (cancelled) return;
         try {
-          engineRef.current = createEngine(canvas, { reducedMotion, mobile, rtl });
+          // `?cosmos=force` renders even on software GL (QA screenshots only).
+          const force = new URLSearchParams(window.location.search).get("cosmos") === "force";
+          engineRef.current = createEngine(canvas, { reducedMotion, mobile, rtl, force });
           engineRef.current.setMode(modeFromPath(window.location.pathname), rtl);
           requestAnimationFrame(() => setReady(true));
         } catch (e) {

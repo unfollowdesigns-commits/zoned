@@ -3,11 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
-/**
- * Global, dependency-free micro-interactions:
- *  - reveals any [data-reveal] element when it enters the viewport (adds .is-in)
- *  - pointer-tracked glow on .card elements (CSS vars --mx/--my)
- */
+/** Reveals any [data-reveal] element when it enters the viewport (adds .is-in). Dependency-free. */
 export function Interactions() {
   const pathname = usePathname();
 
@@ -32,18 +28,6 @@ export function Interactions() {
       mo.disconnect();
     };
   }, [pathname]);
-
-  useEffect(() => {
-    const onMove = (e: PointerEvent) => {
-      const card = (e.target as Element | null)?.closest?.(".card") as HTMLElement | null;
-      if (!card) return;
-      const r = card.getBoundingClientRect();
-      card.style.setProperty("--mx", `${e.clientX - r.left}px`);
-      card.style.setProperty("--my", `${e.clientY - r.top}px`);
-    };
-    window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
-  }, []);
 
   return null;
 }

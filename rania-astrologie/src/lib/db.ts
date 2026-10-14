@@ -2,6 +2,8 @@ import "server-only";
 import { createClient, type Client, type InArgs, type Row } from "@libsql/client";
 import { env } from "./env";
 import { MIGRATIONS } from "./schema";
+import { hashPassword } from "./password";
+import { seedContent } from "./seed-data";
 
 type Global = typeof globalThis & { __raniaDb?: Client; __raniaMigrated?: Promise<void> };
 const g = globalThis as Global;
@@ -30,14 +32,24 @@ export async function migrate(c: Client = client()): Promise<void> {
   }
 }
 
+async function seedDemo(c: Client): Promise<void> {
+  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
+  const admin = email && password ? { email, passwordHash: await hashPassword(password) } : undefined;
+  const log = await seedContent(c, { admin, demoSlots: true });
+  if (log.length) console.info(`[demo] seeded: ${log.join(", ")}`);
+}
+
 /** Returns a ready client; schema migrations run once per process on first use. */
 export async function db(): Promise<Client> {
   const c = client();
   if (!g.__raniaMigrated) {
-    g.__raniaMigrated = migrate(c).catch((e) => {
-      g.__raniaMigrated = undefined;
-      throw e;
-    });
+    g.__raniaMigrated = migrate(c)
+      .then(() => (env.demo ? seedDemo(c) : undefined))
+      .catch((e) => {
+        g.__raniaMigrated = undefined;
+        throw e;
+      });
   }
   await g.__raniaMigrated;
   return c;

@@ -16,7 +16,7 @@ import {
 } from "./chart-data";
 import { MODES, type SceneMode, type ModeParams } from "./modes";
 
-export type EngineOptions = { reducedMotion: boolean; mobile: boolean; rtl: boolean };
+export type EngineOptions = { reducedMotion: boolean; mobile: boolean; rtl: boolean; force?: boolean };
 export type Engine = {
   setMode: (m: SceneMode, rtl: boolean) => void;
   dispose: () => void;
@@ -426,7 +426,19 @@ export function createEngine(canvas: HTMLCanvasElement, options: EngineOptions):
     antialias: true,
     alpha: false,
     powerPreference: "high-performance",
+    // Software-only GL would make the page janky; the caller falls back to the static sky instead.
+    failIfMajorPerformanceCaveat: !options.force,
   });
+  // Some browsers emulate WebGL on the CPU (no GPU, headless, remote desktops): use the static sky there.
+  {
+    const gl = renderer.getContext();
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    const name = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
+    if (!options.force && /swiftshader|llvmpipe|softpipe|software|microsoft basic render/i.test(name)) {
+      renderer.dispose();
+      throw new Error(`Software WebGL renderer (${name})`);
+    }
+  }
   renderer.setClearColor(0x05060c, 1);
   const maxPR = options.mobile ? 1.5 : 1.75;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxPR));
@@ -781,6 +793,11 @@ export function createEngine(canvas: HTMLCanvasElement, options: EngineOptions):
   let raf = 0;
   let running = true;
   let dirty = true;
+  // Adaptive quality: watch real frame times and step down resolution / frame rate on slow devices.
+  let perfFrames = 0;
+  let perfTotal = 0;
+  let quality = 2; // 2 = full, 1 = reduced pixel ratio, 0 = capped at ~24 fps
+  let lastRender = 0;
 
   function resize() {
     width = canvas.clientWidth || window.innerWidth;
@@ -835,8 +852,8 @@ export function createEngine(canvas: HTMLCanvasElement, options: EngineOptions):
     if (narrow) {
       // Phones: centre the wheel above the text and keep it quieter on inner pages.
       t.x = 0;
-      t.y = mode === "home" ? 0.95 : 1.25;
-      t.scale = base.scale * Math.min(1, (width / height) * 1.45) * (mode === "degrees" ? 0.55 : 1);
+      t.y = mode === "home" ? 1.2 : 1.3;
+      t.scale = base.scale * Math.min(1, (width / height) * 1.35) * (mode === "degrees" ? 0.55 : 1);
       if (mode !== "home") t.opacity = base.opacity * 0.55;
     } else if (rtl) {
       t.x = -base.x;
@@ -847,8 +864,27 @@ export function createEngine(canvas: HTMLCanvasElement, options: EngineOptions):
   function frame(now: number) {
     if (!running) return;
     raf = requestAnimationFrame(frame);
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const rawDt = now - last;
+    if (quality === 0 && now - lastRender < 41) return;
+    lastRender = now;
+    const dt = Math.min(0.05, rawDt / 1000);
     last = now;
+    if (quality > 0 && !reduced) {
+      perfFrames++;
+      perfTotal += rawDt;
+      if (perfFrames === 90) {
+        if (perfTotal / perfFrames > 30) {
+          quality--;
+          if (quality === 1) {
+            renderer.setPixelRatio(1);
+            starMat.uniforms.uPR.value = 1;
+            resize();
+          }
+        }
+        perfFrames = 0;
+        perfTotal = 0;
+      }
+    }
     if (reduced && !dirty) return;
     dirty = false;
     if (!reduced) time += dt;
