@@ -1,0 +1,47 @@
+{
+  "name": "rania-astrologie",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rania — Astrologie psychologique, karmique et relationnelle. Site multilingue (FR/EN/AR) avec réservation, journal et espace d'administration.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "node --env-file-if-exists=.env.local --experimental-strip-types --no-warnings scripts/migrate.ts",
+    "db:seed": "node --env-file-if-exists=.env.local --experimental-strip-types --no-warnings scripts/seed.ts",
+    "admin:create": "node --env-file-if-exists=.env.local --experimental-strip-types --no-warnings scripts/create-admin.ts",
+    "test": "node --conditions=react-server --experimental-strip-types --no-warnings --test tests/*.test.ts"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.18.0",
+    "lenis": "^1.3.26",
+    "marked": "^18.1.1",
+    "motion": "^14.2.0",
+    "next": "^16.3.8",
+    "nodemailer": "^10.1.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "sanitize-html": "^2.18.0",
+    "server-only": "^0.0.1",
+    "three": "^0.186.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.20.5",
+    "@types/nodemailer": "^8.0.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/sanitize-html": "^2.16.2",
+    "@types/three": "^0.186.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.8",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
+  }
+}
